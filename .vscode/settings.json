@@ -1,0 +1,26 @@
+{
+	"files.watcherExclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"search.exclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"files.readonlyInclude": {
+		"**/routeTree.gen.ts": true
+	},
+	"projectColors.mainColor": "#0f5a77",
+	"window.title": "${activeEditorShort}${separator}${rootName}${separator}${profileName}",
+	"workbench.colorCustomizations": {
+		"titleBar.activeBackground": "#0f5a77",
+		"titleBar.activeForeground": "#ffffff",
+		"titleBar.inactiveBackground": "#0f5a77",
+		"titleBar.inactiveForeground": "#ffffff90"
+	},
+	"projectColors.name": "admiraltyy",
+	"projectColors.isActivityBarColored": false,
+	"projectColors.isTitleBarColored": true,
+	"projectColors.isStatusBarColored": false,
+	"projectColors.isProjectNameColored": false,
+	"projectColors.isActiveItemsColored": false,
+	"projectColors.setWindowTitle": false
+}

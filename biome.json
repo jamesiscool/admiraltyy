@@ -1,0 +1,85 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": false
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"lineWidth": 200,
+		"attributePosition": "multiline"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnusedImports": {
+					"level": "warn",
+					"fix": "safe"
+				}
+			},
+			"style": {
+				"noEnum": "error"
+			},
+			"suspicious": {
+				"noArrayIndexKey": "error"
+			},
+			"complexity": {
+				"noImportantStyles": "off"
+			},
+			"security": {
+				"noDangerouslySetInnerHtml": "error"
+			},
+			"nursery": {
+				"useSortedClasses": {
+					"level": "error",
+					"fix": "safe",
+					"options": {
+						"functions": [
+							"clsx",
+							"cva",
+							"twMerge",
+							"cn"
+						]
+					}
+				},
+				"noUnnecessaryConditions": "error"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "asNeeded"
+		}
+	},
+	"html": {
+		"formatter": {
+			"selfCloseVoidElements": "always"
+		}
+	},
+	"json": {
+		"formatter": {
+			"lineWidth": 10
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	}
+}

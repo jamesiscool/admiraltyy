@@ -1,0 +1,342 @@
+{
+  "_meta": {
+    "models": {
+      "movies": "A movie being tracked in your library, linked to TMDB. Can be monitored (actively searching for releases) or unmonitored. Movies without a downloaded file are considered 'wanted'."
+    },
+    "relationships": [
+      "Each Movie can have zero or one File (no file = wanted, has file = downloaded)",
+      "Movies link to TMDB via tmdbId for metadata like cast, synopsis, and release dates",
+      "Movies have a quality preference that determines what releases to grab"
+    ]
+  },
+  "movies": [
+    {
+      "id": "mov-001",
+      "tmdbId": 693134,
+      "title": "Dune: Part Two",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",
+      "synopsis": "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a warpath of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, he endeavors to prevent a terrible future only he can foresee.",
+      "runtime": 166,
+      "genres": ["Science Fiction", "Adventure"],
+      "cast": [
+        { "name": "Timothée Chalamet", "character": "Paul Atreides" },
+        { "name": "Zendaya", "character": "Chani" },
+        { "name": "Rebecca Ferguson", "character": "Lady Jessica" },
+        { "name": "Austin Butler", "character": "Feyd-Rautha" }
+      ],
+      "cinemaReleaseDate": "2024-03-01",
+      "digitalReleaseDate": "2024-04-16",
+      "dateAdded": "2024-01-15T10:30:00Z",
+      "monitored": true,
+      "qualityPreference": "2160p",
+      "file": {
+        "id": "file-001",
+        "path": "/media/movies/Dune Part Two (2024)/Dune.Part.Two.2024.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265.mkv",
+        "size": 22540000000,
+        "quality": "2160p",
+        "source": "WEB-DL",
+        "codec": "H.265",
+        "dateImported": "2024-04-17T08:15:00Z"
+      }
+    },
+    {
+      "id": "mov-002",
+      "tmdbId": 1184918,
+      "title": "The Wild Robot",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/wTnV3PCVW5O92JMrFvvrRcV39RU.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/62zw627mH74rng9zc4tFfaR54KW.jpg",
+      "synopsis": "After a shipwreck, an intelligent robot called Roz is stranded on an uninhabited island. To survive the harsh environment, Roz bonds with the island's animals and cares for an orphaned baby goose.",
+      "runtime": 102,
+      "genres": ["Animation", "Science Fiction", "Family"],
+      "cast": [
+        { "name": "Lupita Nyong'o", "character": "Roz (voice)" },
+        { "name": "Pedro Pascal", "character": "Fink (voice)" },
+        { "name": "Kit Connor", "character": "Brightbill (voice)" }
+      ],
+      "cinemaReleaseDate": "2024-09-27",
+      "digitalReleaseDate": "2024-11-19",
+      "dateAdded": "2024-08-10T14:00:00Z",
+      "monitored": true,
+      "qualityPreference": "1080p",
+      "file": {
+        "id": "file-002",
+        "path": "/media/movies/The Wild Robot (2024)/The.Wild.Robot.2024.1080p.BluRay.x264.DTS-HD.MA.7.1.mkv",
+        "size": 12800000000,
+        "quality": "1080p",
+        "source": "BluRay",
+        "codec": "x264",
+        "dateImported": "2024-12-10T16:45:00Z"
+      }
+    },
+    {
+      "id": "mov-003",
+      "tmdbId": 558449,
+      "title": "Gladiator II",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/euYIwmwkmz95mnXvufEmbL6ovhZ.jpg",
+      "synopsis": "Years after witnessing the death of Maximus at the hands of his uncle, Lucius is forced to fight in the Colosseum after his home is conquered by the tyrannical Emperors who now lead Rome.",
+      "runtime": 148,
+      "genres": ["Action", "Adventure", "Drama"],
+      "cast": [
+        { "name": "Paul Mescal", "character": "Lucius" },
+        { "name": "Pedro Pascal", "character": "Marcus Acacius" },
+        { "name": "Denzel Washington", "character": "Macrinus" },
+        { "name": "Connie Nielsen", "character": "Lucilla" }
+      ],
+      "cinemaReleaseDate": "2024-11-15",
+      "digitalReleaseDate": "2025-01-14",
+      "dateAdded": "2024-06-20T09:00:00Z",
+      "monitored": true,
+      "qualityPreference": "2160p",
+      "file": null
+    },
+    {
+      "id": "mov-004",
+      "tmdbId": 945961,
+      "title": "Alien: Romulus",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/2uSWRTtCG336nuBiG8jOTEUKSy8.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/9SSEUrSqhljBMzRe4aBTh17rUaC.jpg",
+      "synopsis": "While scavenging the deep ends of a derelict space station, a group of young space colonizers come face to face with the most terrifying life form in the universe.",
+      "runtime": 119,
+      "genres": ["Horror", "Science Fiction"],
+      "cast": [
+        { "name": "Cailee Spaeny", "character": "Rain" },
+        { "name": "David Jonsson", "character": "Andy" },
+        { "name": "Archie Renaux", "character": "Tyler" }
+      ],
+      "cinemaReleaseDate": "2024-08-16",
+      "digitalReleaseDate": "2024-10-08",
+      "dateAdded": "2024-05-01T11:30:00Z",
+      "monitored": true,
+      "qualityPreference": "1080p",
+      "file": {
+        "id": "file-003",
+        "path": "/media/movies/Alien Romulus (2024)/Alien.Romulus.2024.1080p.WEB-DL.DDP5.1.Atmos.H.264.mkv",
+        "size": 8900000000,
+        "quality": "1080p",
+        "source": "WEB-DL",
+        "codec": "H.264",
+        "dateImported": "2024-10-09T12:00:00Z"
+      }
+    },
+    {
+      "id": "mov-005",
+      "tmdbId": 402431,
+      "title": "Wicked",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/zfaeWoHsBowz6KN4xEtla59xS7.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/placeholder.jpg",
+      "synopsis": "In the land of Oz, ostracized and misunderstood green-skinned Elphaba is forced to share a room with the beautiful and popular Galinda. The two's unlikely friendship is tested as they begin to fulfill their respective destinies as Glinda the Good and the Wicked Witch of the West.",
+      "runtime": 160,
+      "genres": ["Drama", "Fantasy", "Romance"],
+      "cast": [
+        { "name": "Cynthia Erivo", "character": "Elphaba" },
+        { "name": "Ariana Grande", "character": "Galinda" },
+        { "name": "Jonathan Bailey", "character": "Fiyero" },
+        { "name": "Michelle Yeoh", "character": "Madame Morrible" }
+      ],
+      "cinemaReleaseDate": "2024-11-22",
+      "digitalReleaseDate": "2025-02-04",
+      "dateAdded": "2024-03-12T08:00:00Z",
+      "monitored": true,
+      "qualityPreference": "1080p",
+      "file": null
+    },
+    {
+      "id": "mov-006",
+      "tmdbId": 1034541,
+      "title": "Terrifier 3",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/ju10W5gl3PPK3b7TjEmVOZap51I.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/18TSJF1WLA4CkymvVUcKDBwUJ9F.jpg",
+      "synopsis": "Five years after surviving Art the Clown's Halloween massacre, Sienna and Jonathan are still struggling to rebuild their shattered lives. As the holiday season approaches, they try to embrace the Christmas spirit, but Art returns, determined to turn their holidays into a new nightmare.",
+      "runtime": 125,
+      "genres": ["Horror", "Thriller"],
+      "cast": [
+        { "name": "Lauren LaVera", "character": "Sienna Shaw" },
+        { "name": "David Howard Thornton", "character": "Art the Clown" },
+        { "name": "Elliott Fullam", "character": "Jonathan Shaw" }
+      ],
+      "cinemaReleaseDate": "2024-10-11",
+      "digitalReleaseDate": "2024-12-03",
+      "dateAdded": "2024-09-15T20:00:00Z",
+      "monitored": true,
+      "qualityPreference": "1080p",
+      "file": {
+        "id": "file-004",
+        "path": "/media/movies/Terrifier 3 (2024)/Terrifier.3.2024.1080p.BluRay.x265.DTS.mkv",
+        "size": 6200000000,
+        "quality": "1080p",
+        "source": "BluRay",
+        "codec": "x265",
+        "dateImported": "2024-12-20T18:30:00Z"
+      }
+    },
+    {
+      "id": "mov-007",
+      "tmdbId": 426063,
+      "title": "Nosferatu",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/5qGIxdEO841C0tdY8vOdLoRVrr0.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/fYnEbgoNCxW9kL0IgOgtJb9JTBU.jpg",
+      "synopsis": "A gothic tale of obsession between a haunted young woman and the terrifying vampire infatuated with her, causing untold horror in its wake.",
+      "runtime": 132,
+      "genres": ["Horror", "Fantasy"],
+      "cast": [
+        { "name": "Lily-Rose Depp", "character": "Ellen Hutter" },
+        { "name": "Bill Skarsgård", "character": "Count Orlok" },
+        { "name": "Nicholas Hoult", "character": "Thomas Hutter" },
+        { "name": "Willem Dafoe", "character": "Professor Albin Eberhart Von Franz" }
+      ],
+      "cinemaReleaseDate": "2024-12-25",
+      "digitalReleaseDate": "2025-02-18",
+      "dateAdded": "2024-10-01T15:00:00Z",
+      "monitored": true,
+      "qualityPreference": "2160p",
+      "file": null
+    },
+    {
+      "id": "mov-008",
+      "tmdbId": 661539,
+      "title": "A Complete Unknown",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/llWl3GtNoXosbvYboelmoT459NM.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/kcCy5tKTe6WepVQ6SQaSewpmoCj.jpg",
+      "synopsis": "New York City in the early 1960s. Music's a-changin' and 19-year-old Minnesota musician Bob Dylan arrives with his guitar and revolutionary talent, making his way to his musical idol Woody Guthrie, forging relationships with legends of the folk scene and dealing with newfound fame.",
+      "runtime": 141,
+      "genres": ["Drama", "Music"],
+      "cast": [
+        { "name": "Timothée Chalamet", "character": "Bob Dylan" },
+        { "name": "Elle Fanning", "character": "Sylvie Russo" },
+        { "name": "Monica Barbaro", "character": "Joan Baez" },
+        { "name": "Edward Norton", "character": "Pete Seeger" }
+      ],
+      "cinemaReleaseDate": "2024-12-25",
+      "digitalReleaseDate": null,
+      "dateAdded": "2024-11-20T12:00:00Z",
+      "monitored": true,
+      "qualityPreference": "1080p",
+      "file": null
+    },
+    {
+      "id": "mov-009",
+      "tmdbId": 533535,
+      "title": "Deadpool & Wolverine",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/ufpeVEM64uZHPpzzeiDNIAdaeOD.jpg",
+      "synopsis": "A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary, Deadpool, behind him. But when his homeworld faces an existential threat, Wade must reluctantly suit-up again with an even more reluctant Wolverine.",
+      "runtime": 128,
+      "genres": ["Action", "Comedy", "Science Fiction"],
+      "cast": [
+        { "name": "Ryan Reynolds", "character": "Wade Wilson / Deadpool" },
+        { "name": "Hugh Jackman", "character": "Logan / Wolverine" },
+        { "name": "Emma Corrin", "character": "Cassandra Nova" }
+      ],
+      "cinemaReleaseDate": "2024-07-26",
+      "digitalReleaseDate": "2024-09-17",
+      "dateAdded": "2024-02-20T10:00:00Z",
+      "monitored": true,
+      "qualityPreference": "2160p",
+      "file": {
+        "id": "file-005",
+        "path": "/media/movies/Deadpool & Wolverine (2024)/Deadpool.and.Wolverine.2024.2160p.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265.mkv",
+        "size": 19800000000,
+        "quality": "2160p",
+        "source": "WEB-DL",
+        "codec": "H.265",
+        "dateImported": "2024-09-18T06:30:00Z"
+      }
+    },
+    {
+      "id": "mov-010",
+      "tmdbId": 1160018,
+      "title": "Conclave",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/placeholder.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/placeholder.jpg",
+      "synopsis": "Following the unexpected death of the Pope, Cardinal Lawrence is tasked with managing the top-secret process of electing a new pope. When the College of Cardinals gathers in the Sistine Chapel, Lawrence finds himself at the center of a conspiracy and discovers a secret that could shake the very foundations of the Church.",
+      "runtime": 120,
+      "genres": ["Thriller", "Drama", "Mystery"],
+      "cast": [
+        { "name": "Ralph Fiennes", "character": "Cardinal Thomas Lawrence" },
+        { "name": "Stanley Tucci", "character": "Cardinal Bellini" },
+        { "name": "John Lithgow", "character": "Cardinal Tremblay" },
+        { "name": "Isabella Rossellini", "character": "Sister Agnes" }
+      ],
+      "cinemaReleaseDate": "2024-11-01",
+      "digitalReleaseDate": "2024-12-24",
+      "dateAdded": "2024-09-05T14:30:00Z",
+      "monitored": true,
+      "qualityPreference": "1080p",
+      "file": {
+        "id": "file-006",
+        "path": "/media/movies/Conclave (2024)/Conclave.2024.1080p.WEB-DL.DD5.1.H.264.mkv",
+        "size": 7400000000,
+        "quality": "1080p",
+        "source": "WEB-DL",
+        "codec": "H.264",
+        "dateImported": "2024-12-25T09:00:00Z"
+      }
+    },
+    {
+      "id": "mov-011",
+      "tmdbId": 912649,
+      "title": "Venom: The Last Dance",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/1RaSkWakWBxxYOWRrqmwo2my5zg.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/3V4kLQg0kSqPLctI5ziYWabAZYF.jpg",
+      "synopsis": "Eddie and Venom are on the run. Hunted by both of their worlds and with the net closing in, the duo are forced into a devastating decision that will bring the curtains down on Venom and Eddie's last dance.",
+      "runtime": 109,
+      "genres": ["Action", "Science Fiction", "Adventure"],
+      "cast": [
+        { "name": "Tom Hardy", "character": "Eddie Brock / Venom" },
+        { "name": "Chiwetel Ejiofor", "character": "Rex Strickland" },
+        { "name": "Juno Temple", "character": "Dr. Teddy Paine" }
+      ],
+      "cinemaReleaseDate": "2024-10-25",
+      "digitalReleaseDate": "2024-12-10",
+      "dateAdded": "2024-07-08T16:00:00Z",
+      "monitored": false,
+      "qualityPreference": "1080p",
+      "file": null
+    },
+    {
+      "id": "mov-012",
+      "tmdbId": 698687,
+      "title": "Transformers One",
+      "year": 2024,
+      "posterUrl": "https://image.tmdb.org/t/p/w500/iRCgqpdVE4wyLQvGYU3ZP7pAtUc.jpg",
+      "backdropUrl": "https://image.tmdb.org/t/p/original/cMfokHWle5lfCreoV08cbmkKv6G.jpg",
+      "synopsis": "The untold origin story of Optimus Prime and Megatron, better known as sworn enemies, but once were friends bonded like brothers who changed the fate of Cybertron forever.",
+      "runtime": 104,
+      "genres": ["Animation", "Science Fiction", "Action"],
+      "cast": [
+        { "name": "Chris Hemsworth", "character": "Orion Pax / Optimus Prime (voice)" },
+        { "name": "Brian Tyree Henry", "character": "D-16 / Megatron (voice)" },
+        { "name": "Scarlett Johansson", "character": "Elita-1 (voice)" },
+        { "name": "Keegan-Michael Key", "character": "B-127 / Bumblebee (voice)" }
+      ],
+      "cinemaReleaseDate": "2024-09-20",
+      "digitalReleaseDate": "2024-11-12",
+      "dateAdded": "2024-04-22T13:00:00Z",
+      "monitored": true,
+      "qualityPreference": "720p",
+      "file": {
+        "id": "file-007",
+        "path": "/media/movies/Transformers One (2024)/Transformers.One.2024.720p.BluRay.x264.DTS.mkv",
+        "size": 4100000000,
+        "quality": "720p",
+        "source": "BluRay",
+        "codec": "x264",
+        "dateImported": "2024-12-01T11:15:00Z"
+      }
+    }
+  ]
+}
+

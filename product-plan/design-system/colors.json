@@ -1,0 +1,33 @@
+{
+  "primary": "blue",
+  "secondary": "sky",
+  "neutral": "slate",
+  "usage": {
+    "primary-base": "blue-500",
+    "primary-hover": "blue-600",
+    "primary-active": "blue-700",
+    "primary-light": "blue-50",
+    "primary-dark": "blue-950",
+    "secondary-base": "sky-500",
+    "secondary-light": "sky-50",
+    "secondary-dark": "sky-950",
+    "background": "slate-50",
+    "background-dark": "slate-950",
+    "surface": "white",
+    "surface-dark": "slate-900",
+    "border": "slate-200",
+    "border-dark": "slate-800",
+    "text-primary": "slate-900",
+    "text-primary-dark": "white",
+    "text-secondary": "slate-600",
+    "text-secondary-dark": "slate-300",
+    "text-muted": "slate-500"
+  },
+  "status": {
+    "success": "emerald",
+    "warning": "amber",
+    "error": "red",
+    "info": "blue"
+  }
+}
+
