@@ -1,9 +1,8 @@
-export { Settings } from "./Settings";
-export { IndexerCard } from "./IndexerCard";
-export { ServerCard } from "./ServerCard";
-export { FolderSection } from "./FolderSection";
-export { QualitySection } from "./QualitySection";
-export { LanguagesSection } from "./LanguagesSection";
-export { FormatsSection } from "./FormatsSection";
-export { AuthSection } from "./AuthSection";
-
+export { AuthSection } from './AuthSection'
+export { FolderSection } from './FolderSection'
+export { FormatsSection } from './FormatsSection'
+export { IndexerCard } from './IndexerCard'
+export { LanguagesSection } from './LanguagesSection'
+export { QualitySection } from './QualitySection'
+export { ServerCard } from './ServerCard'
+export { Settings } from './Settings'

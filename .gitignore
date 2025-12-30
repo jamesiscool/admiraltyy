@@ -3,6 +3,8 @@ node_modules
 
 reference
 
+src/client/routeTree.gen.ts
+
 # output
 out
 dist

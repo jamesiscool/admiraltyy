@@ -1,7 +1,7 @@
 # Section-by-Section Implementation Prompt Template
 
-- **SECTION_NAME** = Foundation
-- **SECTION_ID** = 01-foundation
+- **SECTION_NAME** = Shell
+- **SECTION_ID** = 02-shell
 
 ---
 

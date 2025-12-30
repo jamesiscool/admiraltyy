@@ -1,196 +1,404 @@
 {
-  "_meta": {
-    "models": {
-      "indexers": "Usenet indexers are search engines for NZB files. Each indexer connects to a service that catalogs available releases.",
-      "servers": "Usenet servers are the actual download providers. They're tried in priority order — if one fails, the next is used.",
-      "folders": "Library folders are where your media files are stored. One folder per type (movies/TV) is marked as default for new downloads.",
-      "qualityTiers": "Quality tiers define file size expectations for each resolution. Releases outside these ranges are rejected or deprioritized.",
-      "languageSettings": "Language preferences control which subtitle and audio tracks are preferred, with fallback options.",
-      "formatSettings": "Format preferences prioritize codecs, HDR formats, and audio formats when multiple releases are available.",
-      "authSettings": "Authentication settings control how users access the application."
-    },
-    "relationships": [
-      "Indexers are searched to find Releases for wanted movies and episodes",
-      "Servers download the grabbed releases from indexers",
-      "Folders are scanned to match Files to Movies and Episodes",
-      "Quality tiers are applied globally and can be overridden per Movie or Series"
-    ]
-  },
-  "indexers": [
-    {
-      "id": "idx-001",
-      "name": "NZBgeek",
-      "url": "https://api.nzbgeek.info",
-      "apiKey": "a1b2c3d4e5f6g7h8i9j0",
-      "enabled": true,
-      "supportsSearch": true,
-      "supportsTvSearch": true,
-      "supportsMovieSearch": true
-    },
-    {
-      "id": "idx-002",
-      "name": "DrunkenSlug",
-      "url": "https://api.drunkenslug.com",
-      "apiKey": "z9y8x7w6v5u4t3s2r1q0",
-      "enabled": true,
-      "supportsSearch": true,
-      "supportsTvSearch": true,
-      "supportsMovieSearch": true
-    },
-    {
-      "id": "idx-003",
-      "name": "NZBFinder",
-      "url": "https://nzbfinder.ws/api",
-      "apiKey": "m1n2o3p4q5r6s7t8u9v0",
-      "enabled": false,
-      "supportsSearch": true,
-      "supportsTvSearch": false,
-      "supportsMovieSearch": true
-    }
-  ],
-  "servers": [
-    {
-      "id": "srv-001",
-      "name": "Newshosting",
-      "host": "news.newshosting.com",
-      "port": 563,
-      "username": "user@example.com",
-      "password": "••••••••••••",
-      "ssl": true,
-      "priority": 0,
-      "connections": 30,
-      "enabled": true
-    },
-    {
-      "id": "srv-002",
-      "name": "Blocknews (Block)",
-      "host": "news.blocknews.net",
-      "port": 563,
-      "username": "blockuser",
-      "password": "••••••••••••",
-      "ssl": true,
-      "priority": 1,
-      "connections": 10,
-      "enabled": true
-    }
-  ],
-  "folders": {
-    "movies": [
-      {
-        "id": "fld-m01",
-        "path": "/media/movies",
-        "isDefault": true
-      },
-      {
-        "id": "fld-m02",
-        "path": "/media/movies-4k",
-        "isDefault": false
-      },
-      {
-        "id": "fld-m03",
-        "path": "/media/movies-kids",
-        "isDefault": false
-      },
-      {
-        "id": "fld-m04",
-        "path": "/external/archive/movies",
-        "isDefault": false
-      }
-    ],
-    "tv": [
-      {
-        "id": "fld-t01",
-        "path": "/media/tv",
-        "isDefault": true
-      },
-      {
-        "id": "fld-t02",
-        "path": "/media/tv-anime",
-        "isDefault": false
-      }
-    ]
-  },
-  "qualityTiers": [
-    {
-      "id": "q-480",
-      "name": "480p",
-      "resolution": 480,
-      "minGbPerHour": 0.3,
-      "targetGbPerHour": 0.5,
-      "maxGbPerHour": 0.8
-    },
-    {
-      "id": "q-720",
-      "name": "720p",
-      "resolution": 720,
-      "minGbPerHour": 0.8,
-      "targetGbPerHour": 1.5,
-      "maxGbPerHour": 2.5
-    },
-    {
-      "id": "q-1080",
-      "name": "1080p",
-      "resolution": 1080,
-      "minGbPerHour": 1.5,
-      "targetGbPerHour": 4,
-      "maxGbPerHour": 8
-    },
-    {
-      "id": "q-2160",
-      "name": "2160p",
-      "resolution": 2160,
-      "minGbPerHour": 5,
-      "targetGbPerHour": 15,
-      "maxGbPerHour": 40
-    }
-  ],
-  "languageSettings": {
-    "subtitleLanguages": [
-      { "code": "en", "name": "English", "priority": 0 },
-      { "code": "es", "name": "Spanish", "priority": 1 },
-      { "code": "fr", "name": "French", "priority": 2 },
-      { "code": "de", "name": "German", "priority": 3 },
-      { "code": "pt", "name": "Portuguese", "priority": 4 }
-    ],
-    "audioLanguages": [
-      { "code": "en", "name": "English", "priority": 0 },
-      { "code": "ja", "name": "Japanese", "priority": 1 },
-      { "code": "ko", "name": "Korean", "priority": 2 },
-      { "code": "es", "name": "Spanish", "priority": 3 }
-    ],
-    "preferOriginalAudio": true,
-    "acceptAnyAudioFallback": true
-  },
-  "formatSettings": {
-    "codecs": [
-      { "id": "codec-x265", "name": "x265", "priority": 0, "matchTerms": ["x265", "h265", "hevc"], "excludeTerms": [] },
-      { "id": "codec-x264", "name": "x264", "priority": 1, "matchTerms": ["x264", "h264", "avc"], "excludeTerms": [] },
-      { "id": "codec-av1", "name": "AV1", "priority": 2, "matchTerms": ["av1", "av01"], "excludeTerms": [] },
-      { "id": "codec-mpeg4", "name": "MPEG-4", "priority": 3, "matchTerms": ["mpeg4", "mpeg-4", "divx", "xvid"], "excludeTerms": [] }
-    ],
-    "hdrFormats": [
-      { "id": "hdr-dv", "name": "Dolby Vision", "priority": 0, "matchTerms": ["dolby vision", "dv", "dovi"], "excludeTerms": [] },
-      { "id": "hdr-hdr10plus", "name": "HDR10+", "priority": 1, "matchTerms": ["hdr10+", "hdr10plus"], "excludeTerms": [] },
-      { "id": "hdr-hdr10", "name": "HDR10", "priority": 2, "matchTerms": ["hdr10", "hdr"], "excludeTerms": ["hdr10+", "hdr10plus"] },
-      { "id": "hdr-hlg", "name": "HLG", "priority": 3, "matchTerms": ["hlg"], "excludeTerms": [] },
-      { "id": "hdr-sdr", "name": "SDR", "priority": 4, "matchTerms": ["sdr"], "excludeTerms": [] }
-    ],
-    "audioFormats": [
-      { "id": "audio-atmos", "name": "Dolby Atmos", "priority": 0, "matchTerms": ["atmos", "dolby atmos"], "excludeTerms": [] },
-      { "id": "audio-truehd", "name": "TrueHD", "priority": 1, "matchTerms": ["truehd", "true-hd"], "excludeTerms": [] },
-      { "id": "audio-dtshd", "name": "DTS-HD MA", "priority": 2, "matchTerms": ["dts-hd ma", "dts-hdma", "dtshd ma"], "excludeTerms": [] },
-      { "id": "audio-dtsx", "name": "DTS-X", "priority": 3, "matchTerms": ["dts-x", "dtsx"], "excludeTerms": [] },
-      { "id": "audio-dts", "name": "DTS", "priority": 4, "matchTerms": ["dts"], "excludeTerms": ["dts-hd", "dts-x", "dtsx", "dts-hdma"] },
-      { "id": "audio-eac3", "name": "DD+ (E-AC3)", "priority": 5, "matchTerms": ["dd+", "ddp", "e-ac3", "eac3", "dolby digital plus"], "excludeTerms": [] },
-      { "id": "audio-ac3", "name": "DD (AC3)", "priority": 6, "matchTerms": ["dd", "ac3", "dolby digital"], "excludeTerms": ["dd+", "ddp", "e-ac3", "eac3", "dolby digital plus"] },
-      { "id": "audio-aac", "name": "AAC", "priority": 7, "matchTerms": ["aac"], "excludeTerms": [] }
-    ]
-  },
-  "authSettings": {
-    "enabled": true,
-    "method": "form",
-    "username": "admin",
-    "apiKey": "k7x9m2p4q8r1s5t3v6w0y2z4a8b1c5d7"
-  }
+	"_meta": {
+		"models": {
+			"indexers": "Usenet indexers are search engines for NZB files. Each indexer connects to a service that catalogs available releases.",
+			"servers": "Usenet servers are the actual download providers. They're tried in priority order — if one fails, the next is used.",
+			"folders": "Library folders are where your media files are stored. One folder per type (movies/TV) is marked as default for new downloads.",
+			"qualityTiers": "Quality tiers define file size expectations for each resolution. Releases outside these ranges are rejected or deprioritized.",
+			"languageSettings": "Language preferences control which subtitle and audio tracks are preferred, with fallback options.",
+			"formatSettings": "Format preferences prioritize codecs, HDR formats, and audio formats when multiple releases are available.",
+			"authSettings": "Authentication settings control how users access the application."
+		},
+		"relationships": [
+			"Indexers are searched to find Releases for wanted movies and episodes",
+			"Servers download the grabbed releases from indexers",
+			"Folders are scanned to match Files to Movies and Episodes",
+			"Quality tiers are applied globally and can be overridden per Movie or Series"
+		]
+	},
+	"indexers": [
+		{
+			"id": "idx-001",
+			"name": "NZBgeek",
+			"url": "https://api.nzbgeek.info",
+			"apiKey": "a1b2c3d4e5f6g7h8i9j0",
+			"enabled": true,
+			"supportsSearch": true,
+			"supportsTvSearch": true,
+			"supportsMovieSearch": true
+		},
+		{
+			"id": "idx-002",
+			"name": "DrunkenSlug",
+			"url": "https://api.drunkenslug.com",
+			"apiKey": "z9y8x7w6v5u4t3s2r1q0",
+			"enabled": true,
+			"supportsSearch": true,
+			"supportsTvSearch": true,
+			"supportsMovieSearch": true
+		},
+		{
+			"id": "idx-003",
+			"name": "NZBFinder",
+			"url": "https://nzbfinder.ws/api",
+			"apiKey": "m1n2o3p4q5r6s7t8u9v0",
+			"enabled": false,
+			"supportsSearch": true,
+			"supportsTvSearch": false,
+			"supportsMovieSearch": true
+		}
+	],
+	"servers": [
+		{
+			"id": "srv-001",
+			"name": "Newshosting",
+			"host": "news.newshosting.com",
+			"port": 563,
+			"username": "user@example.com",
+			"password": "••••••••••••",
+			"ssl": true,
+			"priority": 0,
+			"connections": 30,
+			"enabled": true
+		},
+		{
+			"id": "srv-002",
+			"name": "Blocknews (Block)",
+			"host": "news.blocknews.net",
+			"port": 563,
+			"username": "blockuser",
+			"password": "••••••••••••",
+			"ssl": true,
+			"priority": 1,
+			"connections": 10,
+			"enabled": true
+		}
+	],
+	"folders": {
+		"movies": [
+			{
+				"id": "fld-m01",
+				"path": "/media/movies",
+				"isDefault": true
+			},
+			{
+				"id": "fld-m02",
+				"path": "/media/movies-4k",
+				"isDefault": false
+			},
+			{
+				"id": "fld-m03",
+				"path": "/media/movies-kids",
+				"isDefault": false
+			},
+			{
+				"id": "fld-m04",
+				"path": "/external/archive/movies",
+				"isDefault": false
+			}
+		],
+		"tv": [
+			{
+				"id": "fld-t01",
+				"path": "/media/tv",
+				"isDefault": true
+			},
+			{
+				"id": "fld-t02",
+				"path": "/media/tv-anime",
+				"isDefault": false
+			}
+		]
+	},
+	"qualityTiers": [
+		{
+			"id": "q-480",
+			"name": "480p",
+			"resolution": 480,
+			"minGbPerHour": 0.3,
+			"targetGbPerHour": 0.5,
+			"maxGbPerHour": 0.8
+		},
+		{
+			"id": "q-720",
+			"name": "720p",
+			"resolution": 720,
+			"minGbPerHour": 0.8,
+			"targetGbPerHour": 1.5,
+			"maxGbPerHour": 2.5
+		},
+		{
+			"id": "q-1080",
+			"name": "1080p",
+			"resolution": 1080,
+			"minGbPerHour": 1.5,
+			"targetGbPerHour": 4,
+			"maxGbPerHour": 8
+		},
+		{
+			"id": "q-2160",
+			"name": "2160p",
+			"resolution": 2160,
+			"minGbPerHour": 5,
+			"targetGbPerHour": 15,
+			"maxGbPerHour": 40
+		}
+	],
+	"languageSettings": {
+		"subtitleLanguages": [
+			{
+				"code": "en",
+				"name": "English",
+				"priority": 0
+			},
+			{
+				"code": "es",
+				"name": "Spanish",
+				"priority": 1
+			},
+			{
+				"code": "fr",
+				"name": "French",
+				"priority": 2
+			},
+			{
+				"code": "de",
+				"name": "German",
+				"priority": 3
+			},
+			{
+				"code": "pt",
+				"name": "Portuguese",
+				"priority": 4
+			}
+		],
+		"audioLanguages": [
+			{
+				"code": "en",
+				"name": "English",
+				"priority": 0
+			},
+			{
+				"code": "ja",
+				"name": "Japanese",
+				"priority": 1
+			},
+			{
+				"code": "ko",
+				"name": "Korean",
+				"priority": 2
+			},
+			{
+				"code": "es",
+				"name": "Spanish",
+				"priority": 3
+			}
+		],
+		"preferOriginalAudio": true,
+		"acceptAnyAudioFallback": true
+	},
+	"formatSettings": {
+		"codecs": [
+			{
+				"id": "codec-x265",
+				"name": "x265",
+				"priority": 0,
+				"matchTerms": [
+					"x265",
+					"h265",
+					"hevc"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "codec-x264",
+				"name": "x264",
+				"priority": 1,
+				"matchTerms": [
+					"x264",
+					"h264",
+					"avc"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "codec-av1",
+				"name": "AV1",
+				"priority": 2,
+				"matchTerms": [
+					"av1",
+					"av01"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "codec-mpeg4",
+				"name": "MPEG-4",
+				"priority": 3,
+				"matchTerms": [
+					"mpeg4",
+					"mpeg-4",
+					"divx",
+					"xvid"
+				],
+				"excludeTerms": []
+			}
+		],
+		"hdrFormats": [
+			{
+				"id": "hdr-dv",
+				"name": "Dolby Vision",
+				"priority": 0,
+				"matchTerms": [
+					"dolby vision",
+					"dv",
+					"dovi"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "hdr-hdr10plus",
+				"name": "HDR10+",
+				"priority": 1,
+				"matchTerms": [
+					"hdr10+",
+					"hdr10plus"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "hdr-hdr10",
+				"name": "HDR10",
+				"priority": 2,
+				"matchTerms": [
+					"hdr10",
+					"hdr"
+				],
+				"excludeTerms": [
+					"hdr10+",
+					"hdr10plus"
+				]
+			},
+			{
+				"id": "hdr-hlg",
+				"name": "HLG",
+				"priority": 3,
+				"matchTerms": [
+					"hlg"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "hdr-sdr",
+				"name": "SDR",
+				"priority": 4,
+				"matchTerms": [
+					"sdr"
+				],
+				"excludeTerms": []
+			}
+		],
+		"audioFormats": [
+			{
+				"id": "audio-atmos",
+				"name": "Dolby Atmos",
+				"priority": 0,
+				"matchTerms": [
+					"atmos",
+					"dolby atmos"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "audio-truehd",
+				"name": "TrueHD",
+				"priority": 1,
+				"matchTerms": [
+					"truehd",
+					"true-hd"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "audio-dtshd",
+				"name": "DTS-HD MA",
+				"priority": 2,
+				"matchTerms": [
+					"dts-hd ma",
+					"dts-hdma",
+					"dtshd ma"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "audio-dtsx",
+				"name": "DTS-X",
+				"priority": 3,
+				"matchTerms": [
+					"dts-x",
+					"dtsx"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "audio-dts",
+				"name": "DTS",
+				"priority": 4,
+				"matchTerms": [
+					"dts"
+				],
+				"excludeTerms": [
+					"dts-hd",
+					"dts-x",
+					"dtsx",
+					"dts-hdma"
+				]
+			},
+			{
+				"id": "audio-eac3",
+				"name": "DD+ (E-AC3)",
+				"priority": 5,
+				"matchTerms": [
+					"dd+",
+					"ddp",
+					"e-ac3",
+					"eac3",
+					"dolby digital plus"
+				],
+				"excludeTerms": []
+			},
+			{
+				"id": "audio-ac3",
+				"name": "DD (AC3)",
+				"priority": 6,
+				"matchTerms": [
+					"dd",
+					"ac3",
+					"dolby digital"
+				],
+				"excludeTerms": [
+					"dd+",
+					"ddp",
+					"e-ac3",
+					"eac3",
+					"dolby digital plus"
+				]
+			},
+			{
+				"id": "audio-aac",
+				"name": "AAC",
+				"priority": 7,
+				"matchTerms": [
+					"aac"
+				],
+				"excludeTerms": []
+			}
+		]
+	},
+	"authSettings": {
+		"enabled": true,
+		"method": "form",
+		"username": "admin",
+		"apiKey": "k7x9m2p4q8r1s5t3v6w0y2z4a8b1c5d7"
+	}
 }
-

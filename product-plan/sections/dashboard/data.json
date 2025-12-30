@@ -1,310 +1,383 @@
 {
-  "_meta": {
-    "models": {
-      "wantedMovies": "Movies you're tracking that don't have a file yet. These are filtered from the Movies section - only movies with monitored=true and file=null appear here.",
-      "wantedSeries": "TV series with episodes you're missing. Each includes the full Series data plus the next wanted episode info.",
-      "recentDownloads": "Your recent download history showing what's been grabbed, completed, or failed."
-    },
-    "relationships": [
-      "Wanted Movies are Movies (from movies section) where monitored=true and file=null",
-      "Wanted Series are Series (from tv section) with at least one Episode that is monitored and has status 'missing' or 'airing'",
-      "Recent Downloads link back to their source Movie or Series for navigation"
-    ],
-    "dataSource": "This data is derived from the movies and tv sections - wantedMovies and wantedSeries reference the same data structures."
-  },
-  "wantedMovies": [
-    {
-      "id": "mov-003",
-      "tmdbId": 558449,
-      "title": "Gladiator II",
-      "year": 2024,
-      "posterUrl": "https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg",
-      "backdropUrl": "https://image.tmdb.org/t/p/original/euYIwmwkmz95mnXvufEmbL6ovhZ.jpg",
-      "synopsis": "Years after witnessing the death of Maximus at the hands of his uncle, Lucius is forced to fight in the Colosseum after his home is conquered by the tyrannical Emperors who now lead Rome.",
-      "runtime": 148,
-      "genres": ["Action", "Adventure", "Drama"],
-      "cast": [
-        { "name": "Paul Mescal", "character": "Lucius" },
-        { "name": "Pedro Pascal", "character": "Marcus Acacius" },
-        { "name": "Denzel Washington", "character": "Macrinus" },
-        { "name": "Connie Nielsen", "character": "Lucilla" }
-      ],
-      "cinemaReleaseDate": "2024-11-15",
-      "digitalReleaseDate": "2025-01-14",
-      "dateAdded": "2024-06-20T09:00:00Z",
-      "monitored": true,
-      "qualityPreference": "2160p",
-      "file": null
-    },
-    {
-      "id": "mov-005",
-      "tmdbId": 402431,
-      "title": "Wicked",
-      "year": 2024,
-      "posterUrl": "https://image.tmdb.org/t/p/w500/zfaeWoHsBowz6KN4xEtla59xS7.jpg",
-      "backdropUrl": "https://image.tmdb.org/t/p/original/placeholder.jpg",
-      "synopsis": "In the land of Oz, ostracized and misunderstood green-skinned Elphaba is forced to share a room with the beautiful and popular Galinda. The two's unlikely friendship is tested as they begin to fulfill their respective destinies as Glinda the Good and the Wicked Witch of the West.",
-      "runtime": 160,
-      "genres": ["Drama", "Fantasy", "Romance"],
-      "cast": [
-        { "name": "Cynthia Erivo", "character": "Elphaba" },
-        { "name": "Ariana Grande", "character": "Galinda" },
-        { "name": "Jonathan Bailey", "character": "Fiyero" },
-        { "name": "Michelle Yeoh", "character": "Madame Morrible" }
-      ],
-      "cinemaReleaseDate": "2024-11-22",
-      "digitalReleaseDate": "2025-02-04",
-      "dateAdded": "2024-03-12T08:00:00Z",
-      "monitored": true,
-      "qualityPreference": "1080p",
-      "file": null
-    },
-    {
-      "id": "mov-007",
-      "tmdbId": 426063,
-      "title": "Nosferatu",
-      "year": 2024,
-      "posterUrl": "https://image.tmdb.org/t/p/w500/5qGIxdEO841C0tdY8vOdLoRVrr0.jpg",
-      "backdropUrl": "https://image.tmdb.org/t/p/original/fYnEbgoNCxW9kL0IgOgtJb9JTBU.jpg",
-      "synopsis": "A gothic tale of obsession between a haunted young woman and the terrifying vampire infatuated with her, causing untold horror in its wake.",
-      "runtime": 132,
-      "genres": ["Horror", "Fantasy"],
-      "cast": [
-        { "name": "Lily-Rose Depp", "character": "Ellen Hutter" },
-        { "name": "Bill Skarsgård", "character": "Count Orlok" },
-        { "name": "Nicholas Hoult", "character": "Thomas Hutter" },
-        { "name": "Willem Dafoe", "character": "Professor Albin Eberhart Von Franz" }
-      ],
-      "cinemaReleaseDate": "2024-12-25",
-      "digitalReleaseDate": "2025-02-18",
-      "dateAdded": "2024-10-01T15:00:00Z",
-      "monitored": true,
-      "qualityPreference": "2160p",
-      "file": null
-    },
-    {
-      "id": "mov-008",
-      "tmdbId": 661539,
-      "title": "A Complete Unknown",
-      "year": 2024,
-      "posterUrl": "https://image.tmdb.org/t/p/w500/llWl3GtNoXosbvYboelmoT459NM.jpg",
-      "backdropUrl": "https://image.tmdb.org/t/p/original/kcCy5tKTe6WepVQ6SQaSewpmoCj.jpg",
-      "synopsis": "New York City in the early 1960s. Music's a-changin' and 19-year-old Minnesota musician Bob Dylan arrives with his guitar and revolutionary talent, making his way to his musical idol Woody Guthrie, forging relationships with legends of the folk scene and dealing with newfound fame.",
-      "runtime": 141,
-      "genres": ["Drama", "Music"],
-      "cast": [
-        { "name": "Timothée Chalamet", "character": "Bob Dylan" },
-        { "name": "Elle Fanning", "character": "Sylvie Russo" },
-        { "name": "Monica Barbaro", "character": "Joan Baez" },
-        { "name": "Edward Norton", "character": "Pete Seeger" }
-      ],
-      "cinemaReleaseDate": "2024-12-25",
-      "digitalReleaseDate": null,
-      "dateAdded": "2024-11-20T12:00:00Z",
-      "monitored": true,
-      "qualityPreference": "1080p",
-      "file": null
-    }
-  ],
-  "wantedSeries": [
-    {
-      "series": {
-        "id": "series-001",
-        "tvdbId": 328724,
-        "title": "Severance",
-        "year": 2022,
-        "status": "continuing",
-        "network": "Apple TV+",
-        "overview": "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
-        "posterUrl": "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
-        "backdropUrl": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/ixgFmf1X59PUZam2qbAfskx2gQr.jpg",
-        "genres": ["Drama", "Thriller", "Sci-Fi"],
-        "runtime": 55,
-        "monitored": true,
-        "qualityPreference": "1080p",
-        "dateAdded": "2024-01-15T10:30:00Z",
-        "nextAiring": "2026-01-09T03:00:00Z",
-        "totalEpisodes": 29,
-        "downloadedEpisodes": 19,
-        "seasons": []
-      },
-      "nextWantedEpisode": {
-        "seasonNumber": 3,
-        "episodeNumber": 1,
-        "title": "TBA",
-        "airDate": "2026-01-09",
-        "status": "airing"
-      }
-    },
-    {
-      "series": {
-        "id": "series-003",
-        "tvdbId": 371980,
-        "title": "Slow Horses",
-        "year": 2022,
-        "status": "continuing",
-        "network": "Apple TV+",
-        "overview": "Slow Horses follows a dysfunctional team of British intelligence agents who serve in Slough House, a dumping ground department of MI5 where washed-up spies are sent to see out their failed careers. Led by the irascible Jackson Lamb, they navigate the murky world of espionage.",
-        "posterUrl": "https://image.tmdb.org/t/p/w500/dnpatlJrEPiDSn5fzgzvxtiSnMo.jpg",
-        "backdropUrl": "https://images.unsplash.com/photo-1533929736562-6c6b3dc3e0c3?w=1920&q=80",
-        "genres": ["Drama", "Thriller"],
-        "runtime": 45,
-        "monitored": true,
-        "qualityPreference": "2160p",
-        "dateAdded": "2024-03-10T09:00:00Z",
-        "nextAiring": "2026-03-04T08:00:00Z",
-        "totalEpisodes": 30,
-        "downloadedEpisodes": 24,
-        "seasons": []
-      },
-      "nextWantedEpisode": {
-        "seasonNumber": 5,
-        "episodeNumber": 1,
-        "title": "TBA",
-        "airDate": "2026-03-04",
-        "status": "airing"
-      }
-    },
-    {
-      "series": {
-        "id": "series-006",
-        "tvdbId": 376269,
-        "title": "What We Do in the Shadows",
-        "year": 2019,
-        "status": "ended",
-        "network": "FX",
-        "overview": "A documentary-style look into the daily lives of four vampires who've been roommates for hundreds of years in Staten Island. The vampires navigate modern life while dealing with the challenges of being undead in the 21st century.",
-        "posterUrl": "https://image.tmdb.org/t/p/w500/wa3ZQE9kLnqwN3vQ0NNjg1NPsCa.jpg",
-        "backdropUrl": null,
-        "genres": ["Comedy", "Horror", "Fantasy"],
-        "runtime": 22,
-        "monitored": true,
-        "qualityPreference": "1080p",
-        "dateAdded": "2023-08-14T20:30:00Z",
-        "nextAiring": null,
-        "totalEpisodes": 51,
-        "downloadedEpisodes": 41,
-        "seasons": []
-      },
-      "nextWantedEpisode": {
-        "seasonNumber": 6,
-        "episodeNumber": 2,
-        "title": "Headhunting",
-        "airDate": "2024-10-28",
-        "status": "missing"
-      }
-    }
-  ],
-  "recentDownloads": [
-    {
-      "id": "dl-001",
-      "type": "movie",
-      "title": "Conclave",
-      "quality": "1080p",
-      "size": 7400000000,
-      "dateDownloaded": "2024-12-27T14:32:00Z",
-      "status": "downloading",
-      "progress": 67,
-      "mediaId": "mov-010"
-    },
-    {
-      "id": "dl-002",
-      "type": "tv",
-      "title": "What We Do in the Shadows S06E01",
-      "quality": "1080p",
-      "size": 600000000,
-      "dateDownloaded": "2024-12-27T12:15:00Z",
-      "status": "completed",
-      "progress": 100,
-      "mediaId": "series-006"
-    },
-    {
-      "id": "dl-003",
-      "type": "movie",
-      "title": "Terrifier 3",
-      "quality": "1080p",
-      "size": 6200000000,
-      "dateDownloaded": "2024-12-27T08:45:00Z",
-      "status": "completed",
-      "progress": 100,
-      "mediaId": "mov-006"
-    },
-    {
-      "id": "dl-004",
-      "type": "tv",
-      "title": "Severance S02E10",
-      "quality": "1080p",
-      "size": 3000000000,
-      "dateDownloaded": "2024-12-26T22:30:00Z",
-      "status": "completed",
-      "progress": 100,
-      "mediaId": "series-001"
-    },
-    {
-      "id": "dl-005",
-      "type": "movie",
-      "title": "The Wild Robot",
-      "quality": "1080p",
-      "size": 12800000000,
-      "dateDownloaded": "2024-12-26T16:20:00Z",
-      "status": "completed",
-      "progress": 100,
-      "mediaId": "mov-002"
-    },
-    {
-      "id": "dl-006",
-      "type": "tv",
-      "title": "Slow Horses S04E06",
-      "quality": "2160p",
-      "size": 4800000000,
-      "dateDownloaded": "2024-12-25T20:00:00Z",
-      "status": "completed",
-      "progress": 100,
-      "mediaId": "series-003"
-    },
-    {
-      "id": "dl-007",
-      "type": "movie",
-      "title": "Deadpool & Wolverine",
-      "quality": "2160p",
-      "size": 19800000000,
-      "dateDownloaded": "2024-12-25T10:15:00Z",
-      "status": "completed",
-      "progress": 100,
-      "mediaId": "mov-009"
-    },
-    {
-      "id": "dl-008",
-      "type": "tv",
-      "title": "The Bear S03E10",
-      "quality": "1080p",
-      "size": 1200000000,
-      "dateDownloaded": "2024-12-24T09:30:00Z",
-      "status": "completed",
-      "progress": 100,
-      "mediaId": "series-002"
-    },
-    {
-      "id": "dl-009",
-      "type": "movie",
-      "title": "Alien: Romulus",
-      "quality": "1080p",
-      "size": 8900000000,
-      "dateDownloaded": "2024-12-23T14:45:00Z",
-      "status": "completed",
-      "progress": 100,
-      "mediaId": "mov-004"
-    },
-    {
-      "id": "dl-010",
-      "type": "tv",
-      "title": "Shogun S01E10",
-      "quality": "2160p",
-      "size": 6800000000,
-      "dateDownloaded": "2024-12-22T21:00:00Z",
-      "status": "importing",
-      "progress": 100,
-      "mediaId": "series-005"
-    }
-  ]
+	"_meta": {
+		"models": {
+			"wantedMovies": "Movies you're tracking that don't have a file yet. These are filtered from the Movies section - only movies with monitored=true and file=null appear here.",
+			"wantedSeries": "TV series with episodes you're missing. Each includes the full Series data plus the next wanted episode info.",
+			"recentDownloads": "Your recent download history showing what's been grabbed, completed, or failed."
+		},
+		"relationships": [
+			"Wanted Movies are Movies (from movies section) where monitored=true and file=null",
+			"Wanted Series are Series (from tv section) with at least one Episode that is monitored and has status 'missing' or 'airing'",
+			"Recent Downloads link back to their source Movie or Series for navigation"
+		],
+		"dataSource": "This data is derived from the movies and tv sections - wantedMovies and wantedSeries reference the same data structures."
+	},
+	"wantedMovies": [
+		{
+			"id": "mov-003",
+			"tmdbId": 558449,
+			"title": "Gladiator II",
+			"year": 2024,
+			"posterUrl": "https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg",
+			"backdropUrl": "https://image.tmdb.org/t/p/original/euYIwmwkmz95mnXvufEmbL6ovhZ.jpg",
+			"synopsis": "Years after witnessing the death of Maximus at the hands of his uncle, Lucius is forced to fight in the Colosseum after his home is conquered by the tyrannical Emperors who now lead Rome.",
+			"runtime": 148,
+			"genres": [
+				"Action",
+				"Adventure",
+				"Drama"
+			],
+			"cast": [
+				{
+					"name": "Paul Mescal",
+					"character": "Lucius"
+				},
+				{
+					"name": "Pedro Pascal",
+					"character": "Marcus Acacius"
+				},
+				{
+					"name": "Denzel Washington",
+					"character": "Macrinus"
+				},
+				{
+					"name": "Connie Nielsen",
+					"character": "Lucilla"
+				}
+			],
+			"cinemaReleaseDate": "2024-11-15",
+			"digitalReleaseDate": "2025-01-14",
+			"dateAdded": "2024-06-20T09:00:00Z",
+			"monitored": true,
+			"qualityPreference": "2160p",
+			"file": null
+		},
+		{
+			"id": "mov-005",
+			"tmdbId": 402431,
+			"title": "Wicked",
+			"year": 2024,
+			"posterUrl": "https://image.tmdb.org/t/p/w500/zfaeWoHsBowz6KN4xEtla59xS7.jpg",
+			"backdropUrl": "https://image.tmdb.org/t/p/original/placeholder.jpg",
+			"synopsis": "In the land of Oz, ostracized and misunderstood green-skinned Elphaba is forced to share a room with the beautiful and popular Galinda. The two's unlikely friendship is tested as they begin to fulfill their respective destinies as Glinda the Good and the Wicked Witch of the West.",
+			"runtime": 160,
+			"genres": [
+				"Drama",
+				"Fantasy",
+				"Romance"
+			],
+			"cast": [
+				{
+					"name": "Cynthia Erivo",
+					"character": "Elphaba"
+				},
+				{
+					"name": "Ariana Grande",
+					"character": "Galinda"
+				},
+				{
+					"name": "Jonathan Bailey",
+					"character": "Fiyero"
+				},
+				{
+					"name": "Michelle Yeoh",
+					"character": "Madame Morrible"
+				}
+			],
+			"cinemaReleaseDate": "2024-11-22",
+			"digitalReleaseDate": "2025-02-04",
+			"dateAdded": "2024-03-12T08:00:00Z",
+			"monitored": true,
+			"qualityPreference": "1080p",
+			"file": null
+		},
+		{
+			"id": "mov-007",
+			"tmdbId": 426063,
+			"title": "Nosferatu",
+			"year": 2024,
+			"posterUrl": "https://image.tmdb.org/t/p/w500/5qGIxdEO841C0tdY8vOdLoRVrr0.jpg",
+			"backdropUrl": "https://image.tmdb.org/t/p/original/fYnEbgoNCxW9kL0IgOgtJb9JTBU.jpg",
+			"synopsis": "A gothic tale of obsession between a haunted young woman and the terrifying vampire infatuated with her, causing untold horror in its wake.",
+			"runtime": 132,
+			"genres": [
+				"Horror",
+				"Fantasy"
+			],
+			"cast": [
+				{
+					"name": "Lily-Rose Depp",
+					"character": "Ellen Hutter"
+				},
+				{
+					"name": "Bill Skarsgård",
+					"character": "Count Orlok"
+				},
+				{
+					"name": "Nicholas Hoult",
+					"character": "Thomas Hutter"
+				},
+				{
+					"name": "Willem Dafoe",
+					"character": "Professor Albin Eberhart Von Franz"
+				}
+			],
+			"cinemaReleaseDate": "2024-12-25",
+			"digitalReleaseDate": "2025-02-18",
+			"dateAdded": "2024-10-01T15:00:00Z",
+			"monitored": true,
+			"qualityPreference": "2160p",
+			"file": null
+		},
+		{
+			"id": "mov-008",
+			"tmdbId": 661539,
+			"title": "A Complete Unknown",
+			"year": 2024,
+			"posterUrl": "https://image.tmdb.org/t/p/w500/llWl3GtNoXosbvYboelmoT459NM.jpg",
+			"backdropUrl": "https://image.tmdb.org/t/p/original/kcCy5tKTe6WepVQ6SQaSewpmoCj.jpg",
+			"synopsis": "New York City in the early 1960s. Music's a-changin' and 19-year-old Minnesota musician Bob Dylan arrives with his guitar and revolutionary talent, making his way to his musical idol Woody Guthrie, forging relationships with legends of the folk scene and dealing with newfound fame.",
+			"runtime": 141,
+			"genres": [
+				"Drama",
+				"Music"
+			],
+			"cast": [
+				{
+					"name": "Timothée Chalamet",
+					"character": "Bob Dylan"
+				},
+				{
+					"name": "Elle Fanning",
+					"character": "Sylvie Russo"
+				},
+				{
+					"name": "Monica Barbaro",
+					"character": "Joan Baez"
+				},
+				{
+					"name": "Edward Norton",
+					"character": "Pete Seeger"
+				}
+			],
+			"cinemaReleaseDate": "2024-12-25",
+			"digitalReleaseDate": null,
+			"dateAdded": "2024-11-20T12:00:00Z",
+			"monitored": true,
+			"qualityPreference": "1080p",
+			"file": null
+		}
+	],
+	"wantedSeries": [
+		{
+			"series": {
+				"id": "series-001",
+				"tvdbId": 328724,
+				"title": "Severance",
+				"year": 2022,
+				"status": "continuing",
+				"network": "Apple TV+",
+				"overview": "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
+				"posterUrl": "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
+				"backdropUrl": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/ixgFmf1X59PUZam2qbAfskx2gQr.jpg",
+				"genres": [
+					"Drama",
+					"Thriller",
+					"Sci-Fi"
+				],
+				"runtime": 55,
+				"monitored": true,
+				"qualityPreference": "1080p",
+				"dateAdded": "2024-01-15T10:30:00Z",
+				"nextAiring": "2026-01-09T03:00:00Z",
+				"totalEpisodes": 29,
+				"downloadedEpisodes": 19,
+				"seasons": []
+			},
+			"nextWantedEpisode": {
+				"seasonNumber": 3,
+				"episodeNumber": 1,
+				"title": "TBA",
+				"airDate": "2026-01-09",
+				"status": "airing"
+			}
+		},
+		{
+			"series": {
+				"id": "series-003",
+				"tvdbId": 371980,
+				"title": "Slow Horses",
+				"year": 2022,
+				"status": "continuing",
+				"network": "Apple TV+",
+				"overview": "Slow Horses follows a dysfunctional team of British intelligence agents who serve in Slough House, a dumping ground department of MI5 where washed-up spies are sent to see out their failed careers. Led by the irascible Jackson Lamb, they navigate the murky world of espionage.",
+				"posterUrl": "https://image.tmdb.org/t/p/w500/dnpatlJrEPiDSn5fzgzvxtiSnMo.jpg",
+				"backdropUrl": "https://images.unsplash.com/photo-1533929736562-6c6b3dc3e0c3?w=1920&q=80",
+				"genres": [
+					"Drama",
+					"Thriller"
+				],
+				"runtime": 45,
+				"monitored": true,
+				"qualityPreference": "2160p",
+				"dateAdded": "2024-03-10T09:00:00Z",
+				"nextAiring": "2026-03-04T08:00:00Z",
+				"totalEpisodes": 30,
+				"downloadedEpisodes": 24,
+				"seasons": []
+			},
+			"nextWantedEpisode": {
+				"seasonNumber": 5,
+				"episodeNumber": 1,
+				"title": "TBA",
+				"airDate": "2026-03-04",
+				"status": "airing"
+			}
+		},
+		{
+			"series": {
+				"id": "series-006",
+				"tvdbId": 376269,
+				"title": "What We Do in the Shadows",
+				"year": 2019,
+				"status": "ended",
+				"network": "FX",
+				"overview": "A documentary-style look into the daily lives of four vampires who've been roommates for hundreds of years in Staten Island. The vampires navigate modern life while dealing with the challenges of being undead in the 21st century.",
+				"posterUrl": "https://image.tmdb.org/t/p/w500/wa3ZQE9kLnqwN3vQ0NNjg1NPsCa.jpg",
+				"backdropUrl": null,
+				"genres": [
+					"Comedy",
+					"Horror",
+					"Fantasy"
+				],
+				"runtime": 22,
+				"monitored": true,
+				"qualityPreference": "1080p",
+				"dateAdded": "2023-08-14T20:30:00Z",
+				"nextAiring": null,
+				"totalEpisodes": 51,
+				"downloadedEpisodes": 41,
+				"seasons": []
+			},
+			"nextWantedEpisode": {
+				"seasonNumber": 6,
+				"episodeNumber": 2,
+				"title": "Headhunting",
+				"airDate": "2024-10-28",
+				"status": "missing"
+			}
+		}
+	],
+	"recentDownloads": [
+		{
+			"id": "dl-001",
+			"type": "movie",
+			"title": "Conclave",
+			"quality": "1080p",
+			"size": 7400000000,
+			"dateDownloaded": "2024-12-27T14:32:00Z",
+			"status": "downloading",
+			"progress": 67,
+			"mediaId": "mov-010"
+		},
+		{
+			"id": "dl-002",
+			"type": "tv",
+			"title": "What We Do in the Shadows S06E01",
+			"quality": "1080p",
+			"size": 600000000,
+			"dateDownloaded": "2024-12-27T12:15:00Z",
+			"status": "completed",
+			"progress": 100,
+			"mediaId": "series-006"
+		},
+		{
+			"id": "dl-003",
+			"type": "movie",
+			"title": "Terrifier 3",
+			"quality": "1080p",
+			"size": 6200000000,
+			"dateDownloaded": "2024-12-27T08:45:00Z",
+			"status": "completed",
+			"progress": 100,
+			"mediaId": "mov-006"
+		},
+		{
+			"id": "dl-004",
+			"type": "tv",
+			"title": "Severance S02E10",
+			"quality": "1080p",
+			"size": 3000000000,
+			"dateDownloaded": "2024-12-26T22:30:00Z",
+			"status": "completed",
+			"progress": 100,
+			"mediaId": "series-001"
+		},
+		{
+			"id": "dl-005",
+			"type": "movie",
+			"title": "The Wild Robot",
+			"quality": "1080p",
+			"size": 12800000000,
+			"dateDownloaded": "2024-12-26T16:20:00Z",
+			"status": "completed",
+			"progress": 100,
+			"mediaId": "mov-002"
+		},
+		{
+			"id": "dl-006",
+			"type": "tv",
+			"title": "Slow Horses S04E06",
+			"quality": "2160p",
+			"size": 4800000000,
+			"dateDownloaded": "2024-12-25T20:00:00Z",
+			"status": "completed",
+			"progress": 100,
+			"mediaId": "series-003"
+		},
+		{
+			"id": "dl-007",
+			"type": "movie",
+			"title": "Deadpool & Wolverine",
+			"quality": "2160p",
+			"size": 19800000000,
+			"dateDownloaded": "2024-12-25T10:15:00Z",
+			"status": "completed",
+			"progress": 100,
+			"mediaId": "mov-009"
+		},
+		{
+			"id": "dl-008",
+			"type": "tv",
+			"title": "The Bear S03E10",
+			"quality": "1080p",
+			"size": 1200000000,
+			"dateDownloaded": "2024-12-24T09:30:00Z",
+			"status": "completed",
+			"progress": 100,
+			"mediaId": "series-002"
+		},
+		{
+			"id": "dl-009",
+			"type": "movie",
+			"title": "Alien: Romulus",
+			"quality": "1080p",
+			"size": 8900000000,
+			"dateDownloaded": "2024-12-23T14:45:00Z",
+			"status": "completed",
+			"progress": 100,
+			"mediaId": "mov-004"
+		},
+		{
+			"id": "dl-010",
+			"type": "tv",
+			"title": "Shogun S01E10",
+			"quality": "2160p",
+			"size": 6800000000,
+			"dateDownloaded": "2024-12-22T21:00:00Z",
+			"status": "importing",
+			"progress": 100,
+			"mediaId": "series-005"
+		}
+	]
 }

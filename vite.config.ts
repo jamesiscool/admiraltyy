@@ -1,10 +1,22 @@
 import { resolve } from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
+import { devtools } from '@tanstack/devtools-vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-	plugins: [react(), tailwindcss()],
+	plugins: [
+		devtools(),
+		tanstackRouter({
+			target: 'react',
+			autoCodeSplitting: true,
+			routesDirectory: './src/client/routes',
+			generatedRouteTree: './src/client/routeTree.gen.ts',
+		}),
+		react(),
+		tailwindcss(),
+	],
 	root: '.',
 	publicDir: 'public',
 	resolve: {
@@ -18,9 +30,9 @@ export default defineConfig({
 		outDir: 'dist/client',
 	},
 	server: {
-		port: 5173,
+		port: 2828,
 		proxy: {
-			'/api': 'http://localhost:3000',
+			'/api': 'http://localhost:2829',
 		},
 	},
 })
