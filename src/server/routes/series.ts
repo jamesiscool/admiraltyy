@@ -9,7 +9,10 @@ export const seriesRoutes = new Hono()
 	})
 	// GET /api/series/:id - Get a single series with seasons and episodes
 	.get('/:id', async (c) => {
-		const id = c.req.param('id')
+		const id = parseInt(c.req.param('id'), 10)
+		if (Number.isNaN(id)) {
+			return c.json({ success: false as const, error: 'Invalid series ID' }, 400)
+		}
 		const series = await db
 			.select()
 			.from(schema.series)

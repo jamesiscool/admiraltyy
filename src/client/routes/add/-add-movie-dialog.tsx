@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { Download, Plus } from 'lucide-react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Download, Loader2, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/client/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/client/components/ui/dialog'
@@ -21,6 +21,8 @@ interface AddMovieDialogProps {
 }
 
 export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProps) {
+	const queryClient = useQueryClient()
+
 	const { data: settings } = useQuery({
 		queryKey: ['settings'],
 		queryFn: async () => {
@@ -28,6 +30,19 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 			const json = await res.json()
 			if (!json.success) throw new Error('Failed to load settings')
 			return json.data
+		},
+	})
+
+	const addMovieMutation = useMutation({
+		mutationFn: async ({ tmdbId, resolution }: { tmdbId: number; resolution: string }) => {
+			const res = await api.api.movies.$post({ json: { tmdbId, resolution } })
+			const json = await res.json()
+			if (!json.success) throw new Error('error' in json ? json.error : 'Failed to add movie')
+			return json.data
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['movies'] })
+			onOpenChange(false)
 		},
 	})
 
@@ -48,16 +63,17 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 	const year = movie?.releaseDate ? new Date(movie.releaseDate).getFullYear() : null
 
 	const handleAdd = () => {
-		// TODO: Implement add movie API call
-		console.log('Adding movie:', { tmdbId: movie?.tmdbId, quality, folder })
-		onOpenChange(false)
+		if (!movie) return
+		addMovieMutation.mutate({ tmdbId: movie.tmdbId, resolution: quality })
 	}
 
 	const handleAddAndDownload = () => {
-		// TODO: Implement add and download (same as add for now)
-		console.log('Adding and downloading movie:', { tmdbId: movie?.tmdbId, quality, folder })
-		onOpenChange(false)
+		if (!movie) return
+		// For now, same as add - download trigger can be added later
+		addMovieMutation.mutate({ tmdbId: movie.tmdbId, resolution: quality })
 	}
+
+	const isLoading = addMovieMutation.isPending
 
 	if (!movie) return null
 
@@ -131,16 +147,18 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 					<Button
 						variant="outline"
 						onClick={handleAdd}
+						disabled={isLoading}
 						className="flex-1 sm:flex-none"
 					>
-						<Plus className="mr-2 size-4" />
+						{isLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Plus className="mr-2 size-4" />}
 						Add
 					</Button>
 					<Button
 						onClick={handleAddAndDownload}
+						disabled={isLoading}
 						className="flex-1 sm:flex-none"
 					>
-						<Download className="mr-2 size-4" />
+						{isLoading ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Download className="mr-2 size-4" />}
 						Add & Download
 					</Button>
 				</DialogFooter>

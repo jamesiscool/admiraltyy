@@ -14,7 +14,7 @@ export type SeriesStatus = (typeof seriesStatuses)[number]
 
 // Movies
 export const movies = sqliteTable('movies', {
-	id: text('id').primaryKey(),
+	id: integer('id').primaryKey(),
 	tmdbId: integer('tmdb_id').notNull(),
 	imdbId: text('imdb_id'),
 	title: text('title').notNull(),
@@ -44,7 +44,7 @@ export type MovieInsert = z.infer<typeof insertMovieSchema>
 
 // Series
 export const series = sqliteTable('series', {
-	id: text('id').primaryKey(),
+	id: integer('id').primaryKey(),
 	tvdbId: integer('tvdb_id').notNull(),
 	tmdbId: integer('tmdb_id'),
 	imdbId: text('imdb_id'),
@@ -74,8 +74,8 @@ export type SeriesInsert = z.infer<typeof insertSeriesSchema>
 
 // Seasons
 export const seasons = sqliteTable('seasons', {
-	id: text('id').primaryKey(),
-	seriesId: text('series_id').references(() => series.id),
+	id: integer('id').primaryKey(),
+	seriesId: integer('series_id').references(() => series.id),
 	seasonNumber: integer('season_number').notNull(),
 	monitored: integer('monitored', { mode: 'boolean' }).default(true),
 })
@@ -87,8 +87,8 @@ export type SeasonInsert = z.infer<typeof insertSeasonSchema>
 
 // Episodes
 export const episodes = sqliteTable('episodes', {
-	id: text('id').primaryKey(),
-	seasonId: text('season_id').references(() => seasons.id),
+	id: integer('id').primaryKey(),
+	seasonId: integer('season_id').references(() => seasons.id),
 	episodeNumber: integer('episode_number').notNull(),
 	title: text('title').notNull(),
 	airDate: text('air_date'),
@@ -104,9 +104,9 @@ export type EpisodeInsert = z.infer<typeof insertEpisodeSchema>
 
 // Files
 export const files = sqliteTable('files', {
-	id: text('id').primaryKey(),
-	movieId: text('movie_id').references(() => movies.id),
-	episodeId: text('episode_id').references(() => episodes.id),
+	id: integer('id').primaryKey(),
+	movieId: integer('movie_id').references(() => movies.id),
+	episodeId: integer('episode_id').references(() => episodes.id),
 	path: text('path').notNull(),
 	size: integer('size').notNull(),
 	quality: text('quality').notNull(),
@@ -122,9 +122,9 @@ export type FileInsert = z.infer<typeof insertFileSchema>
 
 // Downloads
 export const downloads = sqliteTable('downloads', {
-	id: text('id').primaryKey(),
-	movieId: text('movie_id').references(() => movies.id),
-	episodeId: text('episode_id').references(() => episodes.id),
+	id: integer('id').primaryKey(),
+	movieId: integer('movie_id').references(() => movies.id),
+	episodeId: integer('episode_id').references(() => episodes.id),
 	title: text('title').notNull(),
 	progress: real('progress').default(0),
 	speed: text('speed'),
@@ -143,7 +143,7 @@ export type DownloadInsert = z.infer<typeof insertDownloadSchema>
 
 // Indexers
 export const indexers = sqliteTable('indexers', {
-	id: text('id').primaryKey(),
+	id: integer('id').primaryKey(),
 	name: text('name').notNull(),
 	url: text('url').notNull(),
 	apiKey: text('api_key').notNull(),
@@ -160,7 +160,7 @@ export type IndexerInsert = z.infer<typeof insertIndexerSchema>
 
 // Usenet Servers
 export const usenetServers = sqliteTable('usenet_servers', {
-	id: text('id').primaryKey(),
+	id: integer('id').primaryKey(),
 	name: text('name').notNull(),
 	host: text('host').notNull(),
 	port: integer('port').notNull(),

@@ -83,6 +83,67 @@ interface TmdbCollectionDetails {
 	}>
 }
 
+interface TmdbGenre {
+	id: number
+	name: string
+}
+
+interface TmdbCastMember {
+	id: number
+	name: string
+	character: string
+	order: number
+	profile_path?: string
+}
+
+interface TmdbReleaseDate {
+	certification: string
+	release_date: string
+	type: number // 1=Premiere, 2=Theatrical (limited), 3=Theatrical, 4=Digital, 5=Physical, 6=TV
+}
+
+interface TmdbReleaseDatesResult {
+	iso_3166_1: string
+	release_dates: TmdbReleaseDate[]
+}
+
+interface TmdbMovieDetailsResponse {
+	id: number
+	imdb_id?: string
+	title: string
+	original_title: string
+	overview: string
+	poster_path?: string
+	backdrop_path?: string
+	release_date: string
+	runtime?: number
+	genres: TmdbGenre[]
+	vote_average: number
+	credits?: {
+		cast: TmdbCastMember[]
+	}
+	release_dates?: {
+		results: TmdbReleaseDatesResult[]
+	}
+}
+
+// Movie details result type (exported for use in routes)
+export interface MovieDetails {
+	tmdbId: number
+	imdbId?: string
+	title: string
+	year: number
+	posterUrl?: string
+	backdropUrl?: string
+	synopsis?: string
+	runtimeMins?: number
+	genres: string[]
+	cast: string[]
+	cinemaReleaseDate?: string
+	digitalReleaseDate?: string
+	contentRating?: string
+}
+
 // Genre ID to name mapping (TMDB standard genres)
 export const MOVIE_GENRES: Record<number, string> = {
 	28: 'Action',
@@ -288,5 +349,77 @@ export async function searchMulti(query: string, page = 1): Promise<SearchRespon
 		page: multiResponse.page,
 		totalPages: multiResponse.total_pages,
 		totalResults: multiResponse.total_results,
+	}
+}
+
+export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
+	const settings = getSettings()
+	const apiKey = settings.tmdbApiKey
+
+	const url = new URL(`${TMDB_BASE_URL}/movie/${tmdbId}`)
+	url.searchParams.set('api_key', apiKey)
+	url.searchParams.set('append_to_response', 'credits,release_dates')
+
+	const response = await fetch(url.toString())
+	if (!response.ok) {
+		throw new Error(`TMDB API error: ${response.status} ${response.statusText}`)
+	}
+
+	const data = (await response.json()) as TmdbMovieDetailsResponse
+
+	// Extract year from release date
+	const year = data.release_date ? new Date(data.release_date).getFullYear() : new Date().getFullYear()
+
+	// Map genre objects to names
+	const genres = data.genres.map((g) => g.name)
+
+	// Get top 10 cast members by order
+	const cast = (data.credits?.cast ?? [])
+		.sort((a, b) => a.order - b.order)
+		.slice(0, 10)
+		.map((c) => c.name)
+
+	// Extract US release dates (cinema = type 3, digital = type 4)
+	let cinemaReleaseDate: string | undefined
+	let digitalReleaseDate: string | undefined
+	let contentRating: string | undefined
+
+	const usReleases = data.release_dates?.results.find((r) => r.iso_3166_1 === 'US')
+	if (usReleases) {
+		for (const rd of usReleases.release_dates) {
+			if (rd.type === 3 && !cinemaReleaseDate) {
+				cinemaReleaseDate = rd.release_date.split('T')[0]
+				if (rd.certification && !contentRating) {
+					contentRating = rd.certification
+				}
+			}
+			if (rd.type === 4 && !digitalReleaseDate) {
+				digitalReleaseDate = rd.release_date.split('T')[0]
+			}
+			if (rd.certification && !contentRating) {
+				contentRating = rd.certification
+			}
+		}
+	}
+
+	// Fall back to general release date for cinema if not found
+	if (!cinemaReleaseDate && data.release_date) {
+		cinemaReleaseDate = data.release_date
+	}
+
+	return {
+		tmdbId: data.id,
+		imdbId: data.imdb_id,
+		title: data.title,
+		year,
+		posterUrl: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : undefined,
+		backdropUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}` : undefined,
+		synopsis: data.overview || undefined,
+		runtimeMins: data.runtime,
+		genres,
+		cast,
+		cinemaReleaseDate,
+		digitalReleaseDate,
+		contentRating,
 	}
 }

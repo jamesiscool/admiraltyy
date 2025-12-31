@@ -1,8 +1,10 @@
 # dependencies (bun install)
 node_modules
 
+# reference files and projects
 reference
 
+# generated files
 src/client/routeTree.gen.ts
 
 # output
@@ -19,21 +21,14 @@ logs
 _.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
+# local dotenv environment variable files
+.env.*.local
 .env.local
 
 # caches
 .cache
 *.tsbuildinfo
-
-# IntelliJ based IDEs
-.idea
+.playwright-mcp
 
 # Finder (MacOS) folder config
 .DS_Store
-.playwright-mcp
-data
