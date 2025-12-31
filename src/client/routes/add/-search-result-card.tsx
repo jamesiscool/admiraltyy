@@ -112,7 +112,7 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 		<Card className="group cursor-pointer overflow-hidden p-0 transition-all hover:bg-muted">
 			<div className="flex">
 				{/* Poster */}
-				<div className="relative aspect-[2/3] w-[92px] shrink-0 overflow-hidden">
+				<div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden">
 					{result.posterPath ? (
 						<img
 							src={result.posterPath}
