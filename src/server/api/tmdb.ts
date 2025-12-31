@@ -49,6 +49,82 @@ interface TmdbSearchMultiResponse {
 	results: (TmdbMovieResult | TmdbTvResult | TmdbPersonResult)[]
 }
 
+interface TmdbCollection {
+	id: number
+	name: string
+	adult: boolean
+	poster_path?: string
+	backdrop_path?: string
+}
+
+interface TmdbSearchCollectionResponse {
+	page: number
+	total_results: number
+	total_pages: number
+	results: TmdbCollection[]
+}
+
+interface TmdbCollectionDetails {
+	id: number
+	name: string
+	overview: string
+	poster_path?: string
+	backdrop_path?: string
+	parts: Array<{
+		id: number
+		title: string
+		poster_path?: string
+		backdrop_path?: string
+		overview: string
+		release_date: string
+		vote_average: number
+		genre_ids: number[]
+		media_type: 'movie'
+	}>
+}
+
+// Genre ID to name mapping (TMDB standard genres)
+export const MOVIE_GENRES: Record<number, string> = {
+	28: 'Action',
+	12: 'Adventure',
+	16: 'Animation',
+	35: 'Comedy',
+	80: 'Crime',
+	99: 'Documentary',
+	18: 'Drama',
+	10751: 'Family',
+	14: 'Fantasy',
+	36: 'History',
+	27: 'Horror',
+	10402: 'Music',
+	9648: 'Mystery',
+	10749: 'Romance',
+	878: 'Sci-Fi',
+	10770: 'TV Movie',
+	53: 'Thriller',
+	10752: 'War',
+	37: 'Western',
+}
+
+export const TV_GENRES: Record<number, string> = {
+	10759: 'Action & Adventure',
+	16: 'Animation',
+	35: 'Comedy',
+	80: 'Crime',
+	99: 'Documentary',
+	18: 'Drama',
+	10751: 'Family',
+	10762: 'Kids',
+	9648: 'Mystery',
+	10763: 'News',
+	10764: 'Reality',
+	10765: 'Sci-Fi & Fantasy',
+	10766: 'Soap',
+	10767: 'Talk',
+	10768: 'War & Politics',
+	37: 'Western',
+}
+
 // De-normalized search result types
 export interface SearchResult {
 	tmdbId: number
@@ -59,6 +135,7 @@ export interface SearchResult {
 	releaseDate?: string
 	voteAverage: number
 	mediaType: 'movie' | 'tv'
+	genreIds: number[]
 }
 
 export interface SearchResponse {
@@ -87,6 +164,7 @@ function mapMovieResult(movie: TmdbMovieResult): SearchResult {
 		releaseDate: movie.release_date,
 		voteAverage: movie.vote_average,
 		mediaType: 'movie',
+		genreIds: movie.genre_ids,
 	}
 }
 
@@ -100,45 +178,115 @@ function mapTvResult(tv: TmdbTvResult): SearchResult {
 		releaseDate: tv.first_air_date,
 		voteAverage: tv.vote_average,
 		mediaType: 'tv',
+		genreIds: tv.genre_ids,
 	}
+}
+
+async function searchCollections(query: string, apiKey: string): Promise<TmdbCollection[]> {
+	const url = new URL(`${TMDB_BASE_URL}/search/collection`)
+	url.searchParams.set('api_key', apiKey)
+	url.searchParams.set('query', query)
+
+	const response = await fetch(url.toString())
+	if (!response.ok) return []
+
+	const data = (await response.json()) as TmdbSearchCollectionResponse
+
+	// Filter: prioritize collections where query is a word boundary match (not substring like "bondage")
+	const queryLower = query.toLowerCase()
+	const wordBoundaryRegex = new RegExp(`\\b${queryLower}\\b`, 'i')
+
+	const filtered = data.results.filter((c) => {
+		// Exclude adult content
+		if (c.adult) return false
+		// Prioritize word-boundary matches
+		return wordBoundaryRegex.test(c.name)
+	})
+
+	// If no word-boundary matches, fall back to substring matches
+	const results = filtered.length > 0 ? filtered : data.results.filter((c) => !c.adult)
+
+	return results.slice(0, 5) // Limit to top 5 collections
+}
+
+async function fetchCollectionDetails(collectionId: number, apiKey: string): Promise<TmdbCollectionDetails | null> {
+	const url = new URL(`${TMDB_BASE_URL}/collection/${collectionId}`)
+	url.searchParams.set('api_key', apiKey)
+
+	const response = await fetch(url.toString())
+	if (!response.ok) return null
+
+	return (await response.json()) as TmdbCollectionDetails
 }
 
 export async function searchMulti(query: string, page = 1): Promise<SearchResponse> {
 	const settings = getSettings()
 	const apiKey = settings.tmdbApiKey
 
-	const url = new URL(`${TMDB_BASE_URL}/search/multi`)
-	url.searchParams.set('api_key', apiKey)
-	url.searchParams.set('query', query)
-	url.searchParams.set('page', String(page))
-	url.searchParams.set('include_adult', 'false')
+	// Run regular search and collection search in parallel
+	const [multiResponse, collections] = await Promise.all([
+		(async () => {
+			const url = new URL(`${TMDB_BASE_URL}/search/multi`)
+			url.searchParams.set('api_key', apiKey)
+			url.searchParams.set('query', query)
+			url.searchParams.set('page', String(page))
+			url.searchParams.set('include_adult', 'false')
 
-	const response = await fetch(url.toString())
-
-	if (!response.ok) {
-		throw new Error(`TMDB API error: ${response.status} ${response.statusText}`)
-	}
-
-	const data = (await response.json()) as TmdbSearchMultiResponse
-	console.log(data)
+			const response = await fetch(url.toString())
+			if (!response.ok) {
+				throw new Error(`TMDB API error: ${response.status} ${response.statusText}`)
+			}
+			return (await response.json()) as TmdbSearchMultiResponse
+		})(),
+		page === 1 ? searchCollections(query, apiKey) : Promise.resolve([]),
+	])
 
 	const movies: SearchResult[] = []
 	const tv: SearchResult[] = []
+	const seenMovieIds = new Set<number>()
 
-	for (const result of data.results) {
+	// Process regular search results first
+	for (const result of multiResponse.results) {
 		if (isMovie(result)) {
 			movies.push(mapMovieResult(result))
+			seenMovieIds.add(result.id)
 		} else if (isTv(result)) {
 			tv.push(mapTvResult(result))
 		}
-		// Ignore person results
 	}
+
+	// Fetch collection movies and add any not already in results
+	if (collections.length > 0 && page === 1) {
+		const collectionDetails = await Promise.all(collections.map((c) => fetchCollectionDetails(c.id, apiKey)))
+
+		for (const details of collectionDetails) {
+			if (!details) continue
+			for (const movie of details.parts) {
+				if (seenMovieIds.has(movie.id)) continue
+				seenMovieIds.add(movie.id)
+				movies.push({
+					tmdbId: movie.id,
+					title: movie.title,
+					posterPath: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined,
+					backdropPath: movie.backdrop_path ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : undefined,
+					overview: movie.overview,
+					releaseDate: movie.release_date,
+					voteAverage: movie.vote_average,
+					mediaType: 'movie',
+					genreIds: movie.genre_ids,
+				})
+			}
+		}
+	}
+
+	// Sort movies by vote average (highest rated first)
+	movies.sort((a, b) => b.voteAverage - a.voteAverage)
 
 	return {
 		movies,
 		tv,
-		page: data.page,
-		totalPages: data.total_pages,
-		totalResults: data.total_results,
+		page: multiResponse.page,
+		totalPages: multiResponse.total_pages,
+		totalResults: multiResponse.total_results,
 	}
 }
