@@ -124,44 +124,37 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 					)}
 				</div>
 
-			{/* Content */}
-			<div className="flex flex-1 flex-col gap-2 rounded-r-xl border-foreground/10 border-y border-r bg-card p-3 transition-colors group-hover:bg-muted">
-				<div className="flex flex-col gap-2">
-					<div className="flex items-center justify-between gap-2">
-						<h3 className="line-clamp-2 font-bold text-lg leading-tight">
-							{result.title}
-							{year && <span className="ml-1.5 font-normal text-neutral-700">({year})</span>}
-						</h3>
-						{ratingPercent > 0 && (
-							<div className="flex shrink-0 items-center gap-2">
-								<TmdbLogo className="h-3 w-auto" />
-								<span className="font-medium text-[15px]">{ratingPercent}%</span>
+				{/* Content */}
+				<div className="flex flex-1 flex-col gap-2 rounded-r-xl border-foreground/10 border-y border-r bg-card p-3 transition-colors group-hover:bg-muted">
+					<div className="flex flex-col gap-2">
+						<div className="flex items-center justify-between gap-2">
+							<h3 className="line-clamp-2 font-bold text-lg leading-tight">
+								{result.title}
+								{year && <span className="ml-1.5 font-normal text-neutral-700">({year})</span>}
+							</h3>
+							{ratingPercent > 0 && (
+								<div className="flex shrink-0 items-center gap-2">
+									<TmdbLogo className="h-3 w-auto" />
+									<span className="font-medium text-[15px]">{ratingPercent}%</span>
+								</div>
+							)}
+						</div>
+						{genres.length > 0 && (
+							<div className="flex flex-wrap gap-1">
+								{genres.map((genre) => (
+									<Badge
+										key={genre}
+										variant="secondary"
+									>
+										{genre}
+									</Badge>
+								))}
 							</div>
 						)}
 					</div>
-					{genres.length > 0 && (
-						<div className="flex flex-wrap gap-1">
-							{genres.map((genre) => (
-								<Badge
-									key={genre}
-						<Badge
-							variant={Number(rating) >= 7 ? 'default' : 'secondary'}
-							className="shrink-0 text-xs"
-						>
-							{rating}
-						</Badge>
-					</div>
 
-					<p className="line-clamp-3 text-muted-foreground text-xs">{result.overview || 'No overview available.'}</p>
-								>
-									{genre}
-								</Badge>
-							))}
-						</div>
-					)}
+					<p className="line-clamp-2 text-muted-foreground text-sm leading-relaxed">{result.overview || 'No overview available.'}</p>
 				</div>
-
-				<p className="line-clamp-2 text-muted-foreground text-sm leading-relaxed">{result.overview || 'No overview available.'}</p>
 			</div>
 		</Card>
 	)
