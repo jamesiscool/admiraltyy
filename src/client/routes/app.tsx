@@ -81,7 +81,7 @@ function App() {
 					<FeatureCard
 						icon={<Settings className="h-6 w-6" />}
 						title="Settings"
-						description="Configure indexers, NZBGet, quality profiles, and more."
+						description="Configure indexers, NZBGet, resolutions, and more."
 					/>
 				</div>
 			</main>

@@ -1,7 +1,7 @@
 # Section-by-Section Implementation Prompt Template
 
-- **SECTION_NAME** = Shell
-- **SECTION_ID** = 02-shell
+- **SECTION_NAME** = Dashboard
+- **SECTION_ID** = 03-dashboard
 
 ---
 
@@ -21,7 +21,14 @@ I'm providing you with:
 - `sections/[section-id]/types.ts` — TypeScript interfaces
 - `sections/[section-id]/data.json` — Sample data for testing
 - `sections/[section-id]/tests.md` — Test cases and user flows
-- `sections/[section-id]/components/` — Reference component implementations
+- `sections/[section-id]/components/` — Reference component implementations. 
+
+!!!! Very important !!!! Only use the reference components as a reference implement with ShadCN UI components and in a ShadCN UI idiomatic style 
+
+
+### Servers
+
+The vite and hono development servers are already running at vite: `http://localhost:2828` and hono `http://localhost:2829`
 
 ### Implementation Approach
 
@@ -31,13 +38,6 @@ I'm providing you with:
 4. Build the UI components following the provided designs
 5. Wire up the frontend to the API
 6. Write and run tests per `tests.md`
-
-### Technical Context
-
-- **Frontend**: React + TypeScript + Tailwind CSS v4
-- **Backend**: Bun + Hono
-- **Database**: [YOUR_DATABASE]
-- **Design System**: Blue primary, slate neutrals, Inter font
 
 ### Component Requirements
 

@@ -1,5 +1,6 @@
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import type { QueryClient } from '@tanstack/react-query'
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import Header from '@/client/components/header'
@@ -25,6 +26,10 @@ function RootComponent() {
 					{
 						name: 'TanStack Router',
 						render: <TanStackRouterDevtoolsPanel />,
+					},
+					{
+						name: 'TanStack Query',
+						render: <ReactQueryDevtoolsPanel />,
 					},
 				]}
 			/>

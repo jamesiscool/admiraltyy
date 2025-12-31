@@ -35,3 +35,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
+.playwright-mcp/add-page-cards-fixed.png
+.playwright-mcp/add-page-cards.png
+data/admiraltyy.db
+data/admiraltyy.settings.json

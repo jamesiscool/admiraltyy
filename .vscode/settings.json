@@ -1,12 +1,14 @@
 {
 	"files.watcherExclude": {
-		"**/routeTree.gen.ts": true
+		"**/routeTree.gen.ts": true,
+		"reference/**": true
 	},
 	"search.exclude": {
 		"**/routeTree.gen.ts": true
 	},
 	"files.readonlyInclude": {
-		"**/routeTree.gen.ts": true
+		"**/routeTree.gen.ts": true,
+		"reference/**": true
 	},
 	"projectColors.mainColor": "#0f5a77",
 	"window.title": "${activeEditorShort}${separator}${rootName}${separator}${profileName}",

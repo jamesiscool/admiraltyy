@@ -112,49 +112,14 @@ Table of recent downloads (max 10).
 
 Implement humanized dates:
 - Within 24 hours: "X hours ago" or "just now"
-- Tomorrow: "tomorrow"
 - Within 1 week: day name ("Wednesday")
-- Beyond: full date ("Jan 15, 2025")
+- Beyond: full date ("Jan 15")
 
-```typescript
-function humanizeDate(date: string): string {
-  const d = new Date(date);
-  const now = new Date();
-  const diffDays = Math.floor((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  
-  if (diffDays === 0) return 'today';
-  if (diffDays === 1) return 'tomorrow';
-  if (diffDays > 1 && diffDays <= 7) return d.toLocaleDateString('en-US', { weekday: 'long' });
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-```
 
 ## Dynamic Grid Sizing
 
 Calculate how many cards fit in 2 rows based on container width:
 
-```typescript
-function useMaxCardsInTwoRows(containerRef: React.RefObject<HTMLDivElement>) {
-  const [maxCards, setMaxCards] = useState(8);
-
-  useEffect(() => {
-    const calculateMaxCards = () => {
-      if (!containerRef.current) return;
-      const containerWidth = containerRef.current.offsetWidth;
-      const cardWidth = 180;
-      const gap = 16;
-      const cardsPerRow = Math.floor((containerWidth + gap) / (cardWidth + gap));
-      setMaxCards(cardsPerRow * 2);
-    };
-
-    const resizeObserver = new ResizeObserver(calculateMaxCards);
-    if (containerRef.current) resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  return maxCards;
-}
-```
 
 ## Empty States
 
@@ -162,20 +127,6 @@ Show appropriate empty states when:
 - No wanted movies: "No wanted movies — All your movies have been downloaded"
 - No wanted series: "No upcoming episodes — All your series are up to date"
 - No recent downloads: "No recent downloads"
-
-## API Endpoints
-
-```typescript
-// Fetch dashboard data
-const fetchDashboard = async () => {
-  const [movies, series, downloads] = await Promise.all([
-    fetch('/api/movies?wanted=true').then(r => r.json()),
-    fetch('/api/series?wanted=true').then(r => r.json()),
-    fetch('/api/activity/history?limit=10').then(r => r.json()),
-  ]);
-  return { wantedMovies: movies, wantedSeries: series, recentDownloads: downloads };
-};
-```
 
 ## Verification
 

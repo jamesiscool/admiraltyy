@@ -1,42 +1,76 @@
 import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
+import type { z } from 'zod'
+
+// Enums
+export const resolutions = ['480p', '720p', '1080p', '2160p'] as const
+export type Resolution = (typeof resolutions)[number]
+
+export const downloadStatuses = ['downloading', 'paused', 'queued', 'unpacking', 'verifying', 'completed', 'failed'] as const
+export type DownloadStatus = (typeof downloadStatuses)[number]
+
+export const seriesStatuses = ['continuing', 'ended'] as const
+export type SeriesStatus = (typeof seriesStatuses)[number]
 
 // Movies
 export const movies = sqliteTable('movies', {
 	id: text('id').primaryKey(),
 	tmdbId: integer('tmdb_id').notNull(),
+	imdbId: text('imdb_id'),
 	title: text('title').notNull(),
 	year: integer('year').notNull(),
 	posterUrl: text('poster_url'),
 	backdropUrl: text('backdrop_url'),
 	synopsis: text('synopsis'),
-	runtime: integer('runtime'),
+	runtimeMins: integer('runtime_mins'),
 	genres: text('genres'), // JSON array
 	cast: text('cast'), // JSON array
 	cinemaReleaseDate: text('cinema_release_date'),
 	digitalReleaseDate: text('digital_release_date'),
+	contentRating: text('content_rating'),
 	dateAdded: text('date_added').notNull(),
 	monitored: integer('monitored', { mode: 'boolean' }).default(true),
-	qualityPreference: text('quality_preference').default('1080p'),
+	resolution: text('resolution', { enum: resolutions }).default('1080p'),
+	lastSearchTime: text('last_search_time'),
+	lastInfoSync: text('last_info_sync'),
+	rtId: text('rt_id'),
+	rtVanity: text('rt_vanity'),
 })
+
+export const selectMovieSchema = createSelectSchema(movies)
+export const insertMovieSchema = createInsertSchema(movies)
+export type Movie = z.infer<typeof selectMovieSchema>
+export type MovieInsert = z.infer<typeof insertMovieSchema>
 
 // Series
 export const series = sqliteTable('series', {
 	id: text('id').primaryKey(),
 	tvdbId: integer('tvdb_id').notNull(),
+	tmdbId: integer('tmdb_id'),
+	imdbId: text('imdb_id'),
 	title: text('title').notNull(),
 	year: integer('year').notNull(),
-	status: text('status').notNull(), // continuing | ended
+	status: text('status', { enum: seriesStatuses }).notNull(),
 	network: text('network'),
 	overview: text('overview'),
 	posterUrl: text('poster_url'),
 	backdropUrl: text('backdrop_url'),
 	genres: text('genres'), // JSON array
-	runtime: integer('runtime'),
+	runtimeMins: integer('runtime_mins'),
+	contentRating: text('content_rating'),
 	monitored: integer('monitored', { mode: 'boolean' }).default(true),
-	qualityPreference: text('quality_preference').default('1080p'),
+	resolution: text('resolution', { enum: resolutions }).default('1080p'),
 	dateAdded: text('date_added').notNull(),
 	nextAiring: text('next_airing'),
+	lastInfoSync: text('last_info_sync'),
+	rtId: text('rt_id'),
+	rtVanity: text('rt_vanity'),
 })
+
+export const selectSeriesSchema = createSelectSchema(series)
+export const insertSeriesSchema = createInsertSchema(series)
+export type Series = z.infer<typeof selectSeriesSchema>
+export type SeriesInsert = z.infer<typeof insertSeriesSchema>
 
 // Seasons
 export const seasons = sqliteTable('seasons', {
@@ -46,6 +80,11 @@ export const seasons = sqliteTable('seasons', {
 	monitored: integer('monitored', { mode: 'boolean' }).default(true),
 })
 
+export const selectSeasonSchema = createSelectSchema(seasons)
+export const insertSeasonSchema = createInsertSchema(seasons)
+export type Season = z.infer<typeof selectSeasonSchema>
+export type SeasonInsert = z.infer<typeof insertSeasonSchema>
+
 // Episodes
 export const episodes = sqliteTable('episodes', {
 	id: text('id').primaryKey(),
@@ -54,8 +93,14 @@ export const episodes = sqliteTable('episodes', {
 	title: text('title').notNull(),
 	airDate: text('air_date'),
 	monitored: integer('monitored', { mode: 'boolean' }).default(true),
-	runtime: integer('runtime'),
+	runtimeMins: integer('runtime_mins'),
+	lastSearchTime: text('last_search_time'),
 })
+
+export const selectEpisodeSchema = createSelectSchema(episodes)
+export const insertEpisodeSchema = createInsertSchema(episodes)
+export type Episode = z.infer<typeof selectEpisodeSchema>
+export type EpisodeInsert = z.infer<typeof insertEpisodeSchema>
 
 // Files
 export const files = sqliteTable('files', {
@@ -70,6 +115,11 @@ export const files = sqliteTable('files', {
 	dateImported: text('date_imported').notNull(),
 })
 
+export const selectFileSchema = createSelectSchema(files)
+export const insertFileSchema = createInsertSchema(files)
+export type File = z.infer<typeof selectFileSchema>
+export type FileInsert = z.infer<typeof insertFileSchema>
+
 // Downloads
 export const downloads = sqliteTable('downloads', {
 	id: text('id').primaryKey(),
@@ -80,11 +130,16 @@ export const downloads = sqliteTable('downloads', {
 	speed: text('speed'),
 	eta: text('eta'),
 	size: text('size'),
-	status: text('status').notNull(), // downloading | paused | queued | unpacking | verifying | completed | failed
+	status: text('status', { enum: downloadStatuses }).notNull(),
 	quality: text('quality'),
 	dateDownloaded: text('date_downloaded').notNull(),
 	errorMessage: text('error_message'),
 })
+
+export const selectDownloadSchema = createSelectSchema(downloads)
+export const insertDownloadSchema = createInsertSchema(downloads)
+export type Download = z.infer<typeof selectDownloadSchema>
+export type DownloadInsert = z.infer<typeof insertDownloadSchema>
 
 // Indexers
 export const indexers = sqliteTable('indexers', {
@@ -98,8 +153,13 @@ export const indexers = sqliteTable('indexers', {
 	supportsMovieSearch: integer('supports_movie_search', { mode: 'boolean' }).default(true),
 })
 
-// Servers
-export const servers = sqliteTable('servers', {
+export const selectIndexerSchema = createSelectSchema(indexers)
+export const insertIndexerSchema = createInsertSchema(indexers)
+export type Indexer = z.infer<typeof selectIndexerSchema>
+export type IndexerInsert = z.infer<typeof insertIndexerSchema>
+
+// Usenet Servers
+export const usenetServers = sqliteTable('usenet_servers', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
 	host: text('host').notNull(),
@@ -112,8 +172,7 @@ export const servers = sqliteTable('servers', {
 	enabled: integer('enabled', { mode: 'boolean' }).default(true),
 })
 
-// Settings
-export const settings = sqliteTable('settings', {
-	key: text('key').primaryKey(),
-	value: text('value').notNull(), // JSON stringified
-})
+export const selectUsenetServerSchema = createSelectSchema(usenetServers)
+export const insertUsenetServerSchema = createInsertSchema(usenetServers)
+export type UsenetServer = z.infer<typeof selectUsenetServerSchema>
+export type UsenetServerInsert = z.infer<typeof insertUsenetServerSchema>

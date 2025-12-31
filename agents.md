@@ -8,10 +8,11 @@
 
 ## UI
 
+- The vite dev server will already be run and the site is at `http://localhost:2829`
 - Global Tailwind design tokens live at `src/client/index.css`.
 
 ## Rules (must follow)
-- !!!!! Use the shadcn/ui components. Request to add components that you might need. Use the product plan as a guide but implemented using ShadCN components 
+- !!!!! Use the shadcn/ui components. Request to add components that you might need. Use the product plan as a guide but implemented using ShadCN components
 
  
 ## Plans
@@ -21,6 +22,8 @@
 ## Naming conventions
 
 Use these rules when generating, editing, or suggesting code. Keep them consistent.
+
+Use kebab case for React component file names
 
 ### Function prefixes
 
