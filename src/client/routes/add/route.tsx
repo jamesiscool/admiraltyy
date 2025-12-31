@@ -82,9 +82,9 @@ function AddPage() {
 				<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
 					{/* Movies Column */}
 					<div>
-						<h2 className="mb-4 flex items-center gap-2 font-semibold text-lg">
+						<h2 className="mb-3 flex items-center gap-2 font-semibold text-lg">
 							Movies
-							<span className="font-normal text-muted-foreground text-sm">({results.movies.length})</span>
+							<span className="pt-1 font-normal text-[15px] text-muted-foreground">({results.movies.length})</span>
 						</h2>
 						{results.movies.length > 0 ? (
 							<div className="flex flex-col gap-3">
@@ -102,9 +102,9 @@ function AddPage() {
 
 					{/* TV Column */}
 					<div>
-						<h2 className="mb-4 flex items-center gap-2 font-semibold text-lg">
+						<h2 className="mb-3 flex items-center gap-2 font-semibold text-lg">
 							TV Shows
-							<span className="font-normal text-muted-foreground text-sm">({results.tv.length})</span>
+							<span className="pt-1 font-normal text-[15px] text-muted-foreground">({results.tv.length})</span>
 						</h2>
 						{results.tv.length > 0 ? (
 							<div className="flex flex-col gap-3">
