@@ -49,4 +49,3 @@ export function logError(message: string, meta?: Record<string, unknown>): void 
 export function logDebug(message: string, meta?: Record<string, unknown>): void {
 	log('debug', message, meta)
 }
-

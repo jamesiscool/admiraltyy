@@ -10,12 +10,12 @@
 		"**/routeTree.gen.ts": true,
 		"reference/**": true
 	},
-	"projectColors.mainColor": "#0f5a77",
+	"projectColors.mainColor": "#bb3e86",
 	"window.title": "${activeEditorShort}${separator}${rootName}${separator}${profileName}",
 	"workbench.colorCustomizations": {
-		"titleBar.activeBackground": "#0f5a77",
+		"titleBar.activeBackground": "#bb3e86",
 		"titleBar.activeForeground": "#ffffff",
-		"titleBar.inactiveBackground": "#0f5a77",
+		"titleBar.inactiveBackground": "#bb3e86",
 		"titleBar.inactiveForeground": "#ffffff90"
 	},
 	"projectColors.name": "admiraltyy",

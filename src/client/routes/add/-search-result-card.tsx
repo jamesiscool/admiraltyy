@@ -1,6 +1,8 @@
 import { Film, Tv } from 'lucide-react'
+import { useState } from 'react'
 import { Badge } from '@/client/components/ui/badge'
 import { Card } from '@/client/components/ui/card'
+import { AddMovieDialog } from './-add-movie-dialog'
 
 // Genre mappings from TMDB
 const MOVIE_GENRES: Record<number, string> = {
@@ -99,6 +101,8 @@ interface SearchResultCardProps {
 }
 
 export function SearchResultCard({ result }: SearchResultCardProps) {
+	const [dialogOpen, setDialogOpen] = useState(false)
+
 	const year = result.releaseDate ? new Date(result.releaseDate).getFullYear() : null
 	const ratingPercent = Math.round(result.voteAverage * 10)
 	const MediaIcon = result.mediaType === 'tv' ? Tv : Film
@@ -108,54 +112,76 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 		.map((id) => genreMap[id])
 		.filter(Boolean)
 
-	return (
-		<Card className="group cursor-pointer overflow-hidden p-0 transition-all hover:bg-muted">
-			<div className="flex">
-				{/* Poster */}
-				<div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden">
-					{result.posterPath ? (
-						<img
-							src={result.posterPath}
-							alt={result.title}
-							className="h-full w-full object-cover transition-transform group-hover:scale-105"
-						/>
-					) : (
-						<div className="flex h-full w-full items-center justify-center bg-primary text-primary-foreground text-xs">No Poster</div>
-					)}
-				</div>
+	const handleClick = () => {
+		if (result.mediaType === 'movie') {
+			setDialogOpen(true)
+		}
+		// TODO: Handle TV show click
+	}
 
-				{/* Content */}
-				<div className="flex flex-1 flex-col gap-2 rounded-r-xl border-foreground/10 border-y border-r bg-card p-3 transition-colors group-hover:bg-muted">
-					<div className="flex flex-col gap-2">
-						<div className="flex items-center justify-between gap-2">
-							<h3 className="line-clamp-2 font-bold text-lg leading-tight">
-								{result.title}
-								{year && <span className="ml-1.5 font-normal text-neutral-700">({year})</span>}
-							</h3>
-							{ratingPercent > 0 && (
-								<div className="flex shrink-0 items-center gap-2">
-									<TmdbLogo className="h-3 w-auto" />
-									<span className="font-medium text-[15px]">{ratingPercent}%</span>
-								</div>
-							)}
-						</div>
-						{genres.length > 0 && (
-							<div className="flex flex-wrap gap-1">
-								{genres.map((genre) => (
-									<Badge
-										key={genre}
-										variant="secondary"
-									>
-										{genre}
-									</Badge>
-								))}
+	return (
+		<>
+			<Card
+				className="group cursor-pointer overflow-hidden p-0 transition-all hover:bg-muted"
+				onClick={handleClick}
+			>
+				<div className="flex">
+					{/* Poster */}
+					<div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden">
+						{result.posterPath ? (
+							<img
+								src={result.posterPath}
+								alt={result.title}
+								className="h-full w-full object-cover transition-transform group-hover:scale-105"
+							/>
+						) : (
+							<div className="flex h-full w-full items-center justify-center bg-primary text-primary-foreground text-xs">
+								<MediaIcon className="size-8 text-primary-foreground" />
 							</div>
 						)}
 					</div>
 
-					<p className="line-clamp-2 text-muted-foreground text-sm leading-relaxed">{result.overview || 'No overview available.'}</p>
+					{/* Content */}
+					<div className="flex flex-1 flex-col gap-2 rounded-r-xl border-foreground/10 border-y border-r bg-card p-3 transition-colors group-hover:bg-muted">
+						<div className="flex flex-col gap-2">
+							<div className="flex items-center justify-between gap-2">
+								<h3 className="line-clamp-2 font-bold text-lg leading-tight">
+									{result.title}
+									{year && <span className="ml-1.5 font-normal text-neutral-700">({year})</span>}
+								</h3>
+								{ratingPercent > 0 && (
+									<div className="flex shrink-0 items-center gap-2">
+										<TmdbLogo className="h-3 w-auto" />
+										<span className="font-medium text-[15px]">{ratingPercent}%</span>
+									</div>
+								)}
+							</div>
+							{genres.length > 0 && (
+								<div className="flex flex-wrap gap-1">
+									{genres.map((genre) => (
+										<Badge key={genre}>{genre}</Badge>
+									))}
+								</div>
+							)}
+						</div>
+
+						<p className="line-clamp-2 text-muted-foreground text-sm leading-relaxed">{result.overview || 'No overview available.'}</p>
+					</div>
 				</div>
-			</div>
-		</Card>
+			</Card>
+
+			{result.mediaType === 'movie' && (
+				<AddMovieDialog
+					movie={{
+						tmdbId: result.tmdbId,
+						title: result.title,
+						posterPath: result.posterPath,
+						releaseDate: result.releaseDate,
+					}}
+					open={dialogOpen}
+					onOpenChange={setDialogOpen}
+				/>
+			)}
+		</>
 	)
 }

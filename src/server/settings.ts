@@ -59,6 +59,7 @@ const authSettingsSchema = z.object({
 export const settingsSchema = z.object({
 	folders: foldersSchema,
 	resolutions: z.array(resolutionSchema),
+	defaultQuality: z.string().default('1080p'),
 	languageSettings: languageSettingsSchema,
 	formatSettings: formatSettingsSchema,
 	authSettings: authSettingsSchema,
@@ -83,9 +84,10 @@ const defaultSettings: Settings = {
 	resolutions: [
 		{ name: '480p', minGbPerHour: 0.3, targetGbPerHour: 0.5, maxGbPerHour: 0.8 },
 		{ name: '720p', minGbPerHour: 0.8, targetGbPerHour: 1.5, maxGbPerHour: 2.5 },
-		{ name: '1080p', minGbPerHour: 1.5, targetGbPerHour: 4, maxGbPerHour: 8 },
+		{ name: '1080p', minGbPerHour: 1.5, targetGbPerHour: 4, maxGbPerHour: 6 },
 		{ name: '2160p', minGbPerHour: 5, targetGbPerHour: 15, maxGbPerHour: 40 },
 	],
+	defaultQuality: '1080p',
 	languageSettings: {
 		subtitleLanguages: [{ code: 'en', name: 'English', priority: 0 }],
 		audioLanguages: [{ code: 'en', name: 'English', priority: 0 }],
