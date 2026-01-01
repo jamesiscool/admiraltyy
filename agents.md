@@ -2,16 +2,22 @@
 
 - In all interactions and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
 
-# Very important !!!!!!!!!!!!!!!!
+## Very important !!!!!!!!!!!!!!!!
 
-- !!!ALWAYS!!! Check for errors by running `bun fix` and then `bun tsc` after each response that changed files
+- !!!ALWAYS!!! Run `bun fix` at the end of any set of file changes and fix any errors
+- !!!ALWAYS!!! Run separately `bun tsc` at the end of any set of file changes and fix any errors
+
+## Design
+- When I refer to the design I want to to reference the design in here `./design` Look at the code examples, particularly those in `design/code` and also the screen shots  
 
 ## UI
 
 - The vite dev server will already be run and the site is at `http://localhost:2828`
 - Global Tailwind design tokens live at `src/client/index.css`.
 - After every UI change test that it works in the browser 
-- When using Playwright, don't use the browser_wait_for and just pass it a time. The browser renders in the time it takes you to think 
+- When using Playwright, don't use the browser_wait_for and just pass it a time. The browser renders in the time it takes you to think. 
+- When using Playwright, don't bother to close the browser at the end 
+- Never add any rings or outlines. Leave the base ones there for accessibility. For hover change the background if you must 
 
 ## Rules (must follow)
 - !!!!! Use the shadcn/ui components. Request to add components that you might need. Use the product plan as a guide but implemented using ShadCN components

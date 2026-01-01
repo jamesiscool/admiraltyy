@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import { AnchorIcon } from 'lucide-react'
-import { Button } from '@/client/components/ui/button'
+import { AnchorIcon, Plus } from 'lucide-react'
+import { buttonVariants } from '@/client/components/ui/button'
 
 export default function Header() {
 	return (
@@ -53,11 +53,13 @@ export default function Header() {
 				</nav>
 			</div>
 			<div className="flex items-center gap-2">
-				<Button variant="default">
-					<Link to="/add">
-						<span className="font-medium">Add</span>
-					</Link>
-				</Button>
+				<Link
+					to="/add"
+					className={buttonVariants({ variant: 'default' })}
+				>
+					<Plus className="size-4" />
+					<span className="font-medium">Add</span>
+				</Link>
 			</div>
 		</header>
 	)

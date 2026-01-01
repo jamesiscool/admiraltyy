@@ -1,0 +1,59 @@
+interface MoviesFooterProps {
+	totalMovies: number
+	downloadedMovies: number
+	wantedMovies: number
+	filteredCount: number
+	filteredSize: number
+	totalSize: number
+}
+
+export function MoviesFooter({ totalMovies, downloadedMovies, wantedMovies, filteredCount, filteredSize, totalSize }: MoviesFooterProps) {
+	// Format GB to human readable
+	const formatSize = (gb: number) => {
+		if (gb === 0) return '0 GB'
+		if (gb >= 1000) return `${(gb / 1000).toFixed(1)} TB`
+		return `${gb.toFixed(1)} GB`
+	}
+
+	return (
+		<div className="mt-auto border-border border-t bg-background">
+			<div className="container py-3">
+				<div className="flex items-center justify-between text-sm">
+					{/* Left side - Status counts */}
+					<div className="flex items-center gap-4">
+						<span className="text-muted-foreground">
+							<span className="font-semibold text-foreground">{totalMovies}</span> Total
+						</span>
+						<span className="text-border">|</span>
+						<span className="text-muted-foreground">
+							<span className="font-semibold text-green-600">{downloadedMovies}</span> Downloaded
+						</span>
+						<span className="text-border">|</span>
+						<span className="text-muted-foreground">
+							<span className="font-semibold text-yellow-500">{wantedMovies}</span> Wanted
+						</span>
+					</div>
+
+					{/* Right side - Selection and size stats */}
+					<div className="flex items-center gap-4">
+						<span className="text-muted-foreground">
+							<span className="font-semibold text-foreground">{filteredCount}</span> Selected
+						</span>
+						<span className="text-border">|</span>
+						<span className="text-muted-foreground">
+							<span className="font-semibold text-foreground">{formatSize(filteredSize)}</span>
+						</span>
+						<span className="text-border">|</span>
+						<span className="text-muted-foreground">
+							<span className="font-semibold text-foreground">{totalMovies}</span> Total
+						</span>
+						<span className="text-border">|</span>
+						<span className="text-muted-foreground">
+							<span className="font-semibold text-foreground">{formatSize(totalSize)}</span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
