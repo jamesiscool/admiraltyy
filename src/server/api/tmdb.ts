@@ -141,11 +141,11 @@ export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
 	// Map genre objects to names
 	const genres = data.genres.map((g) => g.name)
 
-	// Get top 10 cast members by order
+	// Get top 10 cast members by order (with character names)
 	const cast = (data.credits?.cast ?? [])
 		.sort((a, b) => a.order - b.order)
 		.slice(0, 10)
-		.map((c) => c.name)
+		.map((c) => ({ name: c.name, character: c.character }))
 
 	// Extract US release dates (cinema = type 3, digital = type 4)
 	let cinemaReleaseDate: string | undefined
@@ -327,6 +327,11 @@ interface TmdbMovieDetailsResponse {
 }
 
 // Movie details result type (exported for use in routes)
+export interface CastMember {
+	name: string
+	character: string
+}
+
 export interface MovieDetails {
 	tmdbId: number
 	imdbId?: string
@@ -337,7 +342,7 @@ export interface MovieDetails {
 	synopsis?: string
 	runtimeMins?: number
 	genres: string[]
-	cast: string[]
+	cast: CastMember[]
 	cinemaReleaseDate?: string
 	digitalReleaseDate?: string
 	contentRating?: string

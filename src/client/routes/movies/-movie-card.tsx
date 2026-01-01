@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { Bookmark, EyeOff, Film, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '@/client/components/ui/badge'
@@ -5,14 +6,13 @@ import type { Movie } from '@/server/db/schema'
 
 interface MovieCardProps {
 	movie: Movie
-	onView?: () => void
 	onAutoSearch?: () => void
 	onManualSearch?: () => void
 	onDelete?: () => void
 	onToggleMonitored?: (monitored: boolean) => void
 }
 
-export function MovieCard({ movie, onView, onAutoSearch, onManualSearch, onDelete, onToggleMonitored }: MovieCardProps) {
+export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onToggleMonitored }: MovieCardProps) {
 	const [isHovered, setIsHovered] = useState(false)
 
 	// Movie doesn't have file association in the schema yet, so we'll treat all as "wanted" for now
@@ -20,15 +20,12 @@ export function MovieCard({ movie, onView, onAutoSearch, onManualSearch, onDelet
 	const hasFile = false
 
 	return (
-		// biome-ignore lint/a11y/useSemanticElements: Card with complex layout needs div, not button
-		<div
-			role="button"
-			tabIndex={0}
-			className="group relative aspect-[2/3] w-full cursor-pointer overflow-hidden rounded-sm transition-all duration-300 ease-out hover:z-10"
+		<Link
+			to="/movies/$movieId"
+			params={{ movieId: String(movie.id) }}
+			className="group relative block aspect-[2/3] w-full cursor-pointer overflow-hidden rounded-sm transition-all duration-300 ease-out hover:z-10"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
-			onClick={() => onView?.()}
-			onKeyDown={(e) => e.key === 'Enter' && onView?.()}
 		>
 			{/* Poster Image */}
 			<div className="absolute inset-0 bg-neutral-800">
@@ -146,6 +143,6 @@ export function MovieCard({ movie, onView, onAutoSearch, onManualSearch, onDelet
 				{/* Runtime and file size */}
 				<div className="mt-1 text-white/60 text-xs">{movie.runtimeMins} min</div>
 			</div>
-		</div>
+		</Link>
 	)
 }
