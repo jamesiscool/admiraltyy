@@ -9,7 +9,8 @@
 		"ignoreUnknown": false,
 		"includes": [
 			"**",
-			"!product-plan"
+			"!product-plan",
+			"!**/*.gen.ts"
 		]
 	},
 	"formatter": {

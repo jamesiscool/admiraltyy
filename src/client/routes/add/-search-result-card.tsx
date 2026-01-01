@@ -127,7 +127,7 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 			>
 				<div className="flex">
 					{/* Poster */}
-					<div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden">
+					<div className="relative aspect-[2/3] w-36 shrink-0 overflow-hidden">
 						{result.posterPath ? (
 							<img
 								src={result.posterPath}
@@ -144,7 +144,7 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 					{/* Content */}
 					<div className="flex flex-1 flex-col gap-2 rounded-r-xl border-foreground/10 border-y border-r bg-card p-3 transition-colors group-hover:bg-muted">
 						<div className="flex flex-col gap-2">
-							<div className="flex items-center justify-between gap-2">
+							<div className="flex items-start justify-between gap-2">
 								<h3 className="line-clamp-2 font-bold text-lg leading-tight">
 									{result.title}
 									{year && <span className="ml-1.5 font-normal text-neutral-700">({year})</span>}

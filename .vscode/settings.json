@@ -7,8 +7,7 @@
 		"**/routeTree.gen.ts": true
 	},
 	"files.readonlyInclude": {
-		"**/routeTree.gen.ts": true,
-		"reference/**": true
+		"**/routeTree.gen.ts": true
 	},
 	"projectColors.mainColor": "#bb3e86",
 	"window.title": "${activeEditorShort}${separator}${rootName}${separator}${profileName}",

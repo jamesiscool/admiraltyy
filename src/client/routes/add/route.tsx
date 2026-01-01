@@ -49,12 +49,11 @@ function AddPage() {
 	return (
 		<div className="container">
 			{/* Search Header */}
-			<div className="mb-8">
-				<h1 className="mb-2">Add Media</h1>
-				<p className="mb-6 text-muted-foreground">Search for movies and TV shows to add to your library.</p>
+			<div className="mb-8 flex items-center gap-4">
+				<h1 className="mb-2 block max-w-max shrink-0 pt-3 text-3xl!">Add</h1>
 
 				{/* Big Search Input */}
-				<div className="relative mx-auto max-w-2xl">
+				<div className="relative grow">
 					<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						ref={inputRef}
@@ -62,7 +61,7 @@ function AddPage() {
 						placeholder="Search for movies or TV shows..."
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
-						className="h-14 pl-12 text-lg"
+						className="h-12 max-w-full pl-12 md:text-lg"
 						autoFocus
 					/>
 				</div>

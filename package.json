@@ -6,15 +6,17 @@
 	"author": "Admiraltyy",
 	"type": "module",
 	"scripts": {
+		"apigen": "openapi-ts -f src/server/api/openapi-ts.config.ts",
 		"build": "vite build",
 		"db:generate": "drizzle-kit generate",
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
 		"dev": "concurrently --kill-others -n client,server -c cyan,magenta \"bun run dev:client\" \"bun run dev:server\"",
 		"dev:client": "vite",
-		"dev:server": "bun run src/server/index.ts",
+		"dev:server": "bun --hot src/server/index.ts",
 		"fix": "biome check . --write",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"tsc": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.0.0",
@@ -34,6 +36,7 @@
 		"drizzle-zod": "^0.8.3",
 		"hono": "^4.11.3",
 		"lucide-react": "^0.544.0",
+		"ofetch": "^1.5.1",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
 		"shadcn": "^3.6.2",
@@ -44,6 +47,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.10",
+		"@hey-api/openapi-ts": "^0.89.2",
 		"@tailwindcss/vite": "^4.1.18",
 		"@tanstack/devtools-vite": "^0.4.0",
 		"@tanstack/react-query-devtools": "^5.91.2",

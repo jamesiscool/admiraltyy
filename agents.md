@@ -8,7 +8,7 @@
 
 ## UI
 
-- The vite dev server will already be run and the site is at `http://localhost:2829`
+- The vite dev server will already be run and the site is at `http://localhost:2828`
 - Global Tailwind design tokens live at `src/client/index.css`.
 - After every UI change test that it works in the browser 
 - When using Playwright, don't use the browser_wait_for and just pass it a time. The browser renders in the time it takes you to think 
@@ -16,7 +16,10 @@
 ## Rules (must follow)
 - !!!!! Use the shadcn/ui components. Request to add components that you might need. Use the product plan as a guide but implemented using ShadCN components
 
- 
+## External APIs
+
+-- The OpenAPI spec for TMDB can be found here `reference/tmdb.openapi.json`. Use it as a reference when developing code to interact with it 
+
 ## Plans
 
 - At the end of each plan, give me a list of unresolved questions to answer, if any. Make the questions extremely concise. Sacrifice grammar for the sake of concision.

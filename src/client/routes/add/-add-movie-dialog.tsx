@@ -100,7 +100,7 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 							onValueChange={setSelectedQuality}
 						>
 							<SelectTrigger className="w-full">
-								<SelectValue placeholder="Select quality" />
+								<SelectValue>{(v) => v ?? 'Select quality'}</SelectValue>
 							</SelectTrigger>
 							<SelectContent>
 								{resolutions.map((res) => (
@@ -125,7 +125,7 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 								onValueChange={setSelectedFolder}
 							>
 								<SelectTrigger className="w-full">
-									<SelectValue placeholder="Select folder" />
+									<SelectValue>{(v) => movieFolders.find((f) => f.id === v)?.path ?? 'Select folder'}</SelectValue>
 								</SelectTrigger>
 								<SelectContent>
 									{movieFolders.map((f) => (
@@ -134,7 +134,7 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 											value={f.id}
 										>
 											{f.path}
-											{f.isDefault && <span className="ml-2 text-muted-foreground">(default)</span>}
+											{f.isDefault && <span className="ml-2 text-muted-foreground!">(default)</span>}
 										</SelectItem>
 									))}
 								</SelectContent>

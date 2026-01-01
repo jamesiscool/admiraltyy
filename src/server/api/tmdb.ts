@@ -1,6 +1,200 @@
+import { ofetch } from 'ofetch'
 import { getSettings } from '../settings'
 
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3'
+const tmdbFetch = ofetch.create({
+	baseURL: 'https://api.themoviedb.org/3',
+	query: {
+		api_key: getSettings().tmdbApiKey,
+	},
+})
+
+function mapMovieResult(movie: TmdbMovieResult): SearchResult {
+	return {
+		tmdbId: movie.id,
+		title: movie.title,
+		posterPath: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined,
+		backdropPath: movie.backdrop_path ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : undefined,
+		overview: movie.overview,
+		releaseDate: movie.release_date,
+		voteAverage: movie.vote_average,
+		mediaType: 'movie',
+		genreIds: movie.genre_ids,
+	}
+}
+
+function mapTvResult(tv: TmdbTvResult): SearchResult {
+	return {
+		tmdbId: tv.id,
+		title: tv.name,
+		posterPath: tv.poster_path ? `https://image.tmdb.org/t/p/w500${tv.poster_path}` : undefined,
+		backdropPath: tv.backdrop_path ? `https://image.tmdb.org/t/p/w780${tv.backdrop_path}` : undefined,
+		overview: tv.overview,
+		releaseDate: tv.first_air_date,
+		voteAverage: tv.vote_average,
+		mediaType: 'tv',
+		genreIds: tv.genre_ids,
+	}
+}
+
+async function searchCollections(query: string): Promise<TmdbCollection[]> {
+	try {
+		const data = await tmdbFetch<TmdbSearchCollectionResponse>('/search/collection', {
+			query: { query, include_adult: 'false' },
+		})
+
+		// Filter: prioritize collections where query is a word boundary match (not substring like "bondage")
+		const queryLower = query.toLowerCase()
+		const wordBoundaryRegex = new RegExp(`\\b${queryLower}\\b`, 'i')
+
+		const filtered = data.results.filter((c) => wordBoundaryRegex.test(c.name))
+
+		// If no word-boundary matches, fall back to substring matches
+		const results = filtered.length > 0 ? filtered : data.results
+
+		return results.slice(0, 5) // Limit to top 5 collections
+	} catch {
+		return []
+	}
+}
+
+async function fetchCollectionDetails(collectionId: number): Promise<TmdbCollectionDetails | null> {
+	try {
+		const data = await tmdbFetch<TmdbCollectionDetails>(`/collection/${collectionId}`)
+		console.log('fetchCollectionDetails', data)
+		return data
+	} catch {
+		return null
+	}
+}
+
+export async function searchMulti(query: string, page = 1): Promise<SearchResponse> {
+	// Run regular search and collection search in parallel
+	const [multiResponse, collections] = await Promise.all([
+		tmdbFetch<TmdbSearchMultiResponse>('/search/multi', {
+			query: { query, page: String(page), include_adult: 'false' },
+		}),
+		page === 1 ? searchCollections(query) : Promise.resolve([]),
+	])
+
+	const movies: SearchResult[] = []
+	const tv: SearchResult[] = []
+	const seenMovieIds = new Set<number>()
+
+	// Process regular search results first
+	for (const result of multiResponse.results) {
+		if (isMovie(result)) {
+			movies.push(mapMovieResult(result))
+			seenMovieIds.add(result.id)
+		} else if (isTv(result)) {
+			tv.push(mapTvResult(result))
+		}
+	}
+
+	// Fetch collection movies and add any not already in results
+	if (collections.length > 0 && page === 1) {
+		const collectionDetails = await Promise.all(collections.map((c) => fetchCollectionDetails(c.id)))
+
+		for (const details of collectionDetails) {
+			if (!details) continue
+			for (const movie of details.parts) {
+				if (movie.adult || seenMovieIds.has(movie.id)) continue
+				seenMovieIds.add(movie.id)
+				movies.push({
+					tmdbId: movie.id,
+					title: movie.title,
+					posterPath: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined,
+					backdropPath: movie.backdrop_path ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : undefined,
+					overview: movie.overview,
+					releaseDate: movie.release_date,
+					voteAverage: movie.vote_average,
+					mediaType: 'movie',
+					genreIds: movie.genre_ids,
+				})
+			}
+		}
+	}
+
+	// Sort movies by vote average (highest rated first)
+	movies.sort((a, b) => b.voteAverage - a.voteAverage)
+
+	return {
+		movies,
+		tv,
+		page: multiResponse.page,
+		totalPages: multiResponse.total_pages,
+		totalResults: multiResponse.total_results,
+	}
+}
+
+export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
+	const data = await tmdbFetch<TmdbMovieDetailsResponse>(`/movie/${tmdbId}`, {
+		query: { append_to_response: 'credits,release_dates' },
+	})
+
+	// Extract year from release date
+	const year = data.release_date ? new Date(data.release_date).getFullYear() : new Date().getFullYear()
+
+	// Map genre objects to names
+	const genres = data.genres.map((g) => g.name)
+
+	// Get top 10 cast members by order
+	const cast = (data.credits?.cast ?? [])
+		.sort((a, b) => a.order - b.order)
+		.slice(0, 10)
+		.map((c) => c.name)
+
+	// Extract US release dates (cinema = type 3, digital = type 4)
+	let cinemaReleaseDate: string | undefined
+	let digitalReleaseDate: string | undefined
+	let contentRating: string | undefined
+
+	const usReleases = data.release_dates?.results.find((r) => r.iso_3166_1 === 'US')
+	if (usReleases) {
+		for (const rd of usReleases.release_dates) {
+			if (rd.type === 3 && !cinemaReleaseDate) {
+				cinemaReleaseDate = rd.release_date.split('T')[0]
+				if (rd.certification && !contentRating) {
+					contentRating = rd.certification
+				}
+			}
+			if (rd.type === 4 && !digitalReleaseDate) {
+				digitalReleaseDate = rd.release_date.split('T')[0]
+			}
+			if (rd.certification && !contentRating) {
+				contentRating = rd.certification
+			}
+		}
+	}
+
+	// Fall back to general release date for cinema if not found
+	if (!cinemaReleaseDate && data.release_date) {
+		cinemaReleaseDate = data.release_date
+	}
+
+	return {
+		tmdbId: data.id,
+		imdbId: data.imdb_id,
+		title: data.title,
+		year,
+		posterUrl: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : undefined,
+		backdropUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}` : undefined,
+		synopsis: data.overview || undefined,
+		runtimeMins: data.runtime,
+		genres,
+		cast,
+		cinemaReleaseDate,
+		digitalReleaseDate,
+		contentRating,
+	}
+}
+
+function isMovie(result: TmdbMovieResult | TmdbTvResult | TmdbPersonResult): result is TmdbMovieResult {
+	return result.media_type === 'movie'
+}
+
+function isTv(result: TmdbMovieResult | TmdbTvResult | TmdbPersonResult): result is TmdbTvResult {
+	return result.media_type === 'tv'
+}
 
 // TMDB API response types
 interface TmdbMediaResult {
@@ -73,6 +267,7 @@ interface TmdbCollectionDetails {
 	parts: Array<{
 		id: number
 		title: string
+		adult: boolean
 		poster_path?: string
 		backdrop_path?: string
 		overview: string
@@ -205,221 +400,4 @@ export interface SearchResponse {
 	page: number
 	totalPages: number
 	totalResults: number
-}
-
-function isMovie(result: TmdbMovieResult | TmdbTvResult | TmdbPersonResult): result is TmdbMovieResult {
-	return result.media_type === 'movie'
-}
-
-function isTv(result: TmdbMovieResult | TmdbTvResult | TmdbPersonResult): result is TmdbTvResult {
-	return result.media_type === 'tv'
-}
-
-function mapMovieResult(movie: TmdbMovieResult): SearchResult {
-	return {
-		tmdbId: movie.id,
-		title: movie.title,
-		posterPath: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined,
-		backdropPath: movie.backdrop_path ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : undefined,
-		overview: movie.overview,
-		releaseDate: movie.release_date,
-		voteAverage: movie.vote_average,
-		mediaType: 'movie',
-		genreIds: movie.genre_ids,
-	}
-}
-
-function mapTvResult(tv: TmdbTvResult): SearchResult {
-	return {
-		tmdbId: tv.id,
-		title: tv.name,
-		posterPath: tv.poster_path ? `https://image.tmdb.org/t/p/w500${tv.poster_path}` : undefined,
-		backdropPath: tv.backdrop_path ? `https://image.tmdb.org/t/p/w780${tv.backdrop_path}` : undefined,
-		overview: tv.overview,
-		releaseDate: tv.first_air_date,
-		voteAverage: tv.vote_average,
-		mediaType: 'tv',
-		genreIds: tv.genre_ids,
-	}
-}
-
-async function searchCollections(query: string, apiKey: string): Promise<TmdbCollection[]> {
-	const url = new URL(`${TMDB_BASE_URL}/search/collection`)
-	url.searchParams.set('api_key', apiKey)
-	url.searchParams.set('query', query)
-
-	const response = await fetch(url.toString())
-	if (!response.ok) return []
-
-	const data = (await response.json()) as TmdbSearchCollectionResponse
-
-	// Filter: prioritize collections where query is a word boundary match (not substring like "bondage")
-	const queryLower = query.toLowerCase()
-	const wordBoundaryRegex = new RegExp(`\\b${queryLower}\\b`, 'i')
-
-	const filtered = data.results.filter((c) => {
-		// Exclude adult content
-		if (c.adult) return false
-		// Prioritize word-boundary matches
-		return wordBoundaryRegex.test(c.name)
-	})
-
-	// If no word-boundary matches, fall back to substring matches
-	const results = filtered.length > 0 ? filtered : data.results.filter((c) => !c.adult)
-
-	return results.slice(0, 5) // Limit to top 5 collections
-}
-
-async function fetchCollectionDetails(collectionId: number, apiKey: string): Promise<TmdbCollectionDetails | null> {
-	const url = new URL(`${TMDB_BASE_URL}/collection/${collectionId}`)
-	url.searchParams.set('api_key', apiKey)
-
-	const response = await fetch(url.toString())
-	if (!response.ok) return null
-
-	return (await response.json()) as TmdbCollectionDetails
-}
-
-export async function searchMulti(query: string, page = 1): Promise<SearchResponse> {
-	const settings = getSettings()
-	const apiKey = settings.tmdbApiKey
-
-	// Run regular search and collection search in parallel
-	const [multiResponse, collections] = await Promise.all([
-		(async () => {
-			const url = new URL(`${TMDB_BASE_URL}/search/multi`)
-			url.searchParams.set('api_key', apiKey)
-			url.searchParams.set('query', query)
-			url.searchParams.set('page', String(page))
-			url.searchParams.set('include_adult', 'false')
-
-			const response = await fetch(url.toString())
-			if (!response.ok) {
-				throw new Error(`TMDB API error: ${response.status} ${response.statusText}`)
-			}
-			return (await response.json()) as TmdbSearchMultiResponse
-		})(),
-		page === 1 ? searchCollections(query, apiKey) : Promise.resolve([]),
-	])
-
-	const movies: SearchResult[] = []
-	const tv: SearchResult[] = []
-	const seenMovieIds = new Set<number>()
-
-	// Process regular search results first
-	for (const result of multiResponse.results) {
-		if (isMovie(result)) {
-			movies.push(mapMovieResult(result))
-			seenMovieIds.add(result.id)
-		} else if (isTv(result)) {
-			tv.push(mapTvResult(result))
-		}
-	}
-
-	// Fetch collection movies and add any not already in results
-	if (collections.length > 0 && page === 1) {
-		const collectionDetails = await Promise.all(collections.map((c) => fetchCollectionDetails(c.id, apiKey)))
-
-		for (const details of collectionDetails) {
-			if (!details) continue
-			for (const movie of details.parts) {
-				if (seenMovieIds.has(movie.id)) continue
-				seenMovieIds.add(movie.id)
-				movies.push({
-					tmdbId: movie.id,
-					title: movie.title,
-					posterPath: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined,
-					backdropPath: movie.backdrop_path ? `https://image.tmdb.org/t/p/w780${movie.backdrop_path}` : undefined,
-					overview: movie.overview,
-					releaseDate: movie.release_date,
-					voteAverage: movie.vote_average,
-					mediaType: 'movie',
-					genreIds: movie.genre_ids,
-				})
-			}
-		}
-	}
-
-	// Sort movies by vote average (highest rated first)
-	movies.sort((a, b) => b.voteAverage - a.voteAverage)
-
-	return {
-		movies,
-		tv,
-		page: multiResponse.page,
-		totalPages: multiResponse.total_pages,
-		totalResults: multiResponse.total_results,
-	}
-}
-
-export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
-	const settings = getSettings()
-	const apiKey = settings.tmdbApiKey
-
-	const url = new URL(`${TMDB_BASE_URL}/movie/${tmdbId}`)
-	url.searchParams.set('api_key', apiKey)
-	url.searchParams.set('append_to_response', 'credits,release_dates')
-
-	const response = await fetch(url.toString())
-	if (!response.ok) {
-		throw new Error(`TMDB API error: ${response.status} ${response.statusText}`)
-	}
-
-	const data = (await response.json()) as TmdbMovieDetailsResponse
-
-	// Extract year from release date
-	const year = data.release_date ? new Date(data.release_date).getFullYear() : new Date().getFullYear()
-
-	// Map genre objects to names
-	const genres = data.genres.map((g) => g.name)
-
-	// Get top 10 cast members by order
-	const cast = (data.credits?.cast ?? [])
-		.sort((a, b) => a.order - b.order)
-		.slice(0, 10)
-		.map((c) => c.name)
-
-	// Extract US release dates (cinema = type 3, digital = type 4)
-	let cinemaReleaseDate: string | undefined
-	let digitalReleaseDate: string | undefined
-	let contentRating: string | undefined
-
-	const usReleases = data.release_dates?.results.find((r) => r.iso_3166_1 === 'US')
-	if (usReleases) {
-		for (const rd of usReleases.release_dates) {
-			if (rd.type === 3 && !cinemaReleaseDate) {
-				cinemaReleaseDate = rd.release_date.split('T')[0]
-				if (rd.certification && !contentRating) {
-					contentRating = rd.certification
-				}
-			}
-			if (rd.type === 4 && !digitalReleaseDate) {
-				digitalReleaseDate = rd.release_date.split('T')[0]
-			}
-			if (rd.certification && !contentRating) {
-				contentRating = rd.certification
-			}
-		}
-	}
-
-	// Fall back to general release date for cinema if not found
-	if (!cinemaReleaseDate && data.release_date) {
-		cinemaReleaseDate = data.release_date
-	}
-
-	return {
-		tmdbId: data.id,
-		imdbId: data.imdb_id,
-		title: data.title,
-		year,
-		posterUrl: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : undefined,
-		backdropUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}` : undefined,
-		synopsis: data.overview || undefined,
-		runtimeMins: data.runtime,
-		genres,
-		cast,
-		cinemaReleaseDate,
-		digitalReleaseDate,
-		contentRating,
-	}
 }

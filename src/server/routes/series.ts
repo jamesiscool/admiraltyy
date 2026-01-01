@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { db, schema } from '../db'
 
@@ -13,10 +14,7 @@ export const seriesRoutes = new Hono()
 		if (Number.isNaN(id)) {
 			return c.json({ success: false as const, error: 'Invalid series ID' }, 400)
 		}
-		const series = await db
-			.select()
-			.from(schema.series)
-			.where((s) => s.id.equals(id))
+		const series = await db.select().from(schema.series).where(eq(schema.series.id, id))
 		if (!series.length) {
 			return c.json({ success: false as const, error: 'Series not found' }, 404)
 		}
