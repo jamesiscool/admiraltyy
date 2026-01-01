@@ -3,6 +3,7 @@ node_modules
 
 # reference files and projects
 reference
+design
 
 # generated files
 src/client/routeTree.gen.ts
