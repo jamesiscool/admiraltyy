@@ -6,6 +6,11 @@ const tmdbFetch = ofetch.create({
 	query: {
 		api_key: getSettings().tmdbApiKey,
 	},
+	onRequest(request) {
+		const query = { ...request.options.query }
+		delete query.api_key
+		console.log('tmdbFetch', `${request.options.baseURL}${request.request}?${new URLSearchParams(query).toString()}`)
+	},
 })
 
 function mapMovieResult(movie: TmdbMovieResult): SearchResult {
@@ -60,7 +65,6 @@ async function searchCollections(query: string): Promise<TmdbCollection[]> {
 async function fetchCollectionDetails(collectionId: number): Promise<TmdbCollectionDetails | null> {
 	try {
 		const data = await tmdbFetch<TmdbCollectionDetails>(`/collection/${collectionId}`)
-		console.log('fetchCollectionDetails', data)
 		return data
 	} catch {
 		return null
@@ -400,4 +404,168 @@ export interface SearchResponse {
 	page: number
 	totalPages: number
 	totalResults: number
+}
+
+// Series preview types (for add dialog)
+export interface SeasonPreview {
+	seasonNumber: number
+	episodeCount: number
+	airDate?: string
+	name: string
+}
+
+export interface SeriesPreview {
+	tmdbId: number
+	title: string
+	year: number
+	status: 'continuing' | 'ended'
+	network?: string
+	overview?: string
+	posterUrl?: string
+	backdropUrl?: string
+	genres: string[]
+	runtimeMins?: number
+	contentRating?: string
+	seasons: SeasonPreview[]
+}
+
+// Full series types (for adding to DB)
+export interface EpisodeDetails {
+	episodeNumber: number
+	seasonNumber: number
+	title: string
+	airDate?: string
+	runtimeMins?: number
+}
+
+export interface SeasonWithEpisodes {
+	seasonNumber: number
+	episodes: EpisodeDetails[]
+}
+
+export interface SeriesWithEpisodes extends SeriesPreview {
+	seasonsWithEpisodes: SeasonWithEpisodes[]
+}
+
+// TMDB TV response types
+interface TmdbTvSeason {
+	air_date?: string
+	episode_count?: number
+	id?: number
+	name?: string
+	overview?: string
+	poster_path?: string
+	season_number?: number
+	vote_average?: number
+}
+
+interface TmdbContentRating {
+	iso_3166_1: string
+	rating: string
+}
+
+interface TmdbTvDetailsResponse {
+	id: number
+	name: string
+	original_name: string
+	overview?: string
+	poster_path?: string
+	backdrop_path?: string
+	first_air_date?: string
+	status?: string
+	in_production?: boolean
+	genres?: Array<{ id: number; name: string }>
+	networks?: Array<{ id: number; name: string }>
+	episode_run_time?: number[]
+	seasons?: TmdbTvSeason[]
+	content_ratings?: {
+		results: TmdbContentRating[]
+	}
+}
+
+interface TmdbEpisode {
+	id: number
+	name: string
+	episode_number: number
+	season_number: number
+	air_date?: string
+	runtime?: number
+	overview?: string
+}
+
+interface TmdbSeasonDetailsResponse {
+	id: number
+	name: string
+	season_number: number
+	episodes?: TmdbEpisode[]
+}
+
+export async function fetchSeriesPreview(tmdbId: number): Promise<SeriesPreview> {
+	const data = await tmdbFetch<TmdbTvDetailsResponse>(`/tv/${tmdbId}`, {
+		query: { append_to_response: 'content_ratings' },
+	})
+
+	const year = data.first_air_date ? new Date(data.first_air_date).getFullYear() : new Date().getFullYear()
+	const genres = (data.genres ?? []).map((g) => g.name)
+	const network = data.networks?.[0]?.name
+	const runtimeMins = data.episode_run_time?.[0]
+
+	// Get US content rating
+	const usRating = data.content_ratings?.results.find((r) => r.iso_3166_1 === 'US')
+	const contentRating = usRating?.rating
+
+	// Map status
+	const status: 'continuing' | 'ended' = data.status === 'Ended' || data.status === 'Canceled' ? 'ended' : 'continuing'
+
+	// Filter out season 0 (specials) and map seasons
+	const seasons: SeasonPreview[] = (data.seasons ?? [])
+		.filter((s): s is TmdbTvSeason & { season_number: number } => s.season_number !== undefined && s.season_number > 0)
+		.map((s) => ({
+			seasonNumber: s.season_number,
+			episodeCount: s.episode_count ?? 0,
+			airDate: s.air_date,
+			name: s.name ?? `Season ${s.season_number}`,
+		}))
+
+	return {
+		tmdbId: data.id,
+		title: data.name,
+		year,
+		status,
+		network,
+		overview: data.overview,
+		posterUrl: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : undefined,
+		backdropUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/w780${data.backdrop_path}` : undefined,
+		genres,
+		runtimeMins,
+		contentRating,
+		seasons,
+	}
+}
+
+export async function fetchSeriesWithEpisodes(tmdbId: number, seasonNumbers: number[]): Promise<SeriesWithEpisodes> {
+	// First get the series preview
+	const preview = await fetchSeriesPreview(tmdbId)
+
+	// Fetch episode details for requested seasons in parallel
+	const seasonDetailsPromises = seasonNumbers.map((num) => tmdbFetch<TmdbSeasonDetailsResponse>(`/tv/${tmdbId}/season/${num}`).catch(() => null))
+	const seasonDetails = await Promise.all(seasonDetailsPromises)
+
+	const seasonsWithEpisodes: SeasonWithEpisodes[] = seasonDetails
+		.filter((s): s is TmdbSeasonDetailsResponse => s !== null)
+		.map((s) => ({
+			seasonNumber: s.season_number,
+			episodes: (s.episodes ?? []).map((ep) => ({
+				episodeNumber: ep.episode_number,
+				seasonNumber: ep.season_number,
+				title: ep.name,
+				airDate: ep.air_date,
+				runtimeMins: ep.runtime,
+			})),
+		}))
+
+	return {
+		...preview,
+		seasonsWithEpisodes,
+	}
 }

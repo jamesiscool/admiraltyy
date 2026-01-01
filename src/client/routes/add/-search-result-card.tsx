@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Badge } from '@/client/components/ui/badge'
 import { Card } from '@/client/components/ui/card'
 import { AddMovieDialog } from './-add-movie-dialog'
+import { AddSeriesDialog } from './-add-series-dialog'
 
 // Genre mappings from TMDB
 const MOVIE_GENRES: Record<number, string> = {
@@ -101,7 +102,8 @@ interface SearchResultCardProps {
 }
 
 export function SearchResultCard({ result }: SearchResultCardProps) {
-	const [dialogOpen, setDialogOpen] = useState(false)
+	const [movieDialogOpen, setMovieDialogOpen] = useState(false)
+	const [seriesDialogOpen, setSeriesDialogOpen] = useState(false)
 
 	const year = result.releaseDate ? new Date(result.releaseDate).getFullYear() : null
 	const ratingPercent = Math.round(result.voteAverage * 10)
@@ -114,9 +116,10 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 
 	const handleClick = () => {
 		if (result.mediaType === 'movie') {
-			setDialogOpen(true)
+			setMovieDialogOpen(true)
+		} else {
+			setSeriesDialogOpen(true)
 		}
-		// TODO: Handle TV show click
 	}
 
 	return (
@@ -178,8 +181,21 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 						posterPath: result.posterPath,
 						releaseDate: result.releaseDate,
 					}}
-					open={dialogOpen}
-					onOpenChange={setDialogOpen}
+					open={movieDialogOpen}
+					onOpenChange={setMovieDialogOpen}
+				/>
+			)}
+
+			{result.mediaType === 'tv' && (
+				<AddSeriesDialog
+					series={{
+						tmdbId: result.tmdbId,
+						title: result.title,
+						posterPath: result.posterPath,
+						releaseDate: result.releaseDate,
+					}}
+					open={seriesDialogOpen}
+					onOpenChange={setSeriesDialogOpen}
 				/>
 			)}
 		</>

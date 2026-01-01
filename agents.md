@@ -2,9 +2,9 @@
 
 - In all interactions and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
 
-# Very important linting !!!!!!!!!!!!!!!!
-- !!!ALWAYS!!! Check for TypeScript errors through the lsp
-- !!!ALWAYS!!! Check for linting error with the built in tool
+# Very important !!!!!!!!!!!!!!!!
+
+- !!!ALWAYS!!! Check for errors by running `bun fix` and then `bun tsc` after each response that changed files
 
 ## UI
 

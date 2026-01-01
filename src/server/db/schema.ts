@@ -45,8 +45,8 @@ export type MovieInsert = z.infer<typeof insertMovieSchema>
 // Series
 export const series = sqliteTable('series', {
 	id: integer('id').primaryKey(),
-	tvdbId: integer('tvdb_id').notNull(),
-	tmdbId: integer('tmdb_id'),
+	tvdbId: integer('tvdb_id'),
+	tmdbId: integer('tmdb_id').notNull(),
 	imdbId: text('imdb_id'),
 	title: text('title').notNull(),
 	year: integer('year').notNull(),
