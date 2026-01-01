@@ -47,9 +47,9 @@ function AddPage() {
 	const noResults = results && results.movies.length === 0 && results.tv.length === 0 && debouncedQuery.trim()
 
 	return (
-		<div className="">
+		<div className="flex h-full flex-col">
 			{/* Search Header */}
-			<div className="h-[80px] border-b">
+			<div className="shrink-0 border-b">
 				<div className="container flex items-center gap-4 pt-0!">
 					<h1 className="mb-2 block max-w-max shrink-0 pt-3 text-3xl!">Add</h1>
 
@@ -68,8 +68,8 @@ function AddPage() {
 					</div>
 				</div>
 			</div>
-			<div className="max-h-[calc(100vh-170px)] overflow-y-auto">
-				<div className="container">
+			<div className="grow overflow-y-auto">
+				<div className="container pt-5">
 					{/* Loading State */}
 					{isLoading && <div className="py-12 text-center text-muted-foreground">Searching...</div>}
 
@@ -84,12 +84,12 @@ function AddPage() {
 						<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
 							{/* Movies Column */}
 							<div>
-								<h2 className="mb-3 flex items-center gap-2 font-semibold text-lg">
+								<h2 className="mb-3 flex items-center gap-2 font-semibold text-xl">
 									Movies
-									<span className="pt-1 font-normal text-[15px] text-muted-foreground">({results.movies.length})</span>
+									<span className="pt-[1px] font-light text-muted-foreground">({results.movies.length})</span>
 								</h2>
 								{results.movies.length > 0 ? (
-									<div className="flex flex-col gap-3">
+									<div className="flex flex-col gap-4">
 										{results.movies.map((movie) => (
 											<SearchResultCard
 												key={movie.tmdbId}
@@ -104,12 +104,12 @@ function AddPage() {
 
 							{/* TV Column */}
 							<div>
-								<h2 className="mb-3 flex items-center gap-2 font-semibold text-lg">
+								<h2 className="mb-3 flex items-center gap-2 font-semibold text-xl">
 									TV Shows
-									<span className="pt-1 font-normal text-[15px] text-muted-foreground">({results.tv.length})</span>
+									<span className="pt-[1px] font-light text-muted-foreground">({results.tv.length})</span>
 								</h2>
 								{results.tv.length > 0 ? (
-									<div className="flex flex-col gap-3">
+									<div className="flex flex-col gap-4">
 										{results.tv.map((show) => (
 											<SearchResultCard
 												key={show.tmdbId}

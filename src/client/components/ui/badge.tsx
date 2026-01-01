@@ -11,6 +11,8 @@ const badgeVariants = cva(
 			variant: {
 				default: 'bg-blue-100 text-primary [a]:hover:bg-blue-200',
 				secondary: 'bg-pink-100 text-secondary [a]:hover:bg-pink-200',
+				sage: 'bg-sage-100 text-sage [a]:hover:bg-sage-200',
+				'sage-inverse': 'bg-sage-inverse text-sage-inverse-foreground [a]:hover:bg-sage-200',
 				destructive: 'bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20',
 				outline: 'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
 				ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',

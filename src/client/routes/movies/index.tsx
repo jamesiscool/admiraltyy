@@ -122,7 +122,7 @@ function MoviesIndexPage() {
 	return (
 		<div className="flex h-full flex-col">
 			{/* Header */}
-			<div className="border-b">
+			<div className="shrink-0 border-b">
 				<div className="container pt-0!">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 						{/* Title */}
@@ -171,7 +171,7 @@ function MoviesIndexPage() {
 			</div>
 
 			{/* Content */}
-			<div className="max-h-full overflow-y-auto">
+			<div className="grow overflow-y-auto">
 				<div className="container py-8">
 					{/* Loading State */}
 					{isLoading && <div className="py-12 text-center text-muted-foreground">Loading movies...</div>}

@@ -11,7 +11,7 @@ interface MoviesFooterProps {
 
 export function MoviesFooter({ totalMovies, downloadedMovies, wantedMovies, filteredCount, filteredSize, totalSize }: MoviesFooterProps) {
 	return (
-		<div className="border-border border-t bg-background">
+		<div className="shrink-0 border-border border-t bg-background">
 			<div className="container py-3">
 				<div className="flex items-center justify-between text-sm">
 					{/* Left side - Status counts */}
