@@ -1,3 +1,5 @@
+import { formatSize } from '@/client/utils'
+
 interface MoviesFooterProps {
 	totalMovies: number
 	downloadedMovies: number
@@ -8,15 +10,8 @@ interface MoviesFooterProps {
 }
 
 export function MoviesFooter({ totalMovies, downloadedMovies, wantedMovies, filteredCount, filteredSize, totalSize }: MoviesFooterProps) {
-	// Format GB to human readable
-	const formatSize = (gb: number) => {
-		if (gb === 0) return '0 GB'
-		if (gb >= 1000) return `${(gb / 1000).toFixed(1)} TB`
-		return `${gb.toFixed(1)} GB`
-	}
-
 	return (
-		<div className="mt-auto border-border border-t bg-background">
+		<div className="border-border border-t bg-background">
 			<div className="container py-3">
 				<div className="flex items-center justify-between text-sm">
 					{/* Left side - Status counts */}

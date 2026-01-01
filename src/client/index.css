@@ -227,19 +227,52 @@
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
+		min-width: 0;
+		min-height: 0;
 	}
-	body {
+
+	html,
+	body,
+	#root {
 		@apply font-sans bg-background text-foreground;
+		height: 100%;
+		overflow-y: hidden;
 	}
-	html {
-		@apply font-sans;
+
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--border) transparent;
+	}
+
+	*::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+
+	*::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		background: var(--border);
+		border-radius: 9999px;
+		border: 1px solid transparent;
+		background-clip: content-box;
+	}
+
+	h1 {
+		@apply text-2xl font-bold;
+	}
+
+	h1,
+	h2,
+	h3 {
+		@apply tracking-wider;
 	}
 }
 
-.container {
-	@apply mx-auto max-w-content p-6;
-}
-
-h1 {
-	@apply text-2xl font-bold;
+@layer components {
+	.container {
+		@apply mx-auto max-w-content p-6;
+	}
 }

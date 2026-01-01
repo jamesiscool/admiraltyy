@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { Bookmark, EyeOff, Film, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { Badge } from '@/client/components/ui/badge'
 import type { Movie } from '@/server/db/schema'
 
 interface MovieCardProps {
@@ -58,20 +57,13 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 			/>
 
 			{/* Top-left badge: Status Badge */}
-			<div className="absolute top-[7px] left-2 z-10">
-				<Badge
-					// biome-ignore lint/nursery/noUnnecessaryConditions: Need to wire up files later on
-					variant={hasFile ? 'downloaded' : 'wanted'}
-					className="h-auto py-0.5 text-[11px] tracking-wide"
-				>
-					{/** biome-ignore lint/nursery/noUnnecessaryConditions: Need to wire up files later on */}
-					{hasFile ? 'Downloaded' : 'Missing'}
-				</Badge>
-			</div>
+			{/* <div className="absolute top-0 left-0 z-10">
+				<div className="h-auto rounded-none rounded-br bg-yellow-400 px-1.5 py-0.5 text-[11px] text-white tracking-wide">Missing</div>
+			</div> */}
 
 			{/* Monitoring indicator */}
 			{!movie.monitored && (
-				<div className="absolute top-9 left-2 z-10">
+				<div className="absolute top-[22px] left-0 z-10">
 					<span
 						className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium text-[10px]"
 						style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: 'rgba(255,255,255,0.7)' }}
@@ -93,7 +85,7 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 				<button
 					type="button"
 					onClick={() => onToggleMonitored?.(!movie.monitored)}
-					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-blue-600 px-4 py-1.5 font-medium text-white text-xs shadow-lg transition-colors hover:bg-blue-500"
+					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-blue-500 px-4 py-2 font-medium text-white text-xs shadow-lg transition-colors hover:bg-blue-600"
 				>
 					{movie.monitored ? <Bookmark className="size-3.5 fill-current" /> : <Bookmark className="size-3.5" />}
 					{movie.monitored ? 'Monitored' : 'Unmonitored'}
@@ -103,7 +95,7 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 				<button
 					type="button"
 					onClick={() => onAutoSearch?.()}
-					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-blue-600 px-4 py-1.5 font-medium text-white text-xs shadow-lg transition-colors hover:bg-blue-500"
+					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-blue-500 px-4 py-2 font-medium text-white text-xs shadow-lg transition-colors hover:bg-blue-600"
 				>
 					<Search className="size-3.5" />
 					Auto Search
@@ -113,7 +105,7 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 				<button
 					type="button"
 					onClick={() => onManualSearch?.()}
-					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-neutral-500 bg-transparent px-4 py-1.5 font-medium text-white text-xs shadow-lg transition-colors hover:bg-neutral-700"
+					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-white px-4 py-2 font-medium text-foreground text-xs shadow-lg transition-colors hover:bg-neutral-100"
 				>
 					<Search className="size-3.5" />
 					Manual Search
@@ -124,7 +116,7 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 					<button
 						type="button"
 						onClick={() => onDelete?.()}
-						className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-red-500/50 bg-transparent px-4 py-1.5 font-medium text-red-400 text-xs shadow-lg transition-colors hover:bg-red-600/20"
+						className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-red-100 px-4 py-2 font-medium text-red-600 text-xs shadow-lg transition-colors hover:bg-red-200"
 					>
 						<Trash2 className="size-3.5" />
 						Delete Movie
@@ -139,9 +131,9 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 					<span className="font-medium">{movie.year}</span>
 					<span className="text-white/50">•</span>
 					<span className="font-mono text-blue-300">{movie.resolution}</span>
+					<span className="text-white/50">•</span>
+					<span className="text-yellow-400 tracking-wide">Missing</span>
 				</div>
-				{/* Runtime and file size */}
-				<div className="mt-1 text-white/60 text-xs">{movie.runtimeMins} min</div>
 			</div>
 		</Link>
 	)

@@ -4,16 +4,17 @@
 
 ## Very important !!!!!!!!!!!!!!!!
 
-- !!!ALWAYS!!! Run `bun fix` at the end of any set of file changes and fix any errors
-- !!!ALWAYS!!! Run separately `bun tsc` at the end of any set of file changes and fix any errors
+- After finishing file changes, run `bun fix && bun tsc` and fix any errors before responding
 
 ## Design
-- When I refer to the design I want to to reference the design in here `./design` Look at the code examples, particularly those in `design/code` and also the screen shots  
+- When I refer to the design I want to to reference the design in here `./design` Look at the code examples, particularly those in `design/code` and also the screen shots
+- The design server is already running and is available at `http://localhost:3000/sections/dashboard/screen-designs/DashboardView/fullscreen`
 
 ## UI
 
-- The vite dev server will already be run and the site is at `http://localhost:2828`
+- The vite dev server will already be run and the site is at !!!! `http://localhost:2828`
 - Global Tailwind design tokens live at `src/client/index.css`.
+- `--color-*: initial;` resets all default Tailwind colors. Use project tokens (blue-100, navy-500, etc.) not default Tailwind colors (sky, slate, emerald, amber etc.)
 - After every UI change test that it works in the browser 
 - When using Playwright, don't use the browser_wait_for and just pass it a time. The browser renders in the time it takes you to think. 
 - When using Playwright, don't bother to close the browser at the end 

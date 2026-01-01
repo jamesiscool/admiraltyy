@@ -4,7 +4,7 @@ import { buttonVariants } from '@/client/components/ui/button'
 
 export default function Header() {
 	return (
-		<header className="container flex items-center justify-between">
+		<header className="container flex h-[90px] items-center justify-between">
 			<div className="flex items-center gap-5">
 				<Link
 					to="/"

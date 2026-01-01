@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, Bookmark, Calendar, Clock, Film, HardDrive, Search, Settings2, Trash2 } from 'lucide-react'
+import { ArrowLeft, Bookmark, Film, Search, Settings2, Trash2 } from 'lucide-react'
 import { Badge } from '@/client/components/ui/badge'
 import { Button } from '@/client/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/client/components/ui/card'
@@ -95,9 +95,9 @@ function MovieDetailPage() {
 						<img
 							src={movie.backdropUrl}
 							alt=""
-							className="h-full w-full object-cover opacity-20"
+							className="h-full w-full object-cover"
 						/>
-						<div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
+						<div className="absolute inset-0 bg-gradient-to-r from-neutral-900/90 via-neutral-900/70 to-neutral-900/50" />
 					</div>
 				)}
 
@@ -124,20 +124,21 @@ function MovieDetailPage() {
 						<div className="flex flex-1 flex-col gap-4">
 							<div className="flex items-start justify-between gap-4">
 								<div>
-									<h1 className="mb-2">{movie.title}</h1>
-									<div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+									<h1 className="mb-2 text-white">{movie.title}</h1>
+									<div className="flex flex-wrap items-center gap-2 text-neutral-200">
 										<span className="font-medium">{movie.year}</span>
 										<span>•</span>
 										<span>{movie.runtimeMins} min</span>
 										<span>•</span>
-										<Badge variant={hasFile ? 'downloaded' : 'wanted'}>{hasFile ? 'Downloaded' : 'Missing'}</Badge>
+										{/** biome-ignore lint/nursery/noUnnecessaryConditions: File hasn't been connected up to movies yet  */}
+										<span className={hasFile ? 'text-green-300' : 'text-yellow-300'}>{hasFile ? 'Downloaded' : 'Missing'}</span>
 									</div>
 								</div>
 
 								{/* Monitored badge */}
 								<Badge
 									variant={movie.monitored ? 'neutral' : 'outline'}
-									className="shrink-0"
+									className="shrink-0 gap-1.5"
 								>
 									<Bookmark className={movie.monitored ? 'size-3 fill-current' : 'size-3'} />
 									{movie.monitored ? 'Monitored' : 'Unmonitored'}
@@ -148,58 +149,66 @@ function MovieDetailPage() {
 							{genres.length > 0 && (
 								<div className="flex flex-wrap gap-1.5">
 									{genres.map((genre) => (
-										<Badge
+										<span
 											key={genre}
-											variant="outline"
+											className="inline-flex h-5 items-center justify-center rounded-full border-0 bg-blue-100 px-2 font-medium text-blue-800 text-xs"
 										>
 											{genre}
-										</Badge>
+										</span>
 									))}
 								</div>
 							)}
 
 							{/* Synopsis */}
-							{movie.synopsis && <p className="max-w-3xl text-foreground/90 leading-relaxed">{movie.synopsis}</p>}
+							{movie.synopsis && <p className="max-w-3xl text-white leading-relaxed">{movie.synopsis}</p>}
 
 							{/* Info cards */}
-							<div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
-								<InfoCard
-									icon={<Settings2 className="size-4" />}
-									label="Quality"
-									value={movie.resolution ?? '1080p'}
-								/>
-								<InfoCard
-									icon={<Calendar className="size-4" />}
-									label="Cinema Release"
-									value={formatDate(movie.cinemaReleaseDate)}
-								/>
-								<InfoCard
-									icon={<HardDrive className="size-4" />}
-									label="Digital Release"
-									value={formatDate(movie.digitalReleaseDate)}
-								/>
-								<InfoCard
-									icon={<Clock className="size-4" />}
-									label="Added"
-									value={formatDate(movie.dateAdded)}
-								/>
+							<div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
+								<div className="flex flex-wrap gap-x-6 gap-y-2">
+									<div className="flex flex-col">
+										<span className="font-semibold text-sm text-white/80">Quality</span>
+										<span className="text-blue-300">{movie.resolution ?? '1080p'}</span>
+									</div>
+									{movie.cinemaReleaseDate && (
+										<div className="flex flex-col">
+											<span className="font-semibold text-sm text-white/80">Cinema Release</span>
+											<span className="text-white">{formatDate(movie.cinemaReleaseDate)}</span>
+										</div>
+									)}
+									{movie.digitalReleaseDate && (
+										<div className="flex flex-col">
+											<span className="font-semibold text-sm text-white/80">Digital Release</span>
+											<span className="text-white">{formatDate(movie.digitalReleaseDate)}</span>
+										</div>
+									)}
+									<div className="flex flex-col">
+										<span className="font-semibold text-sm text-white/80">Added</span>
+										<span className="text-white">{formatDate(movie.dateAdded)}</span>
+									</div>
+								</div>
 							</div>
 
 							{/* Action buttons */}
 							<div className="mt-2 flex flex-wrap gap-2">
-								<Button>
+								<Button className="h-9 px-4">
 									<Search className="size-4" />
 									Auto Search
 								</Button>
-								<Button variant="outline">
+								<Button
+									variant="outline"
+									className="h-9 px-4"
+								>
 									<Search className="size-4" />
 									Manual Search
 								</Button>
-								<Button variant="outline">
+								<Button
+									variant="outline"
+									className="h-9 px-4"
+								>
 									<Settings2 className="size-4" />
 									Edit Quality
 								</Button>
-								<Button variant="destructive">
+								<Button className="h-9 bg-destructive px-4 text-white hover:bg-destructive/90">
 									<Trash2 className="size-4" />
 									Delete Movie
 								</Button>
@@ -286,18 +295,6 @@ function MovieDetailPage() {
 					</Card>
 				</div>
 			</div>
-		</div>
-	)
-}
-
-function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-	return (
-		<div className="rounded-sm bg-muted/50 px-3 py-2">
-			<div className="mb-1 flex items-center gap-1.5 text-muted-foreground text-xs">
-				{icon}
-				{label}
-			</div>
-			<div className="font-semibold">{value}</div>
 		</div>
 	)
 }
