@@ -1,5 +1,0 @@
-export { Dashboard } from './Dashboard'
-export { DownloadsTable } from './DownloadsTable'
-export { ViewAllCard } from './ViewAllCard'
-export { WantedMovieCard } from './WantedMovieCard'
-export { WantedSeriesCard } from './WantedSeriesCard'
