@@ -1,4 +1,4 @@
-import { formatSize } from '@/client/utils'
+import { formatSize } from '@/client/lib/utils'
 
 interface MoviesFooterProps {
 	totalMovies: number
