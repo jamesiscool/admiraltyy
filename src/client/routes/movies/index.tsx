@@ -235,6 +235,7 @@ function MoviesIndexPage() {
 				filteredCount={filteredMovies.length}
 				filteredSize={filteredSize}
 				totalSize={totalSize}
+				hasActiveFilters={!!hasActiveFilters}
 			/>
 		</div>
 	)
