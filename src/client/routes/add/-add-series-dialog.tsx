@@ -6,6 +6,7 @@ import { Label } from '@/client/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/client/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
 import { useAddSeries, useSeriesPreview, useSettings } from '@/client/lib/api'
+import type { Resolution } from '@/server/db/schema'
 
 interface SeriesResult {
 	tmdbId: number
@@ -77,7 +78,7 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 		if (!series) return
 		addSeriesMutation.mutate({
 			tmdbId: series.tmdbId,
-			resolution: quality,
+			resolution: quality as Resolution,
 			monitoredSeasons: Array.from(monitoredSeasons),
 		})
 	}
@@ -87,7 +88,7 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 		// Same as add for now - download trigger can be added later
 		addSeriesMutation.mutate({
 			tmdbId: series.tmdbId,
-			resolution: quality,
+			resolution: quality as Resolution,
 			monitoredSeasons: Array.from(monitoredSeasons),
 		})
 	}

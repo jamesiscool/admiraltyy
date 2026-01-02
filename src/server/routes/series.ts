@@ -1,8 +1,20 @@
-import { eq } from 'drizzle-orm'
+import { zValidator } from '@hono/zod-validator'
+import { eq, inArray } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { z } from 'zod'
 import { fetchSeriesPreview, fetchSeriesWithEpisodes } from '../api/tmdb'
 import { db, schema } from '../db'
-import type { Resolution } from '../db/schema'
+import { resolutions } from '../db/schema'
+import { logInfo } from '../log/logs'
+
+const idParamSchema = z.object({ id: z.string() })
+const tmdbIdParamSchema = z.object({ tmdbId: z.string() })
+const addSeriesSchema = z.object({
+	tmdbId: z.number(),
+	resolution: z.enum(resolutions).optional(),
+	monitoredSeasons: z.array(z.number()),
+})
+const deleteQuerySchema = z.object({ deleteFiles: z.string().optional() })
 
 export const seriesRoutes = new Hono()
 	// GET /api/series - List all series
@@ -11,41 +23,38 @@ export const seriesRoutes = new Hono()
 		return c.json({ data: allSeries, success: true as const })
 	})
 	// GET /api/series/tmdb/:tmdbId - Preview series from TMDB (for add dialog)
-	.get('/tmdb/:tmdbId', async (c) => {
-		const tmdbId = parseInt(c.req.param('tmdbId'), 10)
-		if (Number.isNaN(tmdbId)) {
+	.get('/tmdb/:tmdbId', zValidator('param', tmdbIdParamSchema), async (c) => {
+		const { tmdbId } = c.req.valid('param')
+		const numId = parseInt(tmdbId, 10)
+		if (Number.isNaN(numId)) {
 			return c.json({ success: false as const, error: 'Invalid TMDB ID' }, 400)
 		}
 		try {
-			const preview = await fetchSeriesPreview(tmdbId)
+			const preview = await fetchSeriesPreview(numId)
 			return c.json({ data: preview, success: true as const })
 		} catch {
 			return c.json({ success: false as const, error: 'Failed to fetch series from TMDB' }, 500)
 		}
 	})
 	// GET /api/series/:id - Get a single series with seasons and episodes
-	.get('/:id', async (c) => {
-		const id = parseInt(c.req.param('id'), 10)
-		if (Number.isNaN(id)) {
+	.get('/:id', zValidator('param', idParamSchema), async (c) => {
+		const { id } = c.req.valid('param')
+		const numId = parseInt(id, 10)
+		if (Number.isNaN(numId)) {
 			return c.json({ success: false as const, error: 'Invalid series ID' }, 400)
 		}
-		const series = await db.select().from(schema.series).where(eq(schema.series.id, id))
+		const series = await db.select().from(schema.series).where(eq(schema.series.id, numId))
 		if (!series.length) {
 			return c.json({ success: false as const, error: 'Series not found' }, 404)
 		}
-		return c.json({ data: series[0], success: true as const })
+		// Mock file data
+		const hasFiles = Math.random() < 0.5
+		const fileSizeGb = hasFiles ? 2 + Math.random() * 198 : undefined
+		return c.json({ data: { ...series[0], hasFiles, fileSizeGb }, success: true as const })
 	})
 	// POST /api/series - Create a new series with seasons and episodes
-	.post('/', async (c) => {
-		const body = await c.req.json<{
-			tmdbId: number
-			resolution?: Resolution
-			monitoredSeasons: number[]
-		}>()
-
-		if (!body.tmdbId || typeof body.tmdbId !== 'number') {
-			return c.json({ success: false as const, error: 'tmdbId is required' }, 400)
-		}
+	.post('/', zValidator('json', addSeriesSchema), async (c) => {
+		const body = c.req.valid('json')
 
 		// Check if series already exists
 		const existing = await db.select().from(schema.series).where(eq(schema.series.tmdbId, body.tmdbId))
@@ -111,12 +120,57 @@ export const seriesRoutes = new Hono()
 		return c.json({ success: true as const, data: insertedSeries })
 	})
 	// PUT /api/series/:id - Update a series
-	.put('/:id', async (c) => {
+	.put('/:id', zValidator('param', idParamSchema), async (c) => {
 		// TODO: Implement series update
 		return c.json({ success: false as const, error: 'Not implemented' }, 501)
 	})
 	// DELETE /api/series/:id - Delete a series
-	.delete('/:id', async (c) => {
-		// TODO: Implement series deletion
-		return c.json({ success: false as const, error: 'Not implemented' }, 501)
+	.delete('/:id', zValidator('param', idParamSchema), zValidator('query', deleteQuerySchema), async (c) => {
+		const { id } = c.req.valid('param')
+		const numId = parseInt(id, 10)
+		if (Number.isNaN(numId)) {
+			return c.json({ success: false as const, error: 'Invalid series ID' }, 400)
+		}
+
+		const { deleteFiles } = c.req.valid('query')
+
+		const seriesRecord = await db.select().from(schema.series).where(eq(schema.series.id, numId))
+		if (!seriesRecord.length) {
+			return c.json({ success: false as const, error: 'Series not found' }, 404)
+		}
+
+		// Get all seasons for this series
+		const seasonsData = await db.select().from(schema.seasons).where(eq(schema.seasons.seriesId, numId))
+		const seasonIds = seasonsData.map((s) => s.id)
+
+		// Delete series folder from disk if requested
+		if (deleteFiles === 'true') {
+			// TODO: Implement actual folder deletion
+			logInfo(`Would delete series folder for: ${seriesRecord[0].title}`)
+		}
+
+		if (seasonIds.length > 0) {
+			// Get all episodes for these seasons
+			const episodesData = await db.select().from(schema.episodes).where(inArray(schema.episodes.seasonId, seasonIds))
+			const episodeIds = episodesData.map((e) => e.id)
+
+			if (episodeIds.length > 0) {
+				// Delete associated files from db
+				await db.delete(schema.files).where(inArray(schema.files.episodeId, episodeIds))
+
+				// Delete associated downloads
+				await db.delete(schema.downloads).where(inArray(schema.downloads.episodeId, episodeIds))
+
+				// Delete episodes
+				await db.delete(schema.episodes).where(inArray(schema.episodes.seasonId, seasonIds))
+			}
+
+			// Delete seasons
+			await db.delete(schema.seasons).where(eq(schema.seasons.seriesId, numId))
+		}
+
+		// Delete series
+		await db.delete(schema.series).where(eq(schema.series.id, numId))
+
+		return c.json({ success: true as const })
 	})

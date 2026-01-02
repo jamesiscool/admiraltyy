@@ -21,7 +21,7 @@ function useDebounce<T>(value: T, delayMs: number): T {
 }
 
 function AddPage() {
-	const [query, setQuery] = useState('bond')
+	const [query, setQuery] = useState('')
 	const debouncedQuery = useDebounce(query, 300)
 	const inputRef = useRef<HTMLInputElement>(null)
 

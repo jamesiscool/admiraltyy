@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, Bookmark, Film, Search, Settings2, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { DeleteConfirmationModal, type DeleteTarget } from '@/client/components/delete-confirmation-modal'
 import { Button } from '@/client/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/client/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
-import { useMovie, useUpdateMovie } from '@/client/lib/api'
+import { useDeleteMovie, useMovie, useUpdateMovie } from '@/client/lib/api'
 
 export const Route = createFileRoute('/movies/$movieId')({
 	component: MovieDetailPage,
@@ -11,9 +13,24 @@ export const Route = createFileRoute('/movies/$movieId')({
 
 function MovieDetailPage() {
 	const { movieId } = Route.useParams()
+	const navigate = useNavigate()
 
 	const { data: movie, isLoading, error } = useMovie(movieId)
 	const updateMovie = useUpdateMovie(movieId)
+
+	// Delete modal state
+	const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
+	const deleteMovie = useDeleteMovie({
+		onSuccess: () => {
+			setDeleteTarget(null)
+			navigate({ to: '/movies' })
+		},
+	})
+
+	const handleDeleteConfirm = (deleteFiles: boolean) => {
+		if (!deleteTarget) return
+		deleteMovie.mutate({ movieId: deleteTarget.id, deleteFiles })
+	}
 
 	if (isLoading) {
 		return (
@@ -194,7 +211,20 @@ function MovieDetailPage() {
 									<Settings2 className="size-4" />
 									Edit Quality
 								</Button>
-								<Button className="h-9 bg-destructive px-4 text-white hover:bg-destructive/90">
+								<Button
+									className="h-9 bg-destructive px-4 text-white hover:bg-destructive/90"
+									onClick={() => {
+										if (!movie) return
+										// TODO: When files table is connected, get hasFiles and fileSize
+										setDeleteTarget({
+											type: 'movie',
+											id: movie.id,
+											title: movie.title,
+											hasFiles: !!fileDetails,
+											fileSize: 0,
+										})
+									}}
+								>
 									<Trash2 className="size-4" />
 									Delete Movie
 								</Button>
@@ -281,6 +311,14 @@ function MovieDetailPage() {
 					</Card>
 				</div>
 			</div>
+
+			{/* Delete Confirmation Modal */}
+			<DeleteConfirmationModal
+				target={deleteTarget}
+				onClose={() => setDeleteTarget(null)}
+				onConfirm={handleDeleteConfirm}
+				isPending={deleteMovie.isPending}
+			/>
 		</div>
 	)
 }

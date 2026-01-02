@@ -1,8 +1,16 @@
+import { zValidator } from '@hono/zod-validator'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { z } from 'zod'
 import { fetchMovieDetails } from '../api/tmdb'
 import { db, schema } from '../db'
-import type { Resolution } from '../db/schema'
+import { resolutions } from '../db/schema'
+import { logInfo } from '../log/logs'
+
+const idParamSchema = z.object({ id: z.string() })
+const addMovieSchema = z.object({ tmdbId: z.number(), resolution: z.enum(resolutions).optional() })
+const updateMovieSchema = z.object({ monitored: z.boolean().optional() })
+const deleteQuerySchema = z.object({ deleteFiles: z.string().optional() })
 
 export const moviesRoutes = new Hono()
 	// GET /api/movies - List all movies
@@ -11,24 +19,24 @@ export const moviesRoutes = new Hono()
 		return c.json({ data: movies, success: true as const })
 	})
 	// GET /api/movies/:id - Get a single movie
-	.get('/:id', async (c) => {
-		const id = parseInt(c.req.param('id'), 10)
-		if (Number.isNaN(id)) {
+	.get('/:id', zValidator('param', idParamSchema), async (c) => {
+		const { id } = c.req.valid('param')
+		const numId = parseInt(id, 10)
+		if (Number.isNaN(numId)) {
 			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
 		}
-		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, id))
+		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, numId))
 		if (!movie.length) {
 			return c.json({ success: false as const, error: 'Movie not found' }, 404)
 		}
-		return c.json({ data: movie[0], success: true as const })
+		// Mock file data
+		const hasFiles = Math.random() < 0.5
+		const fileSizeGb = hasFiles ? 2 + Math.random() * 18 : undefined
+		return c.json({ data: { ...movie[0], hasFiles, fileSizeGb }, success: true as const })
 	})
 	// POST /api/movies - Create a new movie
-	.post('/', async (c) => {
-		const body = await c.req.json<{ tmdbId: number; resolution?: Resolution }>()
-
-		if (!body.tmdbId || typeof body.tmdbId !== 'number') {
-			return c.json({ success: false as const, error: 'tmdbId is required' }, 400)
-		}
+	.post('/', zValidator('json', addMovieSchema), async (c) => {
+		const body = c.req.valid('json')
 
 		// Check if movie already exists
 		const existing = await db.select().from(schema.movies).where(eq(schema.movies.tmdbId, body.tmdbId))
@@ -67,15 +75,16 @@ export const moviesRoutes = new Hono()
 		return c.json({ success: true as const, data: result[0] })
 	})
 	// PUT /api/movies/:id - Update a movie
-	.put('/:id', async (c) => {
-		const id = parseInt(c.req.param('id'), 10)
-		if (Number.isNaN(id)) {
+	.put('/:id', zValidator('param', idParamSchema), zValidator('json', updateMovieSchema), async (c) => {
+		const { id } = c.req.valid('param')
+		const numId = parseInt(id, 10)
+		if (Number.isNaN(numId)) {
 			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
 		}
 
-		const body = await c.req.json<{ monitored?: boolean }>()
+		const body = c.req.valid('json')
 
-		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, id))
+		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, numId))
 		if (!movie.length) {
 			return c.json({ success: false as const, error: 'Movie not found' }, 404)
 		}
@@ -89,11 +98,38 @@ export const moviesRoutes = new Hono()
 			return c.json({ success: true as const, data: movie[0] })
 		}
 
-		const result = await db.update(schema.movies).set(updates).where(eq(schema.movies.id, id)).returning()
+		const result = await db.update(schema.movies).set(updates).where(eq(schema.movies.id, numId)).returning()
 		return c.json({ success: true as const, data: result[0] })
 	})
 	// DELETE /api/movies/:id - Delete a movie
-	.delete('/:id', async (c) => {
-		// TODO: Implement movie deletion
-		return c.json({ success: false as const, error: 'Not implemented' }, 501)
+	.delete('/:id', zValidator('param', idParamSchema), zValidator('query', deleteQuerySchema), async (c) => {
+		const { id } = c.req.valid('param')
+		const numId = parseInt(id, 10)
+		if (Number.isNaN(numId)) {
+			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
+		}
+
+		const { deleteFiles } = c.req.valid('query')
+
+		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, numId))
+		if (!movie.length) {
+			return c.json({ success: false as const, error: 'Movie not found' }, 404)
+		}
+
+		// Delete movie folder from disk if requested
+		if (deleteFiles === 'true') {
+			// TODO: Implement actual folder deletion
+			logInfo(`Would delete movie folder for: ${movie[0].title}`)
+		}
+
+		// Delete associated files from db
+		await db.delete(schema.files).where(eq(schema.files.movieId, numId))
+
+		// Delete associated downloads
+		await db.delete(schema.downloads).where(eq(schema.downloads.movieId, numId))
+
+		// Delete movie
+		await db.delete(schema.movies).where(eq(schema.movies.id, numId))
+
+		return c.json({ success: true as const })
 	})

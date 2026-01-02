@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/client/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/client/components/ui/select'
 import { useAddMovie, useSettings } from '@/client/lib/api'
+import type { Resolution } from '@/server/db/schema'
 
 interface MovieResult {
 	tmdbId: number
@@ -44,13 +45,13 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 
 	const handleAdd = () => {
 		if (!movie) return
-		addMovieMutation.mutate({ tmdbId: movie.tmdbId, resolution: quality })
+		addMovieMutation.mutate({ tmdbId: movie.tmdbId, resolution: quality as Resolution })
 	}
 
 	const handleAddAndDownload = () => {
 		if (!movie) return
 		// For now, same as add - download trigger can be added later
-		addMovieMutation.mutate({ tmdbId: movie.tmdbId, resolution: quality })
+		addMovieMutation.mutate({ tmdbId: movie.tmdbId, resolution: quality as Resolution })
 	}
 
 	const isLoading = addMovieMutation.isPending

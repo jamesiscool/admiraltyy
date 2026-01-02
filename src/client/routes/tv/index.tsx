@@ -1,26 +1,26 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Film, Search, X } from 'lucide-react'
+import { Search, Tv, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { DeleteConfirmationModal, type DeleteTarget } from '@/client/components/delete-confirmation-modal'
 import { Button } from '@/client/components/ui/button'
 import { Input } from '@/client/components/ui/input'
-import { useDeleteMovie, useMovies } from '@/client/lib/api'
+import { useDeleteSeries, useSeries } from '@/client/lib/api'
 import type { Resolution } from '@/server/db/schema'
-import { MovieCard } from './-movie-card'
-import { type MonitoredFilter, MovieFilters, type SortOption, type StatusFilter } from './-movie-filters'
-import { MoviesFooter } from './-movies-footer'
+import { SeriesCard } from './-series-card'
+import { type MonitoredFilter, SeriesFilters, type SeriesStatusFilter, type SortOption } from './-series-filters'
+import { SeriesFooter } from './-series-footer'
 
-export const Route = createFileRoute('/movies/')({
-	component: MoviesIndexPage,
+export const Route = createFileRoute('/tv/')({
+	component: TvIndexPage,
 })
 
-function MoviesIndexPage() {
+function TvIndexPage() {
 	const queryClient = useQueryClient()
 
 	// Search and filter state
 	const [searchQuery, setSearchQuery] = useState('')
-	const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+	const [statusFilter, setStatusFilter] = useState<SeriesStatusFilter>('all')
 	const [qualityFilter, setQualityFilter] = useState<Resolution | 'all'>('all')
 	const [monitoredFilter, setMonitoredFilter] = useState<MonitoredFilter>('all')
 	const [yearRange, setYearRange] = useState<[number, number]>([1900, 2030])
@@ -29,45 +29,42 @@ function MoviesIndexPage() {
 
 	// Delete modal state
 	const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
-	const deleteMovie = useDeleteMovie({ onSuccess: () => setDeleteTarget(null) })
+	const deleteSeries = useDeleteSeries({ onSuccess: () => setDeleteTarget(null) })
 
-	// Fetch movies from API
-	const { data: moviesData, isLoading, error } = useMovies()
+	// Fetch series from API
+	const { data: seriesData, isLoading, error } = useSeries()
 
-	const movies = moviesData ?? []
+	const allSeries = seriesData ?? []
 
-	// Filter and sort movies
-	const filteredMovies = useMemo(() => {
-		let result = [...movies]
+	// Filter and sort series
+	const filteredSeries = useMemo(() => {
+		let result = [...allSeries]
 
 		// Search filter
 		if (searchQuery) {
 			const query = searchQuery.toLowerCase()
-			result = result.filter((m) => m.title.toLowerCase().includes(query))
+			result = result.filter((s) => s.title.toLowerCase().includes(query))
 		}
 
-		// Status filter - TODO: Join with files table to determine downloaded status
-		// For now, we don't have file associations so all movies are "wanted"
-		if (statusFilter === 'downloaded') {
-			// No movies have files yet
-			result = []
+		// Status filter
+		if (statusFilter !== 'all') {
+			result = result.filter((s) => s.status === statusFilter)
 		}
-		// 'wanted' and 'all' show all movies (no file associations yet)
 
 		// Quality filter
 		if (qualityFilter !== 'all') {
-			result = result.filter((m) => m.resolution === qualityFilter)
+			result = result.filter((s) => s.resolution === qualityFilter)
 		}
 
 		// Monitored filter
 		if (monitoredFilter === 'monitored') {
-			result = result.filter((m) => m.monitored)
+			result = result.filter((s) => s.monitored)
 		} else if (monitoredFilter === 'unmonitored') {
-			result = result.filter((m) => !m.monitored)
+			result = result.filter((s) => !s.monitored)
 		}
 
 		// Year range filter
-		result = result.filter((m) => m.year >= yearRange[0] && m.year <= yearRange[1])
+		result = result.filter((s) => s.year >= yearRange[0] && s.year <= yearRange[1])
 
 		// Sort
 		result.sort((a, b) => {
@@ -76,8 +73,8 @@ function MoviesIndexPage() {
 				case 'title':
 					comparison = a.title.localeCompare(b.title)
 					break
-				case 'releaseDate':
-					comparison = new Date(a.cinemaReleaseDate ?? '').getTime() - new Date(b.cinemaReleaseDate ?? '').getTime()
+				case 'nextAiring':
+					comparison = new Date(a.nextAiring ?? '').getTime() - new Date(b.nextAiring ?? '').getTime()
 					break
 				case 'dateAdded':
 					comparison = new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime()
@@ -90,12 +87,12 @@ function MoviesIndexPage() {
 		})
 
 		return result
-	}, [movies, searchQuery, statusFilter, qualityFilter, monitoredFilter, yearRange, sortBy, sortDesc])
+	}, [allSeries, searchQuery, statusFilter, qualityFilter, monitoredFilter, yearRange, sortBy, sortDesc])
 
-	// Stats - TODO: calculate from file associations when available
-	const totalMovies = movies.length
-	const downloadedMovies = 0 // No file associations yet
-	const wantedMovies = totalMovies - downloadedMovies
+	// Stats
+	const totalSeries = allSeries.length
+	const continuingSeries = allSeries.filter((s) => s.status === 'continuing').length
+	const endedSeries = allSeries.filter((s) => s.status === 'ended').length
 
 	// Size stats - TODO: calculate from files when available
 	const totalSize = 0
@@ -114,7 +111,7 @@ function MoviesIndexPage() {
 
 	const handleDeleteConfirm = (deleteFiles: boolean) => {
 		if (!deleteTarget) return
-		deleteMovie.mutate({ movieId: deleteTarget.id, deleteFiles })
+		deleteSeries.mutate({ seriesId: deleteTarget.id, deleteFiles })
 	}
 
 	return (
@@ -124,14 +121,14 @@ function MoviesIndexPage() {
 				<div className="container pt-0!">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 						{/* Title */}
-						<h1>Movies</h1>
+						<h1>TV Series</h1>
 
 						{/* Search */}
 						<div className="relative flex-1 sm:w-64 sm:flex-initial">
 							<Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
 							<Input
 								type="text"
-								placeholder="Search movies..."
+								placeholder="Search series..."
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								className="pr-8 pl-10"
@@ -150,7 +147,7 @@ function MoviesIndexPage() {
 
 					{/* Filters */}
 					<div className="mt-4">
-						<MovieFilters
+						<SeriesFilters
 							statusFilter={statusFilter}
 							onStatusFilterChange={setStatusFilter}
 							qualityFilter={qualityFilter}
@@ -172,24 +169,24 @@ function MoviesIndexPage() {
 			<div className="grow overflow-y-auto">
 				<div className="container py-8">
 					{/* Loading State */}
-					{isLoading && <div className="py-12 text-center text-muted-foreground">Loading movies...</div>}
+					{isLoading && <div className="py-12 text-center text-muted-foreground">Loading series...</div>}
 
 					{/* Error State */}
 					{error && <div className="py-12 text-center text-destructive">{error.message}</div>}
 
 					{/* Empty State */}
-					{!isLoading && !error && filteredMovies.length === 0 && (
+					{!isLoading && !error && filteredSeries.length === 0 && (
 						<div className="flex flex-col items-center justify-center py-24 text-center">
 							<div className="mb-4 rounded bg-muted p-4">
-								<Film className="size-12 text-muted-foreground" />
+								<Tv className="size-12 text-muted-foreground" />
 							</div>
-							<h3 className="mb-2 font-semibold text-xl">No movies found</h3>
+							<h3 className="mb-2 font-semibold text-xl">No series found</h3>
 							<p className="max-w-md text-muted-foreground">
 								{searchQuery
-									? `No movies match "${searchQuery}". Try a different search term.`
-									: movies.length === 0
-										? 'You haven\'t added any movies yet. Click "Add Movie" to get started.'
-										: 'No movies match the current filters. Try adjusting your filters.'}
+									? `No series match "${searchQuery}". Try a different search term.`
+									: allSeries.length === 0
+										? 'You haven\'t added any series yet. Click "Add Series" to get started.'
+										: 'No series match the current filters. Try adjusting your filters.'}
 							</p>
 							{hasActiveFilters && (
 								<Button
@@ -203,38 +200,42 @@ function MoviesIndexPage() {
 						</div>
 					)}
 
-					{/* Movie Grid */}
-					{!isLoading && !error && filteredMovies.length > 0 && (
+					{/* Series Grid */}
+					{!isLoading && !error && filteredSeries.length > 0 && (
 						<div className="grid grid-cols-[repeat(auto-fill,minmax(175px,1fr))] gap-4">
-							{filteredMovies.map((movie) => (
-								<MovieCard
-									key={movie.id}
-									movie={movie}
+							{filteredSeries.map((series) => (
+								<SeriesCard
+									key={series.id}
+									series={series}
+									onView={() => {
+										// TODO: Navigate to series detail when implemented
+										console.log('View series:', series.id)
+									}}
 									onAutoSearch={() => {
 										// TODO: Trigger auto search
-										console.log('Auto search:', movie.id)
+										console.log('Auto search:', series.id)
 									}}
 									onManualSearch={() => {
 										// TODO: Open manual search
-										console.log('Manual search:', movie.id)
+										console.log('Manual search:', series.id)
 									}}
 									onDelete={() => {
-										// TODO: When files table is connected, get hasFiles and fileSize from movie
+										// TODO: When files table is connected, get hasFiles and fileSize from series
 										setDeleteTarget({
-											type: 'movie',
-											id: movie.id,
-											title: movie.title,
+											type: 'series',
+											id: series.id,
+											title: series.title,
 											hasFiles: false,
 											fileSize: 0,
 										})
 									}}
 									onToggleMonitored={async (monitored) => {
-										await fetch(`/api/movies/${movie.id}`, {
+										await fetch(`/api/series/${series.id}`, {
 											method: 'PUT',
 											headers: { 'Content-Type': 'application/json' },
 											body: JSON.stringify({ monitored }),
 										})
-										queryClient.invalidateQueries({ queryKey: ['movies'] })
+										queryClient.invalidateQueries({ queryKey: ['series'] })
 									}}
 								/>
 							))}
@@ -244,11 +245,11 @@ function MoviesIndexPage() {
 			</div>
 
 			{/* Footer */}
-			<MoviesFooter
-				totalMovies={totalMovies}
-				downloadedMovies={downloadedMovies}
-				wantedMovies={wantedMovies}
-				filteredCount={filteredMovies.length}
+			<SeriesFooter
+				totalSeries={totalSeries}
+				continuingSeries={continuingSeries}
+				endedSeries={endedSeries}
+				filteredCount={filteredSeries.length}
 				filteredSize={filteredSize}
 				totalSize={totalSize}
 				hasActiveFilters={!!hasActiveFilters}
@@ -259,7 +260,7 @@ function MoviesIndexPage() {
 				target={deleteTarget}
 				onClose={() => setDeleteTarget(null)}
 				onConfirm={handleDeleteConfirm}
-				isPending={deleteMovie.isPending}
+				isPending={deleteSeries.isPending}
 			/>
 		</div>
 	)
