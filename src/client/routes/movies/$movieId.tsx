@@ -3,7 +3,7 @@ import { ArrowLeft, Bookmark, Film, Search, Settings2, Trash2 } from 'lucide-rea
 import { Button } from '@/client/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/client/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
-import { useMovie } from '@/client/lib/api'
+import { useMovie, useUpdateMovie } from '@/client/lib/api'
 
 export const Route = createFileRoute('/movies/$movieId')({
 	component: MovieDetailPage,
@@ -13,6 +13,7 @@ function MovieDetailPage() {
 	const { movieId } = Route.useParams()
 
 	const { data: movie, isLoading, error } = useMovie(movieId)
+	const updateMovie = useUpdateMovie(movieId)
 
 	if (isLoading) {
 		return (
@@ -120,8 +121,10 @@ function MovieDetailPage() {
 
 								{/* Monitored badge */}
 								<Button
-									variant={movie.monitored ? 'sage' : 'outline'}
+									variant={movie.monitored ? 'monitored' : 'outline'}
 									className="shrink-0 gap-1.5"
+									disabled={updateMovie.isPending}
+									onClick={() => updateMovie.mutate({ monitored: !movie.monitored })}
 								>
 									<Bookmark className={movie.monitored ? 'size-3 fill-current' : 'size-3'} />
 									{movie.monitored ? 'Monitored' : 'Unmonitored'}

@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Film, Search, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -14,6 +15,8 @@ export const Route = createFileRoute('/movies/')({
 })
 
 function MoviesIndexPage() {
+	const queryClient = useQueryClient()
+
 	// Search and filter state
 	const [searchQuery, setSearchQuery] = useState('')
 	const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -209,9 +212,13 @@ function MoviesIndexPage() {
 										// TODO: Delete movie (API not implemented yet)
 										console.log('Delete movie:', movie.id)
 									}}
-									onToggleMonitored={(monitored) => {
-										// TODO: Update movie (API not implemented yet)
-										console.log('Toggle monitored:', movie.id, monitored)
+									onToggleMonitored={async (monitored) => {
+										await fetch(`/api/movies/${movie.id}`, {
+											method: 'PUT',
+											headers: { 'Content-Type': 'application/json' },
+											body: JSON.stringify({ monitored }),
+										})
+										queryClient.invalidateQueries({ queryKey: ['movies'] })
 									}}
 								/>
 							))}

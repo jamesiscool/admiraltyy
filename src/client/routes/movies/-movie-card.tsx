@@ -78,14 +78,20 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: Stops propagation to parent card */}
 			<div
 				className={`absolute top-[40%] left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col gap-1.5 transition-all duration-200 ${isHovered ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}
-				onClick={(e) => e.stopPropagation()}
+				onClick={(e) => {
+					e.preventDefault()
+					e.stopPropagation()
+				}}
 				onKeyDown={(e) => e.stopPropagation()}
 			>
 				{/* Monitored toggle */}
 				<button
 					type="button"
-					onClick={() => onToggleMonitored?.(!movie.monitored)}
-					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-blue-500 px-4 py-2 font-medium text-white text-xs shadow-lg transition-colors hover:bg-blue-600"
+					onClick={(e) => {
+						e.preventDefault()
+						onToggleMonitored?.(!movie.monitored)
+					}}
+					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-pink-600 px-4 py-2 font-medium text-white text-xs shadow-lg transition-colors hover:bg-pink-700"
 				>
 					{movie.monitored ? <Bookmark className="size-3.5 fill-current" /> : <Bookmark className="size-3.5" />}
 					{movie.monitored ? 'Monitored' : 'Unmonitored'}
@@ -94,7 +100,10 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 				{/* Auto Search */}
 				<button
 					type="button"
-					onClick={() => onAutoSearch?.()}
+					onClick={(e) => {
+						e.preventDefault()
+						onAutoSearch?.()
+					}}
 					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-blue-500 px-4 py-2 font-medium text-white text-xs shadow-lg transition-colors hover:bg-blue-600"
 				>
 					<Search className="size-3.5" />
@@ -104,7 +113,10 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 				{/* Manual Search */}
 				<button
 					type="button"
-					onClick={() => onManualSearch?.()}
+					onClick={(e) => {
+						e.preventDefault()
+						onManualSearch?.()
+					}}
 					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-white px-4 py-2 font-medium text-foreground text-xs shadow-lg transition-colors hover:bg-neutral-100"
 				>
 					<Search className="size-3.5" />
@@ -115,7 +127,10 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 				{!hasFile && (
 					<button
 						type="button"
-						onClick={() => onDelete?.()}
+						onClick={(e) => {
+							e.preventDefault()
+							onDelete?.()
+						}}
 						className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-red-100 px-4 py-2 font-medium text-red-600 text-xs shadow-lg transition-colors hover:bg-red-200"
 					>
 						<Trash2 className="size-3.5" />

@@ -179,9 +179,9 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 												<button
 													type="button"
 													onClick={toggleAllSeasons}
-													className="flex items-center justify-center p-1 transition-colors hover:text-primary"
+													className="flex items-center justify-center p-1 transition-colors hover:text-pink-600"
 												>
-													<Bookmark className={`size-4 ${allSelected ? 'fill-primary text-primary' : someSelected ? 'fill-primary/50 text-primary' : ''}`} />
+													<Bookmark className={`size-4 ${allSelected ? 'fill-pink-600 text-pink-600' : someSelected ? 'fill-pink-300 text-pink-600' : 'text-pink-300'}`} />
 												</button>
 											</TableHead>
 											<TableHead>Season</TableHead>
@@ -199,9 +199,9 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 														<button
 															type="button"
 															onClick={() => toggleSeason(season.seasonNumber)}
-															className="flex items-center justify-center p-1 transition-colors hover:text-primary"
+															className="flex items-center justify-center p-1 transition-colors hover:text-pink-600"
 														>
-															<Bookmark className={`size-4 ${isMonitored ? 'fill-primary text-primary' : ''}`} />
+															<Bookmark className={`size-4 ${isMonitored ? 'fill-pink-600 text-pink-600' : 'text-pink-300'}`} />
 														</button>
 													</TableCell>
 													<TableCell className="font-medium">Season {season.seasonNumber}</TableCell>

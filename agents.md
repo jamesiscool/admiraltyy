@@ -4,7 +4,7 @@
 
 ## Very important !!!!!!!!!!!!!!!!
 
-- After finishing file changes, run `bun fix && bun tsc` and fix any errors before responding
+- After all changes, before the summery run `bun fix && bun tsc` and fix any errors
 
 ## Design
 - When I refer to the design I want to to reference the design in here `./design` Look at the code examples, particularly those in `design/code` and also the screen shots

@@ -136,6 +136,8 @@
 	--sage-foreground: white;
 	--sage-inverse: var(--color-sage-100);
 	--sage-inverse-foreground: var(--color-sage-600);
+	--monitored: var(--color-pink-600);
+	--monitored-foreground: white;
 	--muted: oklch(0.97 0 0);
 	--muted-foreground: oklch(0.556 0 0);
 	--accent: oklch(0.97 0 0);
@@ -167,6 +169,8 @@
 	--sage-foreground: white;
 	--sage-inverse: var(--color-sage-100);
 	--sage-inverse-foreground: var(--color-sage-600);
+	--monitored: var(--color-pink-500);
+	--monitored-foreground: white;
 	--muted: oklch(0.269 0 0);
 	--muted-foreground: oklch(0.708 0 0);
 	--accent: oklch(0.371 0 0);
@@ -205,6 +209,8 @@
 	--color-sage-foreground: var(--sage-foreground);
 	--color-sage-inverse: var(--sage-inverse);
 	--color-sage-inverse-foreground: var(--sage-inverse-foreground);
+	--color-monitored: var(--monitored);
+	--color-monitored-foreground: var(--monitored-foreground);
 	--color-popover-foreground: var(--popover-foreground);
 	--color-popover: var(--popover);
 	--color-card-foreground: var(--card-foreground);

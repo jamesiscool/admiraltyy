@@ -68,8 +68,29 @@ export const moviesRoutes = new Hono()
 	})
 	// PUT /api/movies/:id - Update a movie
 	.put('/:id', async (c) => {
-		// TODO: Implement movie update
-		return c.json({ success: false as const, error: 'Not implemented' }, 501)
+		const id = parseInt(c.req.param('id'), 10)
+		if (Number.isNaN(id)) {
+			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
+		}
+
+		const body = await c.req.json<{ monitored?: boolean }>()
+
+		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, id))
+		if (!movie.length) {
+			return c.json({ success: false as const, error: 'Movie not found' }, 404)
+		}
+
+		const updates: Partial<{ monitored: boolean }> = {}
+		if (typeof body.monitored === 'boolean') {
+			updates.monitored = body.monitored
+		}
+
+		if (Object.keys(updates).length === 0) {
+			return c.json({ success: true as const, data: movie[0] })
+		}
+
+		const result = await db.update(schema.movies).set(updates).where(eq(schema.movies.id, id)).returning()
+		return c.json({ success: true as const, data: result[0] })
 	})
 	// DELETE /api/movies/:id - Delete a movie
 	.delete('/:id', async (c) => {

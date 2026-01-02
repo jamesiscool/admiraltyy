@@ -63,6 +63,27 @@ export function useAddMovie(options?: { onSuccess?: () => void }) {
 	})
 }
 
+export function useUpdateMovie(movieId: string) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: async ({ monitored }: { monitored: boolean }) => {
+			const res = await fetch(`/api/movies/${movieId}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ monitored }),
+			})
+			const json = await res.json()
+			if (!json.success) throw new Error(json.error ?? 'Failed to update movie')
+			return json.data as Movie
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['movie', movieId] })
+			queryClient.invalidateQueries({ queryKey: ['movies'] })
+		},
+	})
+}
+
 // Search
 
 interface SearchResultItem {
