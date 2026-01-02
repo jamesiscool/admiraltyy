@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { Bookmark, EyeOff, Film, Search, Trash2 } from 'lucide-react'
+import { Bookmark, Film, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import type { Movie } from '@/server/db/schema'
 
@@ -60,19 +60,6 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 			{/* <div className="absolute top-0 left-0 z-10">
 				<div className="h-auto rounded-none rounded-br bg-yellow-400 px-1.5 py-0.5 text-[11px] text-white tracking-wide">Missing</div>
 			</div> */}
-
-			{/* Monitoring indicator */}
-			{!movie.monitored && (
-				<div className="absolute top-[22px] left-0 z-10">
-					<span
-						className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium text-[10px]"
-						style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: 'rgba(255,255,255,0.7)' }}
-					>
-						<EyeOff className="size-2.5" />
-						Unmonitored
-					</span>
-				</div>
-			)}
 
 			{/* Action buttons - vertical list visible on hover */}
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: Stops propagation to parent card */}
@@ -142,12 +129,12 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 			{/* Movie info - bottom */}
 			<div className="absolute right-0 bottom-0 left-0 z-10 p-3">
 				<h3 className="mb-1 line-clamp-2 font-semibold text-base text-white leading-tight tracking-tight">{movie.title}</h3>
-				<div className="flex items-center gap-1.5 text-sm text-white/80">
+				<div className="flex items-center gap-1 text-sm text-white/80">
 					<span className="font-medium">{movie.year}</span>
 					<span className="text-white/50">•</span>
 					<span className="font-mono text-blue-300">{movie.resolution}</span>
 					<span className="text-white/50">•</span>
-					<span className="text-yellow-400 tracking-wide">Missing</span>
+					{movie.monitored ? <span className="text-yellow-400 tracking-wide">Missing</span> : <Bookmark className="size-3.5 text-pink-300" />}
 				</div>
 			</div>
 		</Link>
