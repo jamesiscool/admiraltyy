@@ -1,9 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Search } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Input } from '@/client/components/ui/input'
-import { api } from '@/client/lib/api'
+import { useSearch } from '@/client/lib/api'
 import { SearchResultCard } from './-search-result-card'
 
 export const Route = createFileRoute('/add')({
@@ -26,22 +25,7 @@ function AddPage() {
 	const debouncedQuery = useDebounce(query, 300)
 	const inputRef = useRef<HTMLInputElement>(null)
 
-	const {
-		data: results,
-		isLoading,
-		error,
-	} = useQuery({
-		queryKey: ['search', debouncedQuery],
-		queryFn: async () => {
-			const res = await api.api.search.$get({ query: { q: debouncedQuery } })
-			const json = await res.json()
-			if (!json.success) {
-				throw new Error(json.error)
-			}
-			return json.data
-		},
-		enabled: debouncedQuery.trim().length > 0,
-	})
+	const { data: results, isLoading, error } = useSearch(debouncedQuery)
 
 	const hasResults = results && (results.movies.length > 0 || results.tv.length > 0)
 	const noResults = results && results.movies.length === 0 && results.tv.length === 0 && debouncedQuery.trim()

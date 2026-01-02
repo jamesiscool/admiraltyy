@@ -1,4 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Bookmark, Download, Loader2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/client/components/ui/button'
@@ -6,27 +5,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/client/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/client/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
-import { api } from '@/client/lib/api'
+import { useAddSeries, useSeriesPreview, useSettings } from '@/client/lib/api'
 
 interface SeriesResult {
 	tmdbId: number
 	title: string
 	posterPath?: string
 	releaseDate?: string
-}
-
-interface SeasonPreview {
-	seasonNumber: number
-	episodeCount: number
-	airDate?: string
-	name: string
-}
-
-interface SeriesPreview {
-	tmdbId: number
-	title: string
-	year: number
-	seasons: SeasonPreview[]
 }
 
 interface AddSeriesDialogProps {
@@ -36,29 +21,13 @@ interface AddSeriesDialogProps {
 }
 
 export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogProps) {
-	const queryClient = useQueryClient()
 	const [monitoredSeasons, setMonitoredSeasons] = useState<Set<number>>(new Set())
 
-	const { data: settings } = useQuery({
-		queryKey: ['settings'],
-		queryFn: async () => {
-			const res = await api.api.settings.$get()
-			const json = await res.json()
-			if (!json.success) throw new Error('Failed to load settings')
-			return json.data
-		},
-	})
+	const { data: settings } = useSettings()
+	const { data: seriesPreview, isLoading: isLoadingPreview } = useSeriesPreview(series?.tmdbId, open && !!series)
 
-	const { data: seriesPreview, isLoading: isLoadingPreview } = useQuery({
-		queryKey: ['series-preview', series?.tmdbId],
-		queryFn: async () => {
-			if (!series) return null
-			const res = await api.api.series.tmdb[':tmdbId'].$get({ param: { tmdbId: String(series.tmdbId) } })
-			const json = await res.json()
-			if (!json.success) throw new Error('Failed to load series preview')
-			return json.data as SeriesPreview
-		},
-		enabled: open && !!series,
+	const addSeriesMutation = useAddSeries({
+		onSuccess: () => onOpenChange(false),
 	})
 
 	// Initialize all seasons as monitored when preview loads
@@ -67,19 +36,6 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 			setMonitoredSeasons(new Set(seriesPreview.seasons.map((s) => s.seasonNumber)))
 		}
 	}, [seriesPreview])
-
-	const addSeriesMutation = useMutation({
-		mutationFn: async ({ tmdbId, resolution, monitoredSeasons }: { tmdbId: number; resolution: string; monitoredSeasons: number[] }) => {
-			const res = await api.api.series.$post({ json: { tmdbId, resolution, monitoredSeasons } })
-			const json = await res.json()
-			if (!json.success) throw new Error('error' in json ? json.error : 'Failed to add series')
-			return json.data
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['series'] })
-			onOpenChange(false)
-		},
-	})
 
 	const seriesFolders = settings?.folders.tv ?? []
 	const resolutions = settings?.resolutions ?? []

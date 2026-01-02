@@ -1,23 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Activity, CheckCircle2, Film, Settings, Ship, Tv } from 'lucide-react'
+import { useHealth } from '@/client/lib/api'
 
 export const Route = createFileRoute('/app')({
 	component: App,
 })
 
 function App() {
-	const {
-		data: health,
-		isLoading,
-		error,
-	} = useQuery({
-		queryKey: ['health'],
-		queryFn: async () => {
-			const res = await fetch('/api/health')
-			return res.json()
-		},
-	})
+	const { data: health, isLoading, error } = useHealth()
 
 	return (
 		<div className="min-h-screen bg-[var(--color-background)]">

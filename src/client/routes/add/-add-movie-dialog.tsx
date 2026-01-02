@@ -1,11 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Download, Loader2, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/client/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/client/components/ui/dialog'
 import { Label } from '@/client/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/client/components/ui/select'
-import { api } from '@/client/lib/api'
+import { useAddMovie, useSettings } from '@/client/lib/api'
 
 interface MovieResult {
 	tmdbId: number
@@ -21,29 +20,10 @@ interface AddMovieDialogProps {
 }
 
 export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProps) {
-	const queryClient = useQueryClient()
+	const { data: settings } = useSettings()
 
-	const { data: settings } = useQuery({
-		queryKey: ['settings'],
-		queryFn: async () => {
-			const res = await api.api.settings.$get()
-			const json = await res.json()
-			if (!json.success) throw new Error('Failed to load settings')
-			return json.data
-		},
-	})
-
-	const addMovieMutation = useMutation({
-		mutationFn: async ({ tmdbId, resolution }: { tmdbId: number; resolution: string }) => {
-			const res = await api.api.movies.$post({ json: { tmdbId, resolution } })
-			const json = await res.json()
-			if (!json.success) throw new Error('error' in json ? json.error : 'Failed to add movie')
-			return json.data
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['movies'] })
-			onOpenChange(false)
-		},
+	const addMovieMutation = useAddMovie({
+		onSuccess: () => onOpenChange(false),
 	})
 
 	const movieFolders = settings?.folders.movies ?? []

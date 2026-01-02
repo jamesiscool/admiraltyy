@@ -1,10 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Film, Search, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Button } from '@/client/components/ui/button'
 import { Input } from '@/client/components/ui/input'
-import { api } from '@/client/lib/api'
+import { useMovies } from '@/client/lib/api'
 import type { Resolution } from '@/server/db/schema'
 import { MovieCard } from './-movie-card'
 import { type MonitoredFilter, MovieFilters, type SortOption, type StatusFilter } from './-movie-filters'
@@ -25,21 +24,7 @@ function MoviesIndexPage() {
 	const [sortDesc, setSortDesc] = useState(true)
 
 	// Fetch movies from API
-	const {
-		data: moviesData,
-		isLoading,
-		error,
-	} = useQuery({
-		queryKey: ['movies'],
-		queryFn: async () => {
-			const res = await api.api.movies.$get()
-			const json = await res.json()
-			if (!json.success) {
-				throw new Error('Failed to fetch movies')
-			}
-			return json.data
-		},
-	})
+	const { data: moviesData, isLoading, error } = useMovies()
 
 	const movies = moviesData ?? []
 

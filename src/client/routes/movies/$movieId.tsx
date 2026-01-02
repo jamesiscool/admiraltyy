@@ -1,12 +1,9 @@
-import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft, Bookmark, Film, Search, Settings2, Trash2 } from 'lucide-react'
-import { Badge } from '@/client/components/ui/badge'
 import { Button } from '@/client/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/client/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
-import { api } from '@/client/lib/api'
-import type { Movie } from '@/server/db/schema'
+import { useMovie } from '@/client/lib/api'
 
 export const Route = createFileRoute('/movies/$movieId')({
 	component: MovieDetailPage,
@@ -15,21 +12,7 @@ export const Route = createFileRoute('/movies/$movieId')({
 function MovieDetailPage() {
 	const { movieId } = Route.useParams()
 
-	const {
-		data: movie,
-		isLoading,
-		error,
-	} = useQuery({
-		queryKey: ['movie', movieId],
-		queryFn: async () => {
-			const res = await api.api.movies[':id'].$get({ param: { id: movieId } })
-			const json = await res.json()
-			if (!json.success) {
-				throw new Error('Failed to fetch movie')
-			}
-			return json.data as Movie
-		},
-	})
+	const { data: movie, isLoading, error } = useMovie(movieId)
 
 	if (isLoading) {
 		return (
@@ -136,13 +119,13 @@ function MovieDetailPage() {
 								</div>
 
 								{/* Monitored badge */}
-								<Badge
-									variant={movie.monitored ? 'neutral' : 'outline'}
+								<Button
+									variant={movie.monitored ? 'sage' : 'outline'}
 									className="shrink-0 gap-1.5"
 								>
 									<Bookmark className={movie.monitored ? 'size-3 fill-current' : 'size-3'} />
 									{movie.monitored ? 'Monitored' : 'Unmonitored'}
-								</Badge>
+								</Button>
 							</div>
 
 							{/* Genres */}
