@@ -45,3 +45,12 @@ export function formatNextAiring(dateStr: string | null): string | null {
 	const month = date.toLocaleDateString('en-US', { month: 'short' })
 	return `${day} ${month}`
 }
+
+export function generateSettingId(): string {
+	const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+	let key = ''
+	for (let i = 0; i < 5; i++) {
+		key += chars[Math.floor(Math.random() * chars.length)]
+	}
+	return key
+}

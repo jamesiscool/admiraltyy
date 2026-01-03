@@ -56,8 +56,33 @@ const authSettingsSchema = z.object({
 	apiKey: z.string(),
 })
 
+const indexerSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	url: z.string(),
+	apiKey: z.string(),
+	enabled: z.boolean(),
+	priority: z.number(),
+})
+
+const usenetServerSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	host: z.string(),
+	port: z.number(),
+	username: z.string(),
+	password: z.string(),
+	ssl: z.boolean(),
+	priority: z.number(),
+	connections: z.number(),
+	enabled: z.boolean(),
+})
+
 export const settingsSchema = z.object({
 	folders: foldersSchema,
+	downloadFolder: z.string().default(''),
+	indexers: z.array(indexerSchema),
+	usenetServers: z.array(usenetServerSchema),
 	resolutions: z.array(resolutionSchema),
 	defaultQuality: z.string().default('1080p'),
 	languageSettings: languageSettingsSchema,
@@ -69,6 +94,8 @@ export const settingsSchema = z.object({
 export type Settings = z.infer<typeof settingsSchema>
 export type Folder = z.infer<typeof folderSchema>
 export type Folders = z.infer<typeof foldersSchema>
+export type Indexer = z.infer<typeof indexerSchema>
+export type UsenetServer = z.infer<typeof usenetServerSchema>
 export type Resolution = z.infer<typeof resolutionSchema>
 export type Language = z.infer<typeof languageSchema>
 export type LanguageSettings = z.infer<typeof languageSettingsSchema>
@@ -81,6 +108,9 @@ const defaultSettings: Settings = {
 		movies: [],
 		tv: [],
 	},
+	downloadFolder: '',
+	indexers: [],
+	usenetServers: [],
 	resolutions: [
 		{ name: '480p', minGbPerHour: 0.3, targetGbPerHour: 0.5, maxGbPerHour: 0.8 },
 		{ name: '720p', minGbPerHour: 0.8, targetGbPerHour: 1.5, maxGbPerHour: 2.5 },

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { fetchMovieDetails } from '../api/tmdb'
 import { db, schema } from '../db'
 import { type Resolution, resolutions } from '../db/schema'
+import { searchMovieReleases } from '../lib/indexer'
 import { logInfo } from '../log/logs'
 
 const idParamSchema = z.object({ id: z.string() })
@@ -141,6 +142,29 @@ export const moviesRoutes = new Hono()
 
 		const result = await db.update(schema.movies).set(updates).where(eq(schema.movies.id, numId)).returning()
 		return c.json({ success: true as const, data: result[0] })
+	})
+	// POST /api/movies/:id/search - Manual search for movie releases
+	.post('/:id/search', zValidator('param', idParamSchema), async (c) => {
+		const { id } = c.req.valid('param')
+		const numId = parseInt(id, 10)
+		if (Number.isNaN(numId)) {
+			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
+		}
+
+		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, numId))
+		if (!movie.length) {
+			return c.json({ success: false as const, error: 'Movie not found' }, 404)
+		}
+
+		const m = movie[0]
+		const releases = await searchMovieReleases({
+			tmdbId: m.tmdbId,
+			imdbId: m.imdbId ?? undefined,
+			title: m.title,
+			year: m.year,
+		})
+
+		return c.json({ success: true as const, data: releases })
 	})
 	// DELETE /api/movies/:id - Delete a movie
 	.delete('/:id', zValidator('param', idParamSchema), zValidator('query', deleteQuerySchema), async (c) => {

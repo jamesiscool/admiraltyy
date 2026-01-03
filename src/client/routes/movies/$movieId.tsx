@@ -1,11 +1,25 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Bookmark, Film, Search, Settings2, Trash2 } from 'lucide-react'
+import { ArrowLeft, Bookmark, Download, Film, Loader2, Search, Settings2, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { DeleteConfirmationModal, type DeleteTarget } from '@/client/components/delete-confirmation-modal'
 import { Button } from '@/client/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/client/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
-import { useDeleteMovie, useMovie, useUpdateMovie } from '@/client/lib/api'
+import { useDeleteMovie, useMovie, useSearchMovieReleases, useUpdateMovie } from '@/client/lib/api'
+
+// Release type from API (publishDate is serialized as string)
+interface Release {
+	guid: string
+	title: string
+	downloadUrl: string
+	infoUrl?: string
+	size: number
+	publishDate: string
+	indexerId: string
+	indexerName: string
+	seeders?: number
+	leechers?: number
+}
 
 export const Route = createFileRoute('/movies/$movieId')({
 	component: MovieDetailPage,
@@ -17,6 +31,10 @@ function MovieDetailPage() {
 
 	const { data: movie, isLoading, error } = useMovie(movieId)
 	const updateMovie = useUpdateMovie(movieId)
+	const searchReleases = useSearchMovieReleases(movieId)
+
+	// Search results state
+	const [searchResults, setSearchResults] = useState<Release[] | null>(null)
 
 	// Delete modal state
 	const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
@@ -194,8 +212,14 @@ function MovieDetailPage() {
 								<Button
 									variant="outline"
 									className="h-9 px-4"
+									disabled={searchReleases.isPending}
+									onClick={() => {
+										searchReleases.mutate(undefined, {
+											onSuccess: (data) => setSearchResults(data),
+										})
+									}}
 								>
-									<Search className="size-4" />
+									{searchReleases.isPending ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
 									Manual Search
 								</Button>
 								<Button
@@ -304,6 +328,65 @@ function MovieDetailPage() {
 				</div>
 			</div>
 
+			{/* Search Results */}
+			{searchResults !== null && (
+				<div className="container pb-8">
+					<Card>
+						<CardHeader>
+							<CardTitle className="flex items-center gap-2">
+								<Search className="size-5" />
+								Search Results
+								<span className="ml-1 font-normal text-muted-foreground text-sm">({searchResults.length} releases)</span>
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="p-0!">
+							{searchResults.length > 0 ? (
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead className="w-[50%]">Release</TableHead>
+											<TableHead>Indexer</TableHead>
+											<TableHead>Size</TableHead>
+											<TableHead>Age</TableHead>
+											<TableHead className="w-[80px]" />
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{searchResults.map((release) => (
+											<TableRow key={release.guid}>
+												<TableCell className="max-w-0">
+													<div
+														className="truncate font-medium"
+														title={release.title}
+													>
+														{release.title}
+													</div>
+												</TableCell>
+												<TableCell className="text-muted-foreground">{release.indexerName}</TableCell>
+												<TableCell className="whitespace-nowrap text-size">{formatSize(release.size)}</TableCell>
+												<TableCell className="whitespace-nowrap text-muted-foreground">{formatAge(release.publishDate)}</TableCell>
+												<TableCell>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="h-7 px-2"
+														title="Grab release"
+													>
+														<Download className="size-4" />
+													</Button>
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							) : (
+								<div className="py-8 text-center text-muted-foreground">No releases found for this movie.</div>
+							)}
+						</CardContent>
+					</Card>
+				</div>
+			)}
+
 			{/* Delete Confirmation Modal */}
 			<DeleteConfirmationModal
 				target={deleteTarget}
@@ -335,4 +418,25 @@ function formatDate(dateStr: string | null | undefined): string {
 	} catch {
 		return dateStr
 	}
+}
+
+function formatSize(bytes: number): string {
+	if (bytes === 0) return '—'
+	const gb = bytes / 1073741824
+	if (gb >= 1) return `${gb.toFixed(1)} GB`
+	const mb = bytes / 1048576
+	return `${mb.toFixed(0)} MB`
+}
+
+function formatAge(date: Date | string): string {
+	const d = typeof date === 'string' ? new Date(date) : date
+	const now = new Date()
+	const diffMs = now.getTime() - d.getTime()
+	const diffDays = Math.floor(diffMs / 86400000)
+
+	if (diffDays === 0) return 'Today'
+	if (diffDays === 1) return '1 day'
+	if (diffDays < 30) return `${diffDays} days`
+	if (diffDays < 365) return `${Math.floor(diffDays / 30)} mo`
+	return `${Math.floor(diffDays / 365)} yr`
 }

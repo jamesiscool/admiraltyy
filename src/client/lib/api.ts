@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { hc } from 'hono/client'
 import type { Resolution } from '@/server/db/schema'
 import type { AppType } from '@/server/index'
+import type { Settings } from '@/server/settings'
 
 // Create typed Hono client
 export const api = hc<AppType>('/').api
@@ -15,6 +16,22 @@ export function useSettings() {
 			const json = await res.json()
 			if (!json.success) throw new Error('Failed to load settings')
 			return json.data
+		},
+	})
+}
+
+export function useUpdateSettings() {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: async (updates: Partial<Settings>) => {
+			const res = await api.settings.$put({ json: updates })
+			const json = await res.json()
+			if (!json.success) throw new Error('Failed to update settings')
+			return json.data
+		},
+		onSuccess: (data) => {
+			queryClient.setQueryData(['settings'], data)
 		},
 	})
 }
@@ -91,6 +108,17 @@ export function useDeleteMovie(options?: { onSuccess?: () => void }) {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ['movies'] })
 			options?.onSuccess?.()
+		},
+	})
+}
+
+export function useSearchMovieReleases(movieId: string) {
+	return useMutation({
+		mutationFn: async () => {
+			const res = await api.movies[':id'].search.$post({ param: { id: movieId } })
+			const json = await res.json()
+			if (!json.success) throw new Error(json.error ?? 'Failed to search releases')
+			return json.data
 		},
 	})
 }
