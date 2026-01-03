@@ -1,14 +1,10 @@
 import { Link } from '@tanstack/react-router'
 import { Bookmark, Film, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import type { Movie } from '@/server/db/schema'
-
-interface MovieWithFiles extends Movie {
-	sizeBytes?: number
-}
+import type { MoviePreview } from '@/server/routes/movies'
 
 interface MovieCardProps {
-	movie: MovieWithFiles
+	movie: MoviePreview
 	onAutoSearch?: () => void
 	onManualSearch?: () => void
 	onDelete?: () => void
@@ -18,7 +14,7 @@ interface MovieCardProps {
 export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onToggleMonitored }: MovieCardProps) {
 	const [isHovered, setIsHovered] = useState(false)
 
-	const hasFile = movie.sizeBytes !== undefined
+	const hasFile = movie.sizeBytes > 0
 
 	return (
 		<Link
@@ -134,7 +130,7 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 					<span className="text-white/50">•</span>
 					<span className="font-mono text-blue-300">{movie.resolution}</span>
 					<span className="text-white/50">•</span>
-					{hasFile && movie.sizeBytes ? (
+					{hasFile ? (
 						<span className="text-size">{(movie.sizeBytes / 1073741824).toFixed(1)} GB</span>
 					) : movie.monitored ? (
 						<span className="text-yellow-400 tracking-wide">Missing</span>

@@ -200,6 +200,44 @@ export function useDeleteSeries(options?: { onSuccess?: () => void }) {
 	})
 }
 
+export function useUpdateSeason(seriesId: string) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: async ({ seasonId, monitored }: { seasonId: number; monitored: boolean }) => {
+			const res = await api.series[':id'].seasons[':seasonId'].$put({
+				param: { id: seriesId, seasonId: String(seasonId) },
+				json: { monitored },
+			})
+			const json = await res.json()
+			if (!json.success) throw new Error(json.error ?? 'Failed to update season')
+			return json.data
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['series', seriesId] })
+		},
+	})
+}
+
+export function useUpdateEpisode(seriesId: string) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: async ({ episodeId, monitored }: { episodeId: number; monitored: boolean }) => {
+			const res = await api.series[':id'].episodes[':episodeId'].$put({
+				param: { id: seriesId, episodeId: String(episodeId) },
+				json: { monitored },
+			})
+			const json = await res.json()
+			if (!json.success) throw new Error(json.error ?? 'Failed to update episode')
+			return json.data
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['series', seriesId] })
+		},
+	})
+}
+
 // Health
 
 export function useHealth() {
@@ -217,7 +255,7 @@ export function useHealth() {
 export function useScanMovies() {
 	return useMutation({
 		mutationFn: async () => {
-			const res = await api.tasks['scan-file-system'].movies.$post()
+			const res = await api.tasks['scan-movies-files'].$post()
 			return res.json()
 		},
 	})
@@ -226,7 +264,7 @@ export function useScanMovies() {
 export function useScanSeries() {
 	return useMutation({
 		mutationFn: async () => {
-			const res = await api.tasks['scan-file-system'].series.$post()
+			const res = await api.tasks['scan-series-files'].$post()
 			return res.json()
 		},
 	})

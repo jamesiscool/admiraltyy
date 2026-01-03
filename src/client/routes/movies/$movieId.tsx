@@ -76,20 +76,7 @@ function MovieDetailPage() {
 		: null
 
 	return (
-		<div className="min-h-[calc(100vh-64px)]">
-			{/* Back link */}
-			<div className="border-border border-b bg-background">
-				<div className="container py-3!">
-					<Link
-						to="/movies"
-						className="inline-flex items-center gap-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground"
-					>
-						<ArrowLeft className="size-4" />
-						Back to Movies
-					</Link>
-				</div>
-			</div>
-
+		<div className="overflow-y-auto">
 			{/* Hero section with backdrop */}
 			<div className="relative">
 				{/* Backdrop image */}
@@ -256,10 +243,6 @@ function MovieDetailPage() {
 									</div>
 									<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
 										<DetailItem
-											label="Size"
-											value={fileDetails.size}
-										/>
-										<DetailItem
 											label="Quality"
 											value={fileDetails.quality}
 											highlight
@@ -271,6 +254,10 @@ function MovieDetailPage() {
 										<DetailItem
 											label="Codec"
 											value={fileDetails.codec}
+										/>
+										<DetailItem
+											label="Size"
+											value={fileDetails.size}
 										/>
 									</div>
 									<div>
@@ -332,7 +319,7 @@ function DetailItem({ label, value, highlight }: { label: string; value: string;
 	return (
 		<div>
 			<div className="mb-0.5 font-medium text-muted-foreground text-xs uppercase tracking-wider">{label}</div>
-			<div className={highlight ? 'font-medium text-primary' : ''}>{value}</div>
+			<div className={highlight ? 'font-medium text-primary' : label === 'Size' ? 'text-size' : ''}>{value}</div>
 		</div>
 	)
 }

@@ -15,7 +15,7 @@
 - The vite dev server will already be run and the site is at !!!! `http://localhost:2828`
 - Global Tailwind design tokens live at `src/client/index.css`.
 - `--color-*: initial;` resets all default Tailwind colors. Use project tokens (blue-100, navy-500, etc.) not default Tailwind colors (sky, slate, amber etc.)
-- - Never add any rings or outlines. Leave the base ones there for accessibility. For hover change the background if you must 
+- 
 - After every UI change test that it works in the browser
 
 ### Playwright MCP Usage

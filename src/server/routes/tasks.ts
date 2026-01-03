@@ -1,14 +1,14 @@
 import { existsSync } from 'node:fs'
 import { eq, isNotNull } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { db } from '../../db'
-import { episodes, files, movies, seasons, series } from '../../db/schema'
-import { buildTitleMap, listSubfolders, listVideoFiles, listVideoFilesRecursive, matchFolder, parseEpisode, parseQuality, type ScannedFile } from '../../lib/scan'
-import { getSettings } from '../../settings'
+import { db } from '../db'
+import { episodes, files, movies, seasons, series } from '../db/schema'
+import { buildTitleMap, listSubfolders, listVideoFiles, listVideoFilesRecursive, matchFolder, parseEpisode, parseQuality, type ScannedFile } from '../lib/scan'
+import { getSettings } from '../settings'
 
-export const scanFileSystemRoutes = new Hono()
+export const tasksRoutes = new Hono()
 	// Scan movies
-	.post('/movies', async (c) => {
+	.post('/scan-movies-files', async (c) => {
 		const settings = getSettings()
 		const movieFolders = settings.folders.movies
 
@@ -60,7 +60,7 @@ export const scanFileSystemRoutes = new Hono()
 		})
 	})
 	// Scan series
-	.post('/series', async (c) => {
+	.post('/scan-series-files', async (c) => {
 		const settings = getSettings()
 		const tvFolders = settings.folders.tv
 

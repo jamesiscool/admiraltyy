@@ -1,10 +1,15 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Bookmark, Search, Settings2, Trash2, Tv } from 'lucide-react'
+import { ArrowLeft, Bookmark, ChevronDown, Download, Search, Settings2, Timer, Trash2, Tv } from 'lucide-react'
 import { useState } from 'react'
 import { DeleteConfirmationModal, type DeleteTarget } from '@/client/components/delete-confirmation-modal'
+import { Badge } from '@/client/components/ui/badge'
 import { Button } from '@/client/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/client/components/ui/card'
-import { useDeleteSeries, useSingleSeries, useUpdateSeries } from '@/client/lib/api'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/client/components/ui/collapsible'
+import { Progress } from '@/client/components/ui/progress'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
+import { useDeleteSeries, useSingleSeries, useUpdateEpisode, useUpdateSeason, useUpdateSeries } from '@/client/lib/api'
+import { cn, formatNextAiring } from '@/client/lib/utils'
+import type { EpisodeWithFiles, SeasonWithEpisodes } from '@/server/routes/series'
 
 export const Route = createFileRoute('/tv/$seriesId')({
 	component: SeriesDetailPage,
@@ -65,41 +70,12 @@ function SeriesDetailPage() {
 	// Calculate total size in GB
 	const totalSizeGb = series.sizeBytes ? `${(series.sizeBytes / 1073741824).toFixed(1)} GB` : '0 GB'
 
-	// Format next airing
-	const formatNextAiring = (dateStr: string | null) => {
-		if (!dateStr) return null
-
-		const date = new Date(dateStr)
-		const now = new Date()
-		const diffMs = date.getTime() - now.getTime()
-		const diffHours = diffMs / (1000 * 60 * 60)
-
-		if (diffMs < 0) return null
-
-		// Within 24 hours: show time like "8 p.m."
-		if (diffHours < 24) {
-			const hour = date.getHours()
-			const period = hour >= 12 ? 'p.m.' : 'a.m.'
-			const hour12 = hour % 12 || 12
-			return `Today at ${hour12} ${period}`
-		}
-
-		// Within 7 days: show day name
-		const diffDays = diffMs / (1000 * 60 * 60 * 24)
-		if (diffDays < 7) {
-			return date.toLocaleDateString('en-US', { weekday: 'long' })
-		}
-
-		// More than 7 days: show date like "4 Feb"
-		return formatDate(dateStr)
-	}
-
 	const nextAiringLabel = formatNextAiring(series.nextAiring ?? null)
 
 	return (
-		<div className="min-h-[calc(100vh-64px)]">
+		<div className="overflow-y-auto">
 			{/* Back link */}
-			<div className="border-border border-b bg-background">
+			{/* <div className="border-border border-b bg-background">
 				<div className="container py-3!">
 					<Link
 						to="/tv"
@@ -109,7 +85,7 @@ function SeriesDetailPage() {
 						Back to TV Shows
 					</Link>
 				</div>
-			</div>
+			</div> */}
 
 			{/* Hero section with backdrop */}
 			<div className="relative">
@@ -169,7 +145,7 @@ function SeriesDetailPage() {
 									disabled={updateSeries.isPending}
 									onClick={() => updateSeries.mutate({ monitored: !series.monitored })}
 								>
-									<Bookmark className={series.monitored ? 'size-3 fill-current' : 'size-3'} />
+									<Bookmark className={series.monitored ? 'size-3.5 fill-current' : 'size-3.5'} />
 									{series.monitored ? 'Monitored' : 'Unmonitored'}
 								</Button>
 							</div>
@@ -226,16 +202,16 @@ function SeriesDetailPage() {
 											<span className="text-white">{series.network}</span>
 										</div>
 									)}
-									{nextAiringLabel && (
-										<div className="flex flex-col">
-											<span className="font-semibold text-sm text-white/80">Next Airing</span>
-											<span className="text-emerald-300">{nextAiringLabel}</span>
-										</div>
-									)}
 									<div className="flex flex-col">
 										<span className="font-semibold text-sm text-white/80">Added</span>
 										<span className="text-white">{formatDate(series.dateAdded)}</span>
 									</div>
+									{nextAiringLabel && (
+										<div className="flex flex-col">
+											<span className="font-semibold text-sm text-white/80">Next Airing</span>
+											<span className="text-white">{nextAiringLabel}</span>
+										</div>
+									)}
 								</div>
 							</div>
 
@@ -280,63 +256,18 @@ function SeriesDetailPage() {
 				</div>
 			</div>
 
-			{/* Details section */}
+			{/* Seasons section */}
 			<div className="container py-8">
-				<div className="grid gap-6 lg:grid-cols-2">
-					{/* Library Stats */}
-					<Card>
-						<CardHeader>
-							<CardTitle>Library Stats</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-								<DetailItem
-									label="Total Size"
-									value={totalSizeGb}
-								/>
-								<DetailItem
-									label="Episodes"
-									value={String(series.episodeCount)}
-								/>
-								<DetailItem
-									label="Files"
-									value={String(fileCount)}
-								/>
-								<DetailItem
-									label="Missing"
-									value={String(series.missingEpisodeCount)}
-									highlight={series.missingEpisodeCount > 0}
-								/>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Series Info */}
-					<Card>
-						<CardHeader>
-							<CardTitle>Series Info</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="grid grid-cols-2 gap-4">
-								<DetailItem
-									label="Status"
-									value={series.status === 'continuing' ? 'Continuing' : 'Ended'}
-								/>
-								{series.network && (
-									<DetailItem
-										label="Network"
-										value={series.network}
-									/>
-								)}
-								{series.runtimeMins && (
-									<DetailItem
-										label="Runtime"
-										value={`${series.runtimeMins} min`}
-									/>
-								)}
-							</div>
-						</CardContent>
-					</Card>
+				<div className="flex flex-col gap-4">
+					{sortSeasons(series.seasons).map((season) => (
+						<SeasonCard
+							key={season.id}
+							season={season}
+							seriesId={String(series.id)}
+							seriesMonitored={series.monitored ?? true}
+							seriesResolution={series.resolution}
+						/>
+					))}
 				</div>
 			</div>
 
@@ -347,15 +278,6 @@ function SeriesDetailPage() {
 				onConfirm={handleDeleteConfirm}
 				isPending={deleteSeries.isPending}
 			/>
-		</div>
-	)
-}
-
-function DetailItem({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
-	return (
-		<div>
-			<div className="mb-0.5 font-medium text-muted-foreground text-xs uppercase tracking-wider">{label}</div>
-			<div className={highlight ? 'font-medium text-primary' : ''}>{value}</div>
 		</div>
 	)
 }
@@ -371,4 +293,180 @@ function formatDate(dateStr: string | null | undefined): string {
 	} catch {
 		return dateStr
 	}
+}
+
+// Sort seasons descending (newest first)
+function sortSeasons(seasons: SeasonWithEpisodes[]): SeasonWithEpisodes[] {
+	return [...seasons].sort((a, b) => b.seasonNumber - a.seasonNumber)
+}
+
+// Sort episodes ascending
+function sortEpisodes(episodes: EpisodeWithFiles[]): EpisodeWithFiles[] {
+	return [...episodes].sort((a, b) => a.episodeNumber - b.episodeNumber)
+}
+
+function SeasonCard({ season, seriesId, seriesMonitored, seriesResolution }: { season: SeasonWithEpisodes; seriesId: string; seriesMonitored: boolean; seriesResolution: string | null }) {
+	const [isOpen, setIsOpen] = useState(true)
+	const updateSeason = useUpdateSeason(seriesId)
+
+	const episodes = sortEpisodes(season.episodes)
+	const totalEpisodes = episodes.length
+	const downloadedEpisodes = episodes.filter((e) => e.files.length > 0).length
+	const progressPercent = totalEpisodes > 0 ? Math.round((downloadedEpisodes / totalEpisodes) * 100) : 0
+
+	const isMonitored = season.monitored ?? true
+	const allEpisodesMonitored = episodes.every((e) => e.monitored)
+	const someEpisodesMonitored = episodes.some((e) => e.monitored) && !allEpisodesMonitored
+
+	const handleToggleMonitored = (e: React.MouseEvent) => {
+		e.stopPropagation()
+		updateSeason.mutate({ seasonId: season.id, monitored: !isMonitored })
+	}
+
+	return (
+		<Collapsible
+			open={isOpen}
+			onOpenChange={setIsOpen}
+			className="overflow-hidden rounded-lg border border-border bg-background"
+		>
+			<div className="flex w-full items-center gap-4 py-2 pr-7 pl-3 hover:bg-muted/50">
+				<button
+					type="button"
+					onClick={handleToggleMonitored}
+					disabled={!seriesMonitored}
+					className="flex items-center justify-center p-2 transition-colors hover:text-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					<Bookmark
+						className={cn('size-4', !seriesMonitored ? 'text-muted-foreground' : isMonitored ? 'fill-pink-600 text-pink-600' : someEpisodesMonitored ? 'fill-pink-300 text-pink-600' : 'text-pink-300')}
+					/>
+				</button>
+				<CollapsibleTrigger className="flex flex-1 cursor-pointer items-center gap-3">
+					<span className="font-semibold">Season {season.seasonNumber}</span>
+					<span className="text-muted-foreground text-sm">
+						{downloadedEpisodes} / {totalEpisodes} episodes
+					</span>
+					<span className="mx-2 text-muted-foreground">•</span>
+					<Progress
+						value={progressPercent}
+						className="w-32"
+					/>
+					<span className="text-muted-foreground text-sm">{progressPercent}%</span>
+					<ChevronDown className={cn('ml-auto size-5 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
+				</CollapsibleTrigger>
+			</div>
+
+			<CollapsibleContent>
+				<Table>
+					<TableHeader>
+						<TableRow className="hover:bg-transparent">
+							<TableHead className="w-10" />
+							<TableHead className="w-16">Episode</TableHead>
+							<TableHead>Title</TableHead>
+							<TableHead className="w-32">Air Date</TableHead>
+							<TableHead className="w-28">Status</TableHead>
+							<TableHead className="w-20">Quality</TableHead>
+							<TableHead className="w-20">Size</TableHead>
+							<TableHead className="text-right">Actions</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{episodes.map((episode) => (
+							<EpisodeRow
+								key={episode.id}
+								episode={episode}
+								seriesId={seriesId}
+								seriesMonitored={seriesMonitored}
+								seriesResolution={seriesResolution}
+							/>
+						))}
+					</TableBody>
+				</Table>
+			</CollapsibleContent>
+		</Collapsible>
+	)
+}
+
+function EpisodeRow({ episode, seriesId, seriesMonitored, seriesResolution }: { episode: EpisodeWithFiles; seriesId: string; seriesMonitored: boolean; seriesResolution: string | null }) {
+	const updateEpisode = useUpdateEpisode(seriesId)
+	const hasFiles = episode.files.length > 0
+	const today = new Date().toISOString().split('T')[0]
+	const airDate = episode.airDate ?? ''
+	const isAired = airDate && airDate <= today
+	const isFuture = airDate && airDate > today
+
+	// Calculate total size of files
+	const totalSizeBytes = episode.files.reduce((sum, f) => sum + (f.size ?? 0), 0)
+	const sizeDisplay = totalSizeBytes > 0 ? `${(totalSizeBytes / 1073741824).toFixed(1)} GB` : '—'
+
+	// Get quality from first file or use series resolution
+	const quality = hasFiles ? (episode.files[0].quality ?? seriesResolution ?? '—') : '—'
+
+	const isMonitored = episode.monitored ?? true
+
+	const handleToggleMonitored = () => {
+		updateEpisode.mutate({ episodeId: episode.id, monitored: !isMonitored })
+	}
+
+	// Status badge
+	let statusBadge: React.ReactNode = null
+	if (hasFiles) {
+		statusBadge = (
+			<Badge variant="downloaded">
+				<Download className="size-3" />
+				Downloaded
+			</Badge>
+		)
+	} else if (isFuture) {
+		statusBadge = (
+			<Badge variant="default">
+				<Timer className="size-3" />
+				Airing
+			</Badge>
+		)
+	} else if (isAired) {
+		statusBadge = (
+			<Badge variant="wanted">
+				<Search className="size-3" />
+				Wanted
+			</Badge>
+		)
+	}
+
+	return (
+		<TableRow>
+			<TableCell className="w-10 pl-3">
+				<button
+					type="button"
+					onClick={handleToggleMonitored}
+					disabled={!seriesMonitored}
+					className="flex items-center justify-center p-2 transition-colors hover:text-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+				>
+					<Bookmark className={cn('size-4', !seriesMonitored ? 'text-muted-foreground' : isMonitored ? 'fill-pink-600 text-pink-600' : 'text-pink-300')} />
+				</button>
+			</TableCell>
+			<TableCell>
+				<span className="font-medium">{episode.episodeNumber}</span>
+			</TableCell>
+			<TableCell>
+				<div>
+					<div className="font-medium">{episode.title || 'TBA'}</div>
+					<div className="text-muted-foreground text-xs">{episode.runtimeMins ? `${episode.runtimeMins} min` : '—'}</div>
+				</div>
+			</TableCell>
+			<TableCell className="text-muted-foreground">{formatDate(episode.airDate)}</TableCell>
+			<TableCell>{statusBadge}</TableCell>
+			<TableCell className={quality !== '—' ? 'text-primary' : 'text-muted-foreground'}>{quality}</TableCell>
+			<TableCell className={sizeDisplay !== '—' ? 'text-size' : 'text-muted-foreground'}>{sizeDisplay}</TableCell>
+			<TableCell className="text-right">
+				<Button
+					variant="ghost"
+					size="sm"
+					className="h-7 gap-1.5 text-muted-foreground hover:text-foreground"
+				>
+					<Search className="size-3.5" />
+					Search
+				</Button>
+			</TableCell>
+		</TableRow>
+	)
 }

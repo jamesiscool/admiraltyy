@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Bookmark, Search, Trash2, Tv } from 'lucide-react'
 import { useState } from 'react'
+import { formatNextAiring } from '@/client/lib/utils'
 import type { SeriesPreview } from '@/server/routes/series'
 
 interface SeriesCardProps {
@@ -15,40 +16,6 @@ export function SeriesCard({ series, onAutoSearch, onManualSearch, onDelete, onT
 	const [isHovered, setIsHovered] = useState(false)
 
 	const hasFile = series.sizeBytes !== undefined
-
-	// Format next airing date with humanization:
-	// - Within 24h: time like "8 p.m."
-	// - 24h to 7 days: day name like "Wednesday"
-	// - More than 7 days: date like "4 Feb"
-	const formatNextAiring = (dateStr: string | null) => {
-		if (!dateStr) return null
-
-		const date = new Date(dateStr)
-		const now = new Date()
-		const diffMs = date.getTime() - now.getTime()
-		const diffHours = diffMs / (1000 * 60 * 60)
-
-		if (diffMs < 0) return null
-
-		// Within 24 hours: show time like "8 p.m."
-		if (diffHours < 24) {
-			const hour = date.getHours()
-			const period = hour >= 12 ? 'p.m.' : 'a.m.'
-			const hour12 = hour % 12 || 12
-			return `${hour12} ${period}`
-		}
-
-		// Within 7 days: show day name
-		const diffDays = diffMs / (1000 * 60 * 60 * 24)
-		if (diffDays < 7) {
-			return date.toLocaleDateString('en-US', { weekday: 'long' })
-		}
-
-		// More than 7 days: show date like "4 Feb"
-		const day = date.getDate()
-		const month = date.toLocaleDateString('en-US', { month: 'short' })
-		return `${day} ${month}`
-	}
 
 	const nextAiringLabel = formatNextAiring(series.nextAiring ?? null)
 

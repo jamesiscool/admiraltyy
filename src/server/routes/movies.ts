@@ -4,7 +4,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { fetchMovieDetails } from '../api/tmdb'
 import { db, schema } from '../db'
-import { type File, resolutions } from '../db/schema'
+import { type Resolution, resolutions } from '../db/schema'
 import { logInfo } from '../log/logs'
 
 const idParamSchema = z.object({ id: z.string() })
@@ -12,36 +12,48 @@ const addMovieSchema = z.object({ tmdbId: z.number(), resolution: z.enum(resolut
 const updateMovieSchema = z.object({ monitored: z.boolean().optional() })
 const deleteQuerySchema = z.object({ deleteFiles: z.string().optional() })
 
-// Aggregate file stats for movies
-async function listMovieFileStats(): Promise<Map<number, { sizeBytes: number; files: File[] }>> {
-	const allFiles = await db
-		.select()
-		.from(schema.files)
-		.where(and(eq(schema.files.isDeleted, false), sql`${schema.files.movieId} IS NOT NULL`))
+// Preview type for list/card display (minimal fields)
+export interface MoviePreview {
+	id: number
+	title: string
+	year: number
+	posterUrl: string | null
+	resolution: Resolution | null
+	monitored: boolean | null
+	dateAdded: string
+	cinemaReleaseDate: string | null
+	sizeBytes: number
+}
 
-	const statsMap = new Map<number, { sizeBytes: number; files: File[] }>()
-	for (const file of allFiles) {
-		if (!file.movieId) continue
-		const existing = statsMap.get(file.movieId) ?? { sizeBytes: 0, files: [] }
-		existing.sizeBytes += file.size
-		existing.files.push(file)
-		statsMap.set(file.movieId, existing)
-	}
-	return statsMap
+// List all movies with computed stats (for list page)
+async function listMoviePreviews(): Promise<MoviePreview[]> {
+	const results = await db.all<MoviePreview>(sql`
+		SELECT 
+			m.id,
+			m.title,
+			m.year,
+			m.poster_url as posterUrl,
+			m.resolution,
+			m.monitored,
+			m.date_added as dateAdded,
+			m.cinema_release_date as cinemaReleaseDate,
+			COALESCE(file_stats.size_bytes, 0) as sizeBytes
+		FROM movies m
+		LEFT JOIN (
+			SELECT movie_id, SUM(size) as size_bytes
+			FROM files 
+			WHERE is_deleted = 0 AND movie_id IS NOT NULL
+			GROUP BY movie_id
+		) file_stats ON file_stats.movie_id = m.id
+	`)
+	return results
 }
 
 export const moviesRoutes = new Hono()
-	// GET /api/movies - List all movies
+	// GET /api/movies - List all movies (preview data only)
 	.get('/', async (c) => {
-		const movies = await db.select().from(schema.movies)
-		const fileStats = await listMovieFileStats()
-		const moviesWithFiles = movies.map((movie) => {
-			const stats = fileStats.get(movie.id)
-			const sizeBytes = stats?.sizeBytes
-			const files = stats?.files ?? []
-			return { ...movie, sizeBytes, files }
-		})
-		return c.json({ data: moviesWithFiles, success: true as const })
+		const movies = await listMoviePreviews()
+		return c.json({ data: movies, success: true as const })
 	})
 	// GET /api/movies/:id - Get a single movie
 	.get('/:id', zValidator('param', idParamSchema), async (c) => {

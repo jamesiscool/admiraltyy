@@ -331,6 +331,46 @@ export const seriesRoutes = new Hono()
 
 		return c.json({ success: true as const, data: updated })
 	})
+	// PUT /api/series/:id/seasons/:seasonId - Update a season
+	.put('/:id/seasons/:seasonId', zValidator('param', z.object({ id: z.string(), seasonId: z.string() })), zValidator('json', z.object({ monitored: z.boolean() })), async (c) => {
+		const { seasonId } = c.req.valid('param')
+		const numId = parseInt(seasonId, 10)
+		if (Number.isNaN(numId)) {
+			return c.json({ success: false as const, error: 'Invalid season ID' }, 400)
+		}
+
+		const body = c.req.valid('json')
+		const existing = await db.select().from(schema.seasons).where(eq(schema.seasons.id, numId))
+		if (!existing.length) {
+			return c.json({ success: false as const, error: 'Season not found' }, 404)
+		}
+
+		// Update season
+		const [updated] = await db.update(schema.seasons).set({ monitored: body.monitored }).where(eq(schema.seasons.id, numId)).returning()
+
+		// Also update all episodes in this season
+		await db.update(schema.episodes).set({ monitored: body.monitored }).where(eq(schema.episodes.seasonId, numId))
+
+		return c.json({ success: true as const, data: updated })
+	})
+	// PUT /api/series/:id/episodes/:episodeId - Update an episode
+	.put('/:id/episodes/:episodeId', zValidator('param', z.object({ id: z.string(), episodeId: z.string() })), zValidator('json', z.object({ monitored: z.boolean() })), async (c) => {
+		const { episodeId } = c.req.valid('param')
+		const numId = parseInt(episodeId, 10)
+		if (Number.isNaN(numId)) {
+			return c.json({ success: false as const, error: 'Invalid episode ID' }, 400)
+		}
+
+		const body = c.req.valid('json')
+		const existing = await db.select().from(schema.episodes).where(eq(schema.episodes.id, numId))
+		if (!existing.length) {
+			return c.json({ success: false as const, error: 'Episode not found' }, 404)
+		}
+
+		const [updated] = await db.update(schema.episodes).set({ monitored: body.monitored }).where(eq(schema.episodes.id, numId)).returning()
+
+		return c.json({ success: true as const, data: updated })
+	})
 	// DELETE /api/series/:id - Delete a series
 	.delete('/:id', zValidator('param', idParamSchema), zValidator('query', deleteQuerySchema), async (c) => {
 		const { id } = c.req.valid('param')

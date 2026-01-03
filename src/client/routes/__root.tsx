@@ -17,7 +17,7 @@ function RootComponent() {
 	return (
 		<div className="flex h-screen flex-col">
 			<Header />
-			<main className="grow">
+			<main className="flex grow flex-col">
 				<Outlet />
 			</main>
 			<TanStackDevtools

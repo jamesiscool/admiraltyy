@@ -5,7 +5,7 @@ import { moviesRoutes } from './routes/movies'
 import { searchRoutes } from './routes/search'
 import { seriesRoutes } from './routes/series'
 import { settingsRoutes } from './routes/settings'
-import { scanFileSystemRoutes } from './routes/tasks/scan-file-system'
+import { tasksRoutes } from './routes/tasks'
 import { initSettings } from './settings'
 
 // Initialize settings before anything else
@@ -19,7 +19,7 @@ const app = new Hono()
 	.route('/api/activity', activityRoutes)
 	.route('/api/settings', settingsRoutes)
 	.route('/api/search', searchRoutes)
-	.route('/api/tasks/scan-file-system', scanFileSystemRoutes)
+	.route('/api/tasks', tasksRoutes)
 	// Health check
 	.get('/api/health', (c) => c.json({ status: 'ok' }))
 
@@ -27,7 +27,7 @@ const app = new Hono()
 export type AppType = typeof app
 
 const port = 2829
-console.log(`🚀 Admiraltyy API running at http://localhost:${port}`)
+console.info(`🚀 Admiraltyy API running at http://localhost:${port}`)
 
 export default {
 	port,
