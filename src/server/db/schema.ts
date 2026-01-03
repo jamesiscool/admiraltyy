@@ -35,6 +35,7 @@ export const movies = sqliteTable('movies', {
 	lastInfoSync: text('last_info_sync'),
 	rtId: text('rt_id'),
 	rtVanity: text('rt_vanity'),
+	alternateTitles: text('alternate_titles'), // JSON array
 })
 
 export const selectMovieSchema = createSelectSchema(movies)
@@ -65,6 +66,7 @@ export const series = sqliteTable('series', {
 	lastInfoSync: text('last_info_sync'),
 	rtId: text('rt_id'),
 	rtVanity: text('rt_vanity'),
+	alternateTitles: text('alternate_titles'), // JSON array
 })
 
 export const selectSeriesSchema = createSelectSchema(series)
@@ -106,6 +108,7 @@ export type EpisodeInsert = z.infer<typeof insertEpisodeSchema>
 export const files = sqliteTable('files', {
 	id: integer('id').primaryKey(),
 	movieId: integer('movie_id').references(() => movies.id),
+	seriesId: integer('series_id').references(() => series.id),
 	episodeId: integer('episode_id').references(() => episodes.id),
 	path: text('path').notNull(),
 	size: integer('size').notNull(),
@@ -113,6 +116,7 @@ export const files = sqliteTable('files', {
 	source: text('source'),
 	codec: text('codec'),
 	dateImported: text('date_imported').notNull(),
+	isDeleted: integer('is_deleted', { mode: 'boolean' }).default(false),
 })
 
 export const selectFileSchema = createSelectSchema(files)

@@ -5,6 +5,7 @@ import { moviesRoutes } from './routes/movies'
 import { searchRoutes } from './routes/search'
 import { seriesRoutes } from './routes/series'
 import { settingsRoutes } from './routes/settings'
+import { scanFileSystemRoutes } from './routes/tasks/scan-file-system'
 import { initSettings } from './settings'
 
 // Initialize settings before anything else
@@ -18,6 +19,7 @@ const app = new Hono()
 	.route('/api/activity', activityRoutes)
 	.route('/api/settings', settingsRoutes)
 	.route('/api/search', searchRoutes)
+	.route('/api/tasks/scan-file-system', scanFileSystemRoutes)
 	// Health check
 	.get('/api/health', (c) => c.json({ status: 'ok' }))
 

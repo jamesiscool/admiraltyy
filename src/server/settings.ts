@@ -122,9 +122,7 @@ const defaultSettings: Settings = {
 	tmdbApiKey: '431a8708161bcd1f1fbe7536137e61ed',
 }
 
-// =============================================================================
 // Helpers
-// =============================================================================
 
 function generateApiKey(): string {
 	const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -135,9 +133,7 @@ function generateApiKey(): string {
 	return key
 }
 
-// =============================================================================
 // Settings State
-// =============================================================================
 
 let currentSettings: Settings = defaultSettings
 
@@ -159,9 +155,7 @@ function saveSettings(): void {
 	writeFileSync(paths.settingsPath, JSON.stringify(currentSettings, null, '\t'))
 }
 
-// =============================================================================
 // Initialization
-// =============================================================================
 
 export function initSettings(): void {
 	// Ensure log directory exists

@@ -62,16 +62,18 @@ function MovieDetailPage() {
 	const rawCast = movie.cast ? JSON.parse(movie.cast) : []
 	const cast: Array<{ name: string; character: string }> = rawCast.map((c: string | { name: string; character: string }) => (typeof c === 'string' ? { name: c, character: '' } : c))
 
-	// TODO: Get from files table when available
-	const hasFile = false
-	const fileDetails = null as null | {
-		path: string
-		size: string
-		quality: string
-		source: string
-		codec: string
-		dateImported: string
-	}
+	// Get file details from files table
+	const hasFile = movie.files && movie.files.length > 0
+	const fileDetails = hasFile
+		? {
+				path: movie.files[0].path,
+				size: `${(movie.files[0].size / 1073741824).toFixed(1)} GB`,
+				quality: movie.files[0].quality,
+				source: movie.files[0].source ?? 'Unknown',
+				codec: movie.files[0].codec ?? 'Unknown',
+				dateImported: movie.files[0].dateImported,
+			}
+		: null
 
 	return (
 		<div className="min-h-[calc(100vh-64px)]">
@@ -131,8 +133,13 @@ function MovieDetailPage() {
 										<span>•</span>
 										<span>{movie.runtimeMins} min</span>
 										<span>•</span>
-										{/** biome-ignore lint/nursery/noUnnecessaryConditions: File hasn't been connected up to movies yet  */}
-										<span className={hasFile ? 'text-green-300' : 'text-yellow-300'}>{hasFile ? 'Downloaded' : 'Missing'}</span>
+										{hasFile && movie.sizeBytes ? (
+											<span className="text-size">{(movie.sizeBytes / 1073741824).toFixed(1)} GB</span>
+										) : movie.monitored ? (
+											<span className="text-yellow-400 tracking-wide">Missing</span>
+										) : (
+											<Bookmark className="size-3.5 text-pink-300" />
+										)}
 									</div>
 								</div>
 
@@ -215,13 +222,11 @@ function MovieDetailPage() {
 									className="h-9 bg-destructive px-4 text-white hover:bg-destructive/90"
 									onClick={() => {
 										if (!movie) return
-										// TODO: When files table is connected, get hasFiles and fileSize
 										setDeleteTarget({
 											type: 'movie',
 											id: movie.id,
 											title: movie.title,
-											hasFiles: !!fileDetails,
-											fileSize: 0,
+											sizeBytes: movie.sizeBytes,
 										})
 									}}
 								>

@@ -14,11 +14,15 @@
 
 - The vite dev server will already be run and the site is at !!!! `http://localhost:2828`
 - Global Tailwind design tokens live at `src/client/index.css`.
-- `--color-*: initial;` resets all default Tailwind colors. Use project tokens (blue-100, navy-500, etc.) not default Tailwind colors (sky, slate, emerald, amber etc.)
-- After every UI change test that it works in the browser 
-- When using Playwright, don't use the browser_wait_for and just pass it a time. The browser renders in the time it takes you to think. 
-- When using Playwright, don't bother to close the browser at the end 
-- Never add any rings or outlines. Leave the base ones there for accessibility. For hover change the background if you must 
+- `--color-*: initial;` resets all default Tailwind colors. Use project tokens (blue-100, navy-500, etc.) not default Tailwind colors (sky, slate, amber etc.)
+- - Never add any rings or outlines. Leave the base ones there for accessibility. For hover change the background if you must 
+- After every UI change test that it works in the browser
+
+### Playwright MCP Usage
+- Use `browser_navigate` to open pages (e.g. `http://localhost:2828/tv`)
+- Don't use `browser_wait_for` - the page renders during your thinking time
+- Don't close the browser at the end
+
 
 ## Rules (must follow)
 - !!!!! Use the shadcn/ui components. Request to add components that you might need. Use the product plan as a guide but implemented using ShadCN components
@@ -81,3 +85,13 @@ Use kebab case for React component file names
 
 - Implement `findX` as the core lookup.  
 - Implement `getX` by calling `findX` and applying a shared null check (e.g., `ensure`).
+
+### Comments
+
+When adding code comments, only add a single line. Do not add like this. 
+
+```
+// =============================================================================
+// Title Matching
+// =============================================================================
+```

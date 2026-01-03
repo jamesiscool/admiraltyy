@@ -207,10 +207,6 @@ function TvIndexPage() {
 								<SeriesCard
 									key={series.id}
 									series={series}
-									onView={() => {
-										// TODO: Navigate to series detail when implemented
-										console.log('View series:', series.id)
-									}}
 									onAutoSearch={() => {
 										// TODO: Trigger auto search
 										console.log('Auto search:', series.id)
@@ -220,13 +216,11 @@ function TvIndexPage() {
 										console.log('Manual search:', series.id)
 									}}
 									onDelete={() => {
-										// TODO: When files table is connected, get hasFiles and fileSize from series
 										setDeleteTarget({
 											type: 'series',
 											id: series.id,
 											title: series.title,
-											hasFiles: false,
-											fileSize: 0,
+											sizeBytes: series.sizeBytes,
 										})
 									}}
 									onToggleMonitored={async (monitored) => {

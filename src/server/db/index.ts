@@ -12,6 +12,7 @@ if (!existsSync(dataDir)) {
 }
 
 const sqlite = new Database(paths.databasePath)
+sqlite.run('PRAGMA journal_mode = WAL;')
 export const db = drizzle(sqlite, { schema })
 
 export { schema }

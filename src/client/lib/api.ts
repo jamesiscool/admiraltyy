@@ -124,6 +124,35 @@ export function useSeries() {
 	})
 }
 
+export function useSingleSeries(seriesId: string) {
+	return useQuery({
+		queryKey: ['series', seriesId],
+		queryFn: async () => {
+			const res = await api.series[':id'].$get({ param: { id: seriesId } })
+			const json = await res.json()
+			if (!json.success) throw new Error('Failed to fetch series')
+			return json.data
+		},
+	})
+}
+
+export function useUpdateSeries(seriesId: string) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: async ({ monitored }: { monitored: boolean }) => {
+			const res = await api.series[':id'].$put({ param: { id: seriesId }, json: { monitored } })
+			const json = await res.json()
+			if (!json.success) throw new Error(json.error ?? 'Failed to update series')
+			return json.data
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ['series', seriesId] })
+			queryClient.invalidateQueries({ queryKey: ['series'] })
+		},
+	})
+}
+
 export function useSeriesPreview(tmdbId: number | undefined, enabled = true) {
 	return useQuery({
 		queryKey: ['series-preview', tmdbId],
@@ -178,6 +207,26 @@ export function useHealth() {
 		queryKey: ['health'],
 		queryFn: async () => {
 			const res = await api.health.$get()
+			return res.json()
+		},
+	})
+}
+
+// Tasks
+
+export function useScanMovies() {
+	return useMutation({
+		mutationFn: async () => {
+			const res = await api.tasks['scan-file-system'].movies.$post()
+			return res.json()
+		},
+	})
+}
+
+export function useScanSeries() {
+	return useMutation({
+		mutationFn: async () => {
+			const res = await api.tasks['scan-file-system'].series.$post()
 			return res.json()
 		},
 	})

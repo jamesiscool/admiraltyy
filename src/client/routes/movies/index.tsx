@@ -219,13 +219,11 @@ function MoviesIndexPage() {
 										console.log('Manual search:', movie.id)
 									}}
 									onDelete={() => {
-										// TODO: When files table is connected, get hasFiles and fileSize from movie
 										setDeleteTarget({
 											type: 'movie',
 											id: movie.id,
 											title: movie.title,
-											hasFiles: false,
-											fileSize: 0,
+											sizeBytes: movie.sizeBytes,
 										})
 									}}
 									onToggleMonitored={async (monitored) => {

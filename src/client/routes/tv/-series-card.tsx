@@ -1,18 +1,20 @@
-import { Bookmark, Calendar, Search, Trash2, Tv } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { Bookmark, Search, Trash2, Tv } from 'lucide-react'
 import { useState } from 'react'
-import type { Series } from '@/server/db/schema'
+import type { SeriesPreview } from '@/server/routes/series'
 
 interface SeriesCardProps {
-	series: Series
-	onView?: () => void
+	series: SeriesPreview
 	onAutoSearch?: () => void
 	onManualSearch?: () => void
 	onDelete?: () => void
 	onToggleMonitored?: (monitored: boolean) => void
 }
 
-export function SeriesCard({ series, onView, onAutoSearch, onManualSearch, onDelete, onToggleMonitored }: SeriesCardProps) {
+export function SeriesCard({ series, onAutoSearch, onManualSearch, onDelete, onToggleMonitored }: SeriesCardProps) {
 	const [isHovered, setIsHovered] = useState(false)
+
+	const hasFile = series.sizeBytes !== undefined
 
 	// Format next airing date with humanization:
 	// - Within 24h: time like "8 p.m."
@@ -51,15 +53,12 @@ export function SeriesCard({ series, onView, onAutoSearch, onManualSearch, onDel
 	const nextAiringLabel = formatNextAiring(series.nextAiring ?? null)
 
 	return (
-		// biome-ignore lint/a11y/useSemanticElements: Card is interactive, will be Link when detail page exists
-		<div
-			role="button"
-			tabIndex={0}
+		<Link
+			to="/tv/$seriesId"
+			params={{ seriesId: String(series.id) }}
 			className="group relative block aspect-[2/3] w-full cursor-pointer overflow-hidden rounded-sm transition-all duration-300 ease-out hover:z-10"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
-			onClick={() => onView?.()}
-			onKeyDown={(e) => e.key === 'Enter' && onView?.()}
 		>
 			{/* Poster Image */}
 			<div className="absolute inset-0 bg-neutral-800">
@@ -90,16 +89,6 @@ export function SeriesCard({ series, onView, onAutoSearch, onManualSearch, onDel
 				className={`absolute inset-0 backdrop-blur-[2px] transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
 				style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
 			/>
-
-			{/* Top-left badge: Next Airing Date */}
-			{nextAiringLabel && series.monitored && (
-				<div className="absolute top-2 left-2 z-10">
-					<span className="inline-flex items-center gap-1 rounded-full bg-blue-600/90 px-2 py-0.5 font-semibold text-[10px] text-white tracking-wide shadow-lg">
-						<Calendar className="size-2.5" />
-						{nextAiringLabel}
-					</span>
-				</div>
-			)}
 
 			{/* Action buttons - vertical list visible on hover */}
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: Stops propagation to parent card */}
@@ -172,15 +161,19 @@ export function SeriesCard({ series, onView, onAutoSearch, onManualSearch, onDel
 					<span className="text-white/50">•</span>
 					<span className="font-mono text-blue-300">{series.resolution}</span>
 					<span className="text-white/50">•</span>
-					{series.status === 'ended' ? (
-						<span className="text-neutral-400">Ended</span>
-					) : nextAiringLabel ? (
-						<span className="text-emerald-400">{nextAiringLabel}</span>
+					{hasFile && series.sizeBytes ? (
+						nextAiringLabel ? (
+							<span className="text-white/80">{nextAiringLabel}</span>
+						) : (
+							<span className="text-size">{(series.sizeBytes / 1073741824).toFixed(1)} GB</span>
+						)
+					) : series.monitored ? (
+						<span className="text-yellow-400">{series.missingEpisodeCount && series.missingEpisodeCount > 0 ? `${series.missingEpisodeCount} ` : ''}Missing</span>
 					) : (
-						!series.monitored && <Bookmark className="size-3.5 text-pink-300" />
+						<Bookmark className="size-3.5 text-pink-300" />
 					)}
 				</div>
 			</div>
-		</div>
+		</Link>
 	)
 }

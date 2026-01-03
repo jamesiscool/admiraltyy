@@ -1,10 +1,10 @@
 import { zValidator } from '@hono/zod-validator'
-import { eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { fetchMovieDetails } from '../api/tmdb'
 import { db, schema } from '../db'
-import { resolutions } from '../db/schema'
+import { type File, resolutions } from '../db/schema'
 import { logInfo } from '../log/logs'
 
 const idParamSchema = z.object({ id: z.string() })
@@ -12,11 +12,36 @@ const addMovieSchema = z.object({ tmdbId: z.number(), resolution: z.enum(resolut
 const updateMovieSchema = z.object({ monitored: z.boolean().optional() })
 const deleteQuerySchema = z.object({ deleteFiles: z.string().optional() })
 
+// Aggregate file stats for movies
+async function listMovieFileStats(): Promise<Map<number, { sizeBytes: number; files: File[] }>> {
+	const allFiles = await db
+		.select()
+		.from(schema.files)
+		.where(and(eq(schema.files.isDeleted, false), sql`${schema.files.movieId} IS NOT NULL`))
+
+	const statsMap = new Map<number, { sizeBytes: number; files: File[] }>()
+	for (const file of allFiles) {
+		if (!file.movieId) continue
+		const existing = statsMap.get(file.movieId) ?? { sizeBytes: 0, files: [] }
+		existing.sizeBytes += file.size
+		existing.files.push(file)
+		statsMap.set(file.movieId, existing)
+	}
+	return statsMap
+}
+
 export const moviesRoutes = new Hono()
 	// GET /api/movies - List all movies
 	.get('/', async (c) => {
 		const movies = await db.select().from(schema.movies)
-		return c.json({ data: movies, success: true as const })
+		const fileStats = await listMovieFileStats()
+		const moviesWithFiles = movies.map((movie) => {
+			const stats = fileStats.get(movie.id)
+			const sizeBytes = stats?.sizeBytes
+			const files = stats?.files ?? []
+			return { ...movie, sizeBytes, files }
+		})
+		return c.json({ data: moviesWithFiles, success: true as const })
 	})
 	// GET /api/movies/:id - Get a single movie
 	.get('/:id', zValidator('param', idParamSchema), async (c) => {
@@ -29,10 +54,13 @@ export const moviesRoutes = new Hono()
 		if (!movie.length) {
 			return c.json({ success: false as const, error: 'Movie not found' }, 404)
 		}
-		// Mock file data
-		const hasFiles = Math.random() < 0.5
-		const fileSizeGb = hasFiles ? 2 + Math.random() * 18 : undefined
-		return c.json({ data: { ...movie[0], hasFiles, fileSizeGb }, success: true as const })
+		// Get files for this movie
+		const files = await db
+			.select()
+			.from(schema.files)
+			.where(and(eq(schema.files.movieId, numId), eq(schema.files.isDeleted, false)))
+		const sizeBytes = files.reduce((sum, f) => sum + f.size, 0) || undefined
+		return c.json({ data: { ...movie[0], sizeBytes, files }, success: true as const })
 	})
 	// POST /api/movies - Create a new movie
 	.post('/', zValidator('json', addMovieSchema), async (c) => {
@@ -65,6 +93,7 @@ export const moviesRoutes = new Hono()
 				cinemaReleaseDate: details.cinemaReleaseDate,
 				digitalReleaseDate: details.digitalReleaseDate,
 				contentRating: details.contentRating,
+				alternateTitles: JSON.stringify(details.alternateTitles),
 				dateAdded: now,
 				monitored: true,
 				resolution: body.resolution ?? '1080p',

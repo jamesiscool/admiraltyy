@@ -22,6 +22,7 @@ function mapMovieResult(movie: TmdbMovieResult): SearchResult {
 		overview: movie.overview,
 		releaseDate: movie.release_date,
 		voteAverage: movie.vote_average,
+		voteCount: movie.vote_count,
 		mediaType: 'movie',
 		genreIds: movie.genre_ids,
 	}
@@ -36,6 +37,7 @@ function mapTvResult(tv: TmdbTvResult): SearchResult {
 		overview: tv.overview,
 		releaseDate: tv.first_air_date,
 		voteAverage: tv.vote_average,
+		voteCount: tv.vote_count,
 		mediaType: 'tv',
 		genreIds: tv.genre_ids,
 	}
@@ -111,6 +113,7 @@ export async function searchMulti(query: string, page = 1): Promise<SearchRespon
 					overview: movie.overview,
 					releaseDate: movie.release_date,
 					voteAverage: movie.vote_average,
+					voteCount: movie.vote_count,
 					mediaType: 'movie',
 					genreIds: movie.genre_ids,
 				})
@@ -118,8 +121,8 @@ export async function searchMulti(query: string, page = 1): Promise<SearchRespon
 		}
 	}
 
-	// Sort movies by vote average (highest rated first)
-	movies.sort((a, b) => b.voteAverage - a.voteAverage)
+	// Sort movies by vote count (most votes first)
+	movies.sort((a, b) => b.voteCount - a.voteCount)
 
 	return {
 		movies,
@@ -131,9 +134,12 @@ export async function searchMulti(query: string, page = 1): Promise<SearchRespon
 }
 
 export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
-	const data = await tmdbFetch<TmdbMovieDetailsResponse>(`/movie/${tmdbId}`, {
-		query: { append_to_response: 'credits,release_dates' },
-	})
+	const [data, altTitlesData] = await Promise.all([
+		tmdbFetch<TmdbMovieDetailsResponse>(`/movie/${tmdbId}`, {
+			query: { append_to_response: 'credits,release_dates' },
+		}),
+		tmdbFetch<{ id: number; titles: Array<{ iso_3166_1: string; title: string; type: string }> }>(`/movie/${tmdbId}/alternative_titles`).catch(() => ({ id: tmdbId, titles: [] })),
+	])
 
 	// Extract year from release date
 	const year = data.release_date ? new Date(data.release_date).getFullYear() : new Date().getFullYear()
@@ -175,6 +181,22 @@ export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
 		cinemaReleaseDate = data.release_date
 	}
 
+	// Extract alternate titles (just the title strings, ignoring country and type)
+	// De-dupe against each other and against the original title
+	const originalTitleLower = data.title.toLowerCase().trim()
+	const seenTitles = new Set<string>()
+	const alternateTitles = altTitlesData.titles
+		.map((t) => t.title.trim())
+		.filter((title) => {
+			const titleLower = title.toLowerCase()
+			// Skip if matches original title or if we've seen this title before
+			if (titleLower === originalTitleLower || seenTitles.has(titleLower)) {
+				return false
+			}
+			seenTitles.add(titleLower)
+			return true
+		})
+
 	return {
 		tmdbId: data.id,
 		imdbId: data.imdb_id,
@@ -189,6 +211,7 @@ export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
 		cinemaReleaseDate,
 		digitalReleaseDate,
 		contentRating,
+		alternateTitles,
 	}
 }
 
@@ -277,6 +300,7 @@ interface TmdbCollectionDetails {
 		overview: string
 		release_date: string
 		vote_average: number
+		vote_count: number
 		genre_ids: number[]
 		media_type: 'movie'
 	}>
@@ -346,6 +370,7 @@ export interface MovieDetails {
 	cinemaReleaseDate?: string
 	digitalReleaseDate?: string
 	contentRating?: string
+	alternateTitles: string[]
 }
 
 // Genre ID to name mapping (TMDB standard genres)
@@ -399,6 +424,7 @@ export interface SearchResult {
 	overview: string
 	releaseDate?: string
 	voteAverage: number
+	voteCount: number
 	mediaType: 'movie' | 'tv'
 	genreIds: number[]
 }
@@ -432,6 +458,7 @@ export interface SeriesPreview {
 	runtimeMins?: number
 	contentRating?: string
 	seasons: SeasonPreview[]
+	alternateTitles: string[]
 }
 
 // Full series types (for adding to DB)
@@ -506,9 +533,12 @@ interface TmdbSeasonDetailsResponse {
 }
 
 export async function fetchSeriesPreview(tmdbId: number): Promise<SeriesPreview> {
-	const data = await tmdbFetch<TmdbTvDetailsResponse>(`/tv/${tmdbId}`, {
-		query: { append_to_response: 'content_ratings' },
-	})
+	const [data, altTitlesData] = await Promise.all([
+		tmdbFetch<TmdbTvDetailsResponse>(`/tv/${tmdbId}`, {
+			query: { append_to_response: 'content_ratings' },
+		}),
+		tmdbFetch<{ id: number; results: Array<{ iso_3166_1: string; title: string; type: string }> }>(`/tv/${tmdbId}/alternative_titles`).catch(() => ({ id: tmdbId, results: [] })),
+	])
 
 	const year = data.first_air_date ? new Date(data.first_air_date).getFullYear() : new Date().getFullYear()
 	const genres = (data.genres ?? []).map((g) => g.name)
@@ -532,6 +562,22 @@ export async function fetchSeriesPreview(tmdbId: number): Promise<SeriesPreview>
 			name: s.name ?? `Season ${s.season_number}`,
 		}))
 
+	// Extract alternate titles (just the title strings, ignoring country and type)
+	// De-dupe against each other and against the original title
+	const originalTitleLower = data.name.toLowerCase().trim()
+	const seenTitles = new Set<string>()
+	const alternateTitles = altTitlesData.results
+		.map((t) => t.title.trim())
+		.filter((title) => {
+			const titleLower = title.toLowerCase()
+			// Skip if matches original title or if we've seen this title before
+			if (titleLower === originalTitleLower || seenTitles.has(titleLower)) {
+				return false
+			}
+			seenTitles.add(titleLower)
+			return true
+		})
+
 	return {
 		tmdbId: data.id,
 		title: data.name,
@@ -545,6 +591,7 @@ export async function fetchSeriesPreview(tmdbId: number): Promise<SeriesPreview>
 		runtimeMins,
 		contentRating,
 		seasons,
+		alternateTitles,
 	}
 }
 

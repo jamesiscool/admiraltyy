@@ -3,8 +3,12 @@ import { Bookmark, Film, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import type { Movie } from '@/server/db/schema'
 
+interface MovieWithFiles extends Movie {
+	sizeBytes?: number
+}
+
 interface MovieCardProps {
-	movie: Movie
+	movie: MovieWithFiles
 	onAutoSearch?: () => void
 	onManualSearch?: () => void
 	onDelete?: () => void
@@ -14,9 +18,7 @@ interface MovieCardProps {
 export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onToggleMonitored }: MovieCardProps) {
 	const [isHovered, setIsHovered] = useState(false)
 
-	// Movie doesn't have file association in the schema yet, so we'll treat all as "wanted" for now
-	// TODO: Join with files table when we need downloaded status
-	const hasFile = false
+	const hasFile = movie.sizeBytes !== undefined
 
 	return (
 		<Link
@@ -110,20 +112,18 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 					Manual Search
 				</button>
 
-				{/* Delete - only show if no file */}
-				{!hasFile && (
-					<button
-						type="button"
-						onClick={(e) => {
-							e.preventDefault()
-							onDelete?.()
-						}}
-						className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-red-100 px-4 py-2 font-medium text-red-600 text-xs shadow-lg transition-colors hover:bg-red-200"
-					>
-						<Trash2 className="size-3.5" />
-						Delete Movie
-					</button>
-				)}
+				{/* Delete */}
+				<button
+					type="button"
+					onClick={(e) => {
+						e.preventDefault()
+						onDelete?.()
+					}}
+					className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-red-100 px-4 py-2 font-medium text-red-600 text-xs shadow-lg transition-colors hover:bg-red-200"
+				>
+					<Trash2 className="size-3.5" />
+					Delete Movie
+				</button>
 			</div>
 
 			{/* Movie info - bottom */}
@@ -134,7 +134,13 @@ export function MovieCard({ movie, onAutoSearch, onManualSearch, onDelete, onTog
 					<span className="text-white/50">•</span>
 					<span className="font-mono text-blue-300">{movie.resolution}</span>
 					<span className="text-white/50">•</span>
-					{movie.monitored ? <span className="text-yellow-400 tracking-wide">Missing</span> : <Bookmark className="size-3.5 text-pink-300" />}
+					{hasFile && movie.sizeBytes ? (
+						<span className="text-size">{(movie.sizeBytes / 1073741824).toFixed(1)} GB</span>
+					) : movie.monitored ? (
+						<span className="text-yellow-400 tracking-wide">Missing</span>
+					) : (
+						<Bookmark className="size-3.5 text-pink-300" />
+					)}
 				</div>
 			</div>
 		</Link>

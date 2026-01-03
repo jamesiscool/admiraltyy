@@ -39,16 +39,16 @@ export default function Header() {
 						Activity
 					</Link>
 					<Link
+						to="/tasks"
+						className="rounded px-3 py-[4.5px] tracking-wide transition-colors hover:bg-neutral-100 hover:text-neutral-1000 data-active:bg-blue-50 data-active:text-blue-800"
+					>
+						Tasks
+					</Link>
+					<Link
 						to="/settings"
 						className="rounded px-3 py-[4.5px] tracking-wide transition-colors hover:bg-neutral-100 hover:text-neutral-1000 data-active:bg-blue-50 data-active:text-blue-800"
 					>
 						Settings
-					</Link>
-					<Link
-						to="/app"
-						className="rounded px-3 py-[4.5px] tracking-wide transition-colors hover:bg-neutral-100 hover:text-neutral-1000 data-active:bg-blue-50 data-active:text-blue-800"
-					>
-						App
 					</Link>
 				</nav>
 			</div>
