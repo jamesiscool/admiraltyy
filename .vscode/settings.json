@@ -9,19 +9,10 @@
 	"files.readonlyInclude": {
 		"**/routeTree.gen.ts": true
 	},
-	"projectColors.mainColor": "#bb3e86",
-	"window.title": "${activeEditorShort}${separator}${rootName}${separator}${profileName}",
 	"workbench.colorCustomizations": {
-		"titleBar.activeBackground": "#bb3e86",
-		"titleBar.activeForeground": "#ffffff",
-		"titleBar.inactiveBackground": "#bb3e86",
-		"titleBar.inactiveForeground": "#ffffff90"
-	},
-	"projectColors.name": "admiraltyy",
-	"projectColors.isActivityBarColored": false,
-	"projectColors.isTitleBarColored": true,
-	"projectColors.isStatusBarColored": false,
-	"projectColors.isProjectNameColored": false,
-	"projectColors.isActiveItemsColored": false,
-	"projectColors.setWindowTitle": false
+		"titleBar.activeBackground": "#BB3E86",
+		"titleBar.activeForeground": "#000000",
+		"titleBar.inactiveBackground": "#BB3E86",
+		"titleBar.inactiveForeground": "#00000090"
+	}
 }
