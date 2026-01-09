@@ -21,7 +21,7 @@ function RouteComponent() {
 					title="Scan file system for movies"
 					description="Scan configured movie folders and match to library"
 					isLoading={scanMovies.isPending}
-					onRun={() => scanMovies.mutate()}
+					onRun={() => scanMovies.mutate({})}
 					result={scanMovies.data}
 					error={scanMovies.error?.message}
 				/>
@@ -29,7 +29,7 @@ function RouteComponent() {
 					title="Scan file system for TV series"
 					description="Scan configured TV folders and match to library"
 					isLoading={scanSeries.isPending}
-					onRun={() => scanSeries.mutate()}
+					onRun={() => scanSeries.mutate({})}
 					result={scanSeries.data}
 					error={scanSeries.error?.message}
 				/>

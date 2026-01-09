@@ -111,7 +111,7 @@ function TvIndexPage() {
 
 	const handleDeleteConfirm = (deleteFiles: boolean) => {
 		if (!deleteTarget) return
-		deleteSeries.mutate({ seriesId: deleteTarget.id, deleteFiles })
+		deleteSeries.mutate({ param: { id: String(deleteTarget.id) }, query: { deleteFiles: String(deleteFiles) } })
 	}
 
 	return (

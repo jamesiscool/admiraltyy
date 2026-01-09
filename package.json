@@ -14,7 +14,7 @@
 		"dev": "concurrently --kill-others -n client,server,design,db:studio -c cyan,magenta,yellow,green \"bun run dev:client\" \"bun run dev:server\" \"bun run dev:design\" \"bun run db:studio\"",
 		"dev:client": "vite",
 		"dev:design": "cd design && bun run dev",
-		"dev:server": "bun --hot src/server/index.ts",
+		"dev:server": "bun --hot src/server/server.ts",
 		"fix": "biome check . --write",
 		"preview": "vite preview",
 		"tsc": "tsc --noEmit"
@@ -37,6 +37,7 @@
 		"drizzle-orm": "^0.45.1",
 		"drizzle-zod": "^0.8.3",
 		"hono": "^4.11.3",
+		"hono-rpc-query": "^1.4.0",
 		"lucide-react": "^0.544.0",
 		"ofetch": "^1.5.1",
 		"react": "^19.2.3",

@@ -77,9 +77,11 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 	const handleAdd = () => {
 		if (!series) return
 		addSeriesMutation.mutate({
-			tmdbId: series.tmdbId,
-			resolution: quality as Resolution,
-			monitoredSeasons: Array.from(monitoredSeasons),
+			json: {
+				tmdbId: series.tmdbId,
+				resolution: quality as Resolution,
+				monitoredSeasons: Array.from(monitoredSeasons),
+			},
 		})
 	}
 
@@ -87,9 +89,11 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 		if (!series) return
 		// Same as add for now - download trigger can be added later
 		addSeriesMutation.mutate({
-			tmdbId: series.tmdbId,
-			resolution: quality as Resolution,
-			monitoredSeasons: Array.from(monitoredSeasons),
+			json: {
+				tmdbId: series.tmdbId,
+				resolution: quality as Resolution,
+				monitoredSeasons: Array.from(monitoredSeasons),
+			},
 		})
 	}
 

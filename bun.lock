@@ -22,6 +22,7 @@
         "drizzle-orm": "^0.45.1",
         "drizzle-zod": "^0.8.3",
         "hono": "^4.11.3",
+        "hono-rpc-query": "^1.4.0",
         "lucide-react": "^0.544.0",
         "ofetch": "^1.5.1",
         "react": "^19.2.3",
@@ -725,6 +726,8 @@
     "headers-polyfill": ["headers-polyfill@4.0.3", "", {}, "sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ=="],
 
     "hono": ["hono@4.11.3", "", {}, "sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w=="],
+
+    "hono-rpc-query": ["hono-rpc-query@1.4.0", "", { "peerDependencies": { "@tanstack/react-query": "^5.75.5", "hono": "^4.7.8" } }, "sha512-eb+o5P6x4iA6sBznYG8iyiDLUS6a60agklCpVLpzRSD29FG+N7YIb86WHbqbdCJq7uIskolpfSxrIRlGtfRWTg=="],
 
     "http-errors": ["http-errors@2.0.1", "", { "dependencies": { "depd": "~2.0.0", "inherits": "~2.0.4", "setprototypeof": "~1.2.0", "statuses": "~2.0.2", "toidentifier": "~1.0.1" } }, "sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ=="],
 

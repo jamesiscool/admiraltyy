@@ -45,13 +45,13 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 
 	const handleAdd = () => {
 		if (!movie) return
-		addMovieMutation.mutate({ tmdbId: movie.tmdbId, resolution: quality as Resolution })
+		addMovieMutation.mutate({ json: { tmdbId: movie.tmdbId, resolution: quality as Resolution } })
 	}
 
 	const handleAddAndDownload = () => {
 		if (!movie) return
 		// For now, same as add - download trigger can be added later
-		addMovieMutation.mutate({ tmdbId: movie.tmdbId, resolution: quality as Resolution })
+		addMovieMutation.mutate({ json: { tmdbId: movie.tmdbId, resolution: quality as Resolution } })
 	}
 
 	const isLoading = addMovieMutation.isPending

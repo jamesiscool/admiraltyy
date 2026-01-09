@@ -33,7 +33,7 @@ function SeriesDetailPage() {
 
 	const handleDeleteConfirm = (deleteFiles: boolean) => {
 		if (!deleteTarget) return
-		deleteSeries.mutate({ seriesId: deleteTarget.id, deleteFiles })
+		deleteSeries.mutate({ param: { id: String(deleteTarget.id) }, query: { deleteFiles: String(deleteFiles) } })
 	}
 
 	if (isLoading) {
@@ -143,7 +143,7 @@ function SeriesDetailPage() {
 									variant={series.monitored ? 'monitored' : 'outline'}
 									className="shrink-0 gap-1.5"
 									disabled={updateSeries.isPending}
-									onClick={() => updateSeries.mutate({ monitored: !series.monitored })}
+									onClick={() => updateSeries.mutate({ param: { id: seriesId }, json: { monitored: !series.monitored } })}
 								>
 									<Bookmark className={series.monitored ? 'size-3.5 fill-current' : 'size-3.5'} />
 									{series.monitored ? 'Monitored' : 'Unmonitored'}
@@ -320,7 +320,7 @@ function SeasonCard({ season, seriesId, seriesMonitored, seriesResolution }: { s
 
 	const handleToggleMonitored = (e: React.MouseEvent) => {
 		e.stopPropagation()
-		updateSeason.mutate({ seasonId: season.id, monitored: !isMonitored })
+		updateSeason.mutate({ param: { id: seriesId, seasonId: season.id.toString() }, json: { monitored: !isMonitored } })
 	}
 
 	return (
@@ -404,7 +404,7 @@ function EpisodeRow({ episode, seriesId, seriesMonitored, seriesResolution }: { 
 	const isMonitored = episode.monitored ?? true
 
 	const handleToggleMonitored = () => {
-		updateEpisode.mutate({ episodeId: episode.id, monitored: !isMonitored })
+		updateEpisode.mutate({ param: { id: seriesId, episodeId: episode.id.toString() }, json: { monitored: !isMonitored } })
 	}
 
 	// Status badge

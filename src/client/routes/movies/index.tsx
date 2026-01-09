@@ -114,7 +114,7 @@ function MoviesIndexPage() {
 
 	const handleDeleteConfirm = (deleteFiles: boolean) => {
 		if (!deleteTarget) return
-		deleteMovie.mutate({ movieId: deleteTarget.id, deleteFiles })
+		deleteMovie.mutate({ param: { id: String(deleteTarget.id) }, query: { deleteFiles: String(deleteFiles) } })
 	}
 
 	return (

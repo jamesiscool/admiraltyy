@@ -5,7 +5,7 @@ import { DeleteConfirmationModal, type DeleteTarget } from '@/client/components/
 import { Button } from '@/client/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/client/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
-import { useDeleteMovie, useMovie, useSearchMovieReleases, useUpdateMovie } from '@/client/lib/api'
+import { useDeleteMovie, useGrabMovieRelease, useMovie, useSearchMovieReleases, useUpdateMovie } from '@/client/lib/api'
 
 // Release type from API (publishDate is serialized as string)
 interface Release {
@@ -31,7 +31,8 @@ function MovieDetailPage() {
 
 	const { data: movie, isLoading, error } = useMovie(movieId)
 	const updateMovie = useUpdateMovie(movieId)
-	const searchReleases = useSearchMovieReleases(movieId)
+	const searchReleases = useSearchMovieReleases()
+	const grabRelease = useGrabMovieRelease()
 
 	// Search results state
 	const [searchResults, setSearchResults] = useState<Release[] | null>(null)
@@ -47,7 +48,7 @@ function MovieDetailPage() {
 
 	const handleDeleteConfirm = (deleteFiles: boolean) => {
 		if (!deleteTarget) return
-		deleteMovie.mutate({ movieId: deleteTarget.id, deleteFiles })
+		deleteMovie.mutate({ param: { id: String(deleteTarget.id) }, query: { deleteFiles: String(deleteFiles) } })
 	}
 
 	if (isLoading) {
@@ -153,7 +154,7 @@ function MovieDetailPage() {
 									variant={movie.monitored ? 'monitored' : 'outline'}
 									className="shrink-0 gap-1.5"
 									disabled={updateMovie.isPending}
-									onClick={() => updateMovie.mutate({ monitored: !movie.monitored })}
+									onClick={() => updateMovie.mutate({ param: { id: movieId }, json: { monitored: !movie.monitored } })}
 								>
 									<Bookmark className={movie.monitored ? 'size-3 fill-current' : 'size-3'} />
 									{movie.monitored ? 'Monitored' : 'Unmonitored'}
@@ -214,9 +215,12 @@ function MovieDetailPage() {
 									className="h-9 px-4"
 									disabled={searchReleases.isPending}
 									onClick={() => {
-										searchReleases.mutate(undefined, {
-											onSuccess: (data) => setSearchResults(data),
-										})
+										searchReleases.mutate(
+											{ param: { id: movieId } },
+											{
+												onSuccess: (data) => setSearchResults(data),
+											},
+										)
 									}}
 								>
 									{searchReleases.isPending ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
@@ -371,8 +375,22 @@ function MovieDetailPage() {
 														size="sm"
 														className="h-7 px-2"
 														title="Grab release"
+														disabled={grabRelease.isPending}
+														onClick={() => {
+															grabRelease.mutate(
+																{
+																	param: { id: movieId },
+																	json: { downloadUrl: release.downloadUrl, title: release.title },
+																},
+																{
+																	onSuccess: (data) => {
+																		console.log('[Grab] NZB downloaded to:', data.nzbPath)
+																	},
+																},
+															)
+														}}
 													>
-														<Download className="size-4" />
+														{grabRelease.isPending ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
 													</Button>
 												</TableCell>
 											</TableRow>
