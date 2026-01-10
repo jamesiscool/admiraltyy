@@ -1,0 +1,25 @@
+{
+	"main": "main.sh",
+	"name": "AdmiraltyySync",
+	"homepage": "",
+	"kind": "POST-PROCESSING",
+	"displayName": "Admiraltyy Sync",
+	"version": "1.0",
+	"author": "Admiraltyy",
+	"license": "MIT",
+	"about": "Notifies Admiraltyy when a download completes",
+	"description": [
+		"Calls Admiraltyy API to sync download history after post-processing"
+	],
+	"options": [
+		{
+			"name": "ApiUrl",
+			"displayName": "API URL",
+			"value": "http://localhost:2829",
+			"description": [
+				"Base URL for Admiraltyy API"
+			],
+			"select": []
+		}
+	]
+}

@@ -6,7 +6,7 @@ import type { z } from 'zod'
 export const resolutions = ['480p', '720p', '1080p', '2160p'] as const
 export type Resolution = (typeof resolutions)[number]
 
-export const downloadStatuses = ['downloading', 'paused', 'queued', 'unpacking', 'verifying', 'completed', 'failed'] as const
+export const downloadStatuses = ['queued', 'downloading', 'paused', 'unpacking', 'verifying', 'completed', 'failed'] as const
 export type DownloadStatus = (typeof downloadStatuses)[number]
 
 export const seriesStatuses = ['continuing', 'ended'] as const
@@ -124,33 +124,11 @@ export const insertFileSchema = createInsertSchema(files)
 export type File = z.infer<typeof selectFileSchema>
 export type FileInsert = z.infer<typeof insertFileSchema>
 
-// Downloads
-export const downloads = sqliteTable('downloads', {
-	id: integer('id').primaryKey(),
-	movieId: integer('movie_id').references(() => movies.id),
-	episodeId: integer('episode_id').references(() => episodes.id),
-	title: text('title').notNull(),
-	progress: real('progress').default(0),
-	speed: text('speed'),
-	eta: text('eta'),
-	size: text('size'),
-	status: text('status', { enum: downloadStatuses }).notNull(),
-	quality: text('quality'),
-	dateDownloaded: text('date_downloaded').notNull(),
-	errorMessage: text('error_message'),
-})
-
-export const selectDownloadSchema = createSelectSchema(downloads)
-export const insertDownloadSchema = createInsertSchema(downloads)
-export type Download = z.infer<typeof selectDownloadSchema>
-export type DownloadInsert = z.infer<typeof insertDownloadSchema>
-
 // Releases (grabbed indexer results)
 export const releases = sqliteTable('releases', {
 	id: integer('id').primaryKey(),
 	movieId: integer('movie_id').references(() => movies.id),
 	episodeId: integer('episode_id').references(() => episodes.id),
-	downloadId: integer('download_id').references(() => downloads.id),
 
 	// From IndexerRelease
 	guid: text('guid').notNull(),
@@ -171,6 +149,38 @@ export const selectReleaseSchema = createSelectSchema(releases)
 export const insertReleaseSchema = createInsertSchema(releases)
 export type Release = z.infer<typeof selectReleaseSchema>
 export type ReleaseInsert = z.infer<typeof insertReleaseSchema>
+
+// Downloads (one release can have multiple download attempts)
+export const downloads = sqliteTable('downloads', {
+	id: integer('id').primaryKey(),
+	releaseId: integer('release_id').references(() => releases.id),
+	nzbId: integer('nzb_id'), // NZBGet's NZBID for matching
+	title: text('title').notNull(),
+	status: text('status', { enum: downloadStatuses }).notNull(),
+	errorMessage: text('error_message'),
+
+	// Progress tracking (updated during download)
+	progress: real('progress').default(0),
+	speed: text('speed'),
+	eta: text('eta'),
+	size: integer('size'),
+
+	// NZBGet final state
+	parStatus: text('par_status'),
+	unpackStatus: text('unpack_status'),
+	finalDir: text('final_dir'),
+	downloadedSizeMb: integer('downloaded_size_mb'),
+	downloadTimeSec: integer('download_time_sec'),
+
+	// Timestamps
+	queuedAt: text('queued_at').notNull(),
+	completedAt: text('completed_at'),
+})
+
+export const selectDownloadSchema = createSelectSchema(downloads)
+export const insertDownloadSchema = createInsertSchema(downloads)
+export type Download = z.infer<typeof selectDownloadSchema>
+export type DownloadInsert = z.infer<typeof insertDownloadSchema>
 
 // Indexers
 export const indexers = sqliteTable('indexers', {

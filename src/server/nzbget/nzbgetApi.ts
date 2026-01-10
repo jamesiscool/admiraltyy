@@ -1,5 +1,6 @@
 import { type $Fetch, ofetch } from 'ofetch'
 import { getSettings, type UsenetServer } from '../settings'
+import type { NzbgetConfigOption, NzbgetHistoryItem, NzbgetQueueItem, NzbgetRpcResponse, NzbgetStatus } from './nzbgetSchema'
 
 // Module-level fetch client (initialized once on process start)
 let nzbgetFetch: $Fetch | null = null
@@ -14,65 +15,6 @@ export function initNzbgetApi(): void {
 		method: 'POST',
 		headers: { Authorization: `Basic ${auth}` },
 	})
-}
-
-// JSON-RPC response wrapper
-interface NzbgetRpcResponse<T> {
-	version: '1.1'
-	result: T
-}
-
-// Status response from NZBGet
-export interface NzbgetStatus {
-	RemainingSizeMB: number
-	DownloadedSizeMB: number
-	DownloadRate: number
-	DownloadPaused: boolean
-	PostPaused: boolean
-	ServerStandBy: boolean
-	UpTimeSec: number
-	DownloadTimeSec: number
-	FreeDiskSpaceMB: number
-	PostJobCount: number
-	UrlCount: number
-	ThreadCount: number
-	DownloadLimit: number
-	AverageDownloadRate: number
-	MonthSizeMB: number
-	DaySizeMB: number
-	ArticleCacheMB: number
-	NewsServers: NzbgetNewsServer[]
-}
-
-export interface NzbgetNewsServer {
-	ID: number
-	Active: boolean
-}
-
-// Queue item from listgroups
-export interface NzbgetQueueItem {
-	NZBID: number
-	NZBName: string
-	NZBFilename: string
-	Kind: 'NZB' | 'URL'
-	URL: string
-	DestDir: string
-	FinalDir: string
-	Category: string
-	FileSizeMB: number
-	RemainingSizeMB: number
-	PausedSizeMB: number
-	FileCount: number
-	RemainingFileCount: number
-	Status: string
-	Health: number
-	CriticalHealth: number
-	DownloadedSizeMB: number
-	DownloadTimeSec: number
-	ActiveDownloads: number
-	MaxPriority: number
-	PostInfoText: string
-	PostStageProgress: number
 }
 
 // Generic JSON-RPC call helper
@@ -100,6 +42,10 @@ export async function listNzbgetQueue(): Promise<NzbgetQueueItem[]> {
 	return rpcCall<NzbgetQueueItem[]>('listgroups', [0])
 }
 
+export async function listNzbgetHistory(showHidden = false): Promise<NzbgetHistoryItem[]> {
+	return rpcCall<NzbgetHistoryItem[]>('history', [showHidden])
+}
+
 // Append NZB file to download queue
 // Returns the NZBID of the added item (positive number) or 0 on failure
 export async function appendNzb(options: {
@@ -124,12 +70,6 @@ export async function appendNzb(options: {
 		0, // DupeScore
 		'SCORE', // DupeMode
 	])
-}
-
-// Config option from NZBGet
-interface NzbgetConfigOption {
-	Name: string
-	Value: string
 }
 
 // Fetch current NZBGet config
@@ -220,6 +160,12 @@ export async function testUsenetServer(server: { host: string; port: number; use
 		server.ssl,
 		'', // cipher (default)
 		30, // timeout seconds
-		2, // certVerifLevel: strict
+		2, // cert verification level: strict
 	])
+}
+
+// Delete history items permanently by NZBID
+export async function clearNzbgetHistory(nzbIds: number[]): Promise<boolean> {
+	if (nzbIds.length === 0) return true
+	return rpcCall<boolean>('editqueue', ['HistoryFinalDelete', '', nzbIds])
 }

@@ -380,11 +380,20 @@ function MovieDetailPage() {
 															grabRelease.mutate(
 																{
 																	param: { id: movieId },
-																	json: { downloadUrl: release.downloadUrl, title: release.title },
+																	json: {
+																		guid: release.guid,
+																		title: release.title,
+																		downloadUrl: release.downloadUrl,
+																		infoUrl: release.infoUrl,
+																		size: release.size,
+																		publishDate: release.publishDate,
+																		indexerId: release.indexerId,
+																		indexerName: release.indexerName,
+																	},
 																},
 																{
 																	onSuccess: (data) => {
-																		console.log('[Grab] NZB downloaded to:', data.nzbPath)
+																		console.log('[Grab] Download queued:', data.download.id)
 																	},
 																},
 															)

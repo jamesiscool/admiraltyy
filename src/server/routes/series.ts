@@ -406,8 +406,14 @@ export const seriesRoutes = new Hono()
 				// Delete associated files from db
 				await db.delete(schema.files).where(inArray(schema.files.episodeId, episodeIds))
 
-				// Delete associated downloads
-				await db.delete(schema.downloads).where(inArray(schema.downloads.episodeId, episodeIds))
+				// Get releases for these episodes to delete their downloads
+				const episodeReleases = await db.select({ id: schema.releases.id }).from(schema.releases).where(inArray(schema.releases.episodeId, episodeIds))
+				for (const release of episodeReleases) {
+					await db.delete(schema.downloads).where(eq(schema.downloads.releaseId, release.id))
+				}
+
+				// Delete releases
+				await db.delete(schema.releases).where(inArray(schema.releases.episodeId, episodeIds))
 
 				// Delete episodes
 				await db.delete(schema.episodes).where(inArray(schema.episodes.seasonId, seasonIds))

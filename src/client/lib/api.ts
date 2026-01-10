@@ -222,6 +222,36 @@ export function useNzbgetQueue() {
 	)
 }
 
+export function useNzbgetHistory() {
+	return useQuery(
+		api.activity.nzbget.history.$get.queryOptions({
+			refetchInterval: 5000,
+			retry: false,
+		}),
+	)
+}
+
+export function useDownloads() {
+	return useQuery(
+		api.activity.downloads.$get.queryOptions({
+			refetchInterval: 5000,
+			retry: false,
+		}),
+	)
+}
+
+export function useSyncNzbget() {
+	const queryClient = useQueryClient()
+
+	return useMutation(
+		api.activity.nzbget.sync.$post.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: api.activity.downloads.$get.queryOptions({}).queryKey })
+			},
+		}),
+	)
+}
+
 // Tasks
 
 export function useScanMovies() {

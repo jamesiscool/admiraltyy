@@ -1,6 +1,11 @@
+import { dirname, join } from 'node:path'
 import type { Subprocess } from 'bun'
 import { generateNzbgetPassword, getSettings, saveSettings, type UsenetServer, updateSettings } from '../settings'
 import { clearNzbgetQueue, initNzbgetApi } from './nzbgetApi'
+
+// Get path to the scripts folder (relative to project root)
+const projectRoot = join(dirname(import.meta.dir), '..')
+const scriptsDir = join(projectRoot, 'scripts')
 
 let nzbgetProcess: Subprocess | null = null
 
@@ -121,6 +126,9 @@ export async function startNzbget() {
 
 	const serverArgs = buildServerArgs(settings.usenetServers)
 
+	// API URL for post-processing script to call back
+	const apiUrl = `http://127.0.0.1:2829`
+
 	const args = [
 		'nzbget',
 		'-n', // run without config file
@@ -139,6 +147,13 @@ export async function startNzbget() {
 		`DestDir=${downloadFolder}`,
 		'-o',
 		`InterDir=${downloadFolder}/.incomplete`,
+		// Post-processing extension config
+		'-o',
+		`ScriptDir=${scriptsDir}`,
+		'-o',
+		'Extensions=nzbget-sync',
+		'-o',
+		`AdmiraltyySync:ApiUrl=${apiUrl}`,
 		...serverArgs,
 	]
 

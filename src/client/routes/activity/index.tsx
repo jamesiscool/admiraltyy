@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { RefreshCw } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
-import { useNzbgetQueue, useNzbgetStatus } from '@/client/lib/api'
+import { useDownloads, useNzbgetHistory, useNzbgetQueue, useNzbgetStatus, useSyncNzbget } from '@/client/lib/api'
 import { type ActivityAlert, AlertBanner } from './-alert-banner'
+import { DownloadsTable } from './-downloads-table'
+import { type HistoryItem, type HistoryStatus, HistoryTable } from './-history-table'
 import { type DownloadStatus, type QueueItem, QueueTable } from './-queue-table'
 
 export const Route = createFileRoute('/activity/')({
@@ -41,6 +44,44 @@ function parseQuality(name: string): string {
 	return match ? match[1] : '--'
 }
 
+// Parse history status from NZBGet status string
+function parseHistoryStatus(status: string, deleteStatus: string, markStatus: string): HistoryStatus {
+	if (markStatus === 'BAD' || deleteStatus === 'MANUAL' || deleteStatus === 'DUPE' || deleteStatus === 'HEALTH') {
+		return 'removed'
+	}
+	if (status === 'SUCCESS' || status === 'SUCCESS/ALL' || status.includes('SUCCESS')) {
+		return 'completed'
+	}
+	return 'failed'
+}
+
+// Format relative date
+function formatRelativeDate(timestamp: number): string {
+	const now = Date.now() / 1000
+	const diffSec = now - timestamp
+
+	if (diffSec < 60) return 'Just now'
+	if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`
+	if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`
+	if (diffSec < 172800) return 'Yesterday'
+	if (diffSec < 604800) return `${Math.floor(diffSec / 86400)} days ago`
+	return new Date(timestamp * 1000).toLocaleDateString()
+}
+
+// Get error message from history item
+function getErrorMessage(status: string, health: number, criticalHealth: number): string | undefined {
+	if (status.includes('FAILURE') || status.includes('FAIL')) {
+		if (health < criticalHealth) {
+			const completionPercent = Math.round((health / 1000) * 100)
+			return `Not enough repair blocks available (${completionPercent}% completion)`
+		}
+		if (status.includes('UNPACK')) return 'Unpack failed'
+		if (status.includes('PAR')) return 'Repair failed'
+		return 'Download failed'
+	}
+	return undefined
+}
+
 interface SpeedSample {
 	id: number
 	value: number
@@ -66,6 +107,9 @@ function SpeedHistogram({ samples }: { samples: SpeedSample[] }) {
 function RouteComponent() {
 	const { data: status, error: statusError } = useNzbgetStatus()
 	const { data: queue, error: queueError } = useNzbgetQueue()
+	const { data: history, error: historyError } = useNzbgetHistory()
+	const { data: downloads } = useDownloads()
+	const syncNzbget = useSyncNzbget()
 
 	// Dismissed alerts state
 	const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
@@ -102,8 +146,16 @@ function RouteComponent() {
 				dismissible: true,
 			})
 		}
+		if (historyError && !dismissedAlerts.has('history-error')) {
+			result.push({
+				id: 'history-error',
+				type: 'error',
+				message: `History error: ${historyError.message}`,
+				dismissible: true,
+			})
+		}
 		return result
-	}, [statusError, queueError, dismissedAlerts])
+	}, [statusError, queueError, historyError, dismissedAlerts])
 
 	// Transform NZBGet queue to our format
 	const queueItems = useMemo<QueueItem[]>(() => {
@@ -125,6 +177,21 @@ function RouteComponent() {
 			}
 		})
 	}, [queue, currentSpeedMBps])
+
+	// Transform NZBGet history to our format
+	const historyItems = useMemo<HistoryItem[]>(() => {
+		if (!history) return []
+		return history.map((item) => ({
+			id: String(item.NZBID),
+			title: item.Name,
+			date: formatRelativeDate(item.HistoryTime),
+			dateRaw: item.HistoryTime,
+			status: parseHistoryStatus(item.Status, item.DeleteStatus, item.MarkStatus),
+			size: formatSize(item.FileSizeMB),
+			quality: parseQuality(item.Name),
+			errorMessage: getErrorMessage(item.Status, item.Health, item.CriticalHealth),
+		}))
+	}, [history])
 
 	const handleDismissAlert = (id: string) => {
 		setDismissedAlerts((prev) => new Set(prev).add(id))
@@ -171,6 +238,38 @@ function RouteComponent() {
 							onForceStart={(id) => console.log('Force start:', id)}
 						/>
 					</div>
+				</section>
+
+				{/* Downloads Section */}
+				<section className="mb-8">
+					<div className="mb-4 flex items-center gap-2">
+						<h2 className="font-bold text-lg tracking-tight">Downloads</h2>
+						<button
+							type="button"
+							onClick={() => syncNzbget.mutate({})}
+							disabled={syncNzbget.isPending}
+							className="rounded-sm p-1.5 text-navy-400 transition-colors hover:bg-navy-100 hover:text-navy-600 disabled:opacity-50"
+							title="Sync with NZBGet"
+						>
+							<RefreshCw className={`h-4 w-4 ${syncNzbget.isPending ? 'animate-spin' : ''}`} />
+						</button>
+					</div>
+					<DownloadsTable
+						items={downloads ?? []}
+						onDelete={(id) => console.log('Delete download:', id)}
+						onRetry={(id) => console.log('Retry download:', id)}
+					/>
+				</section>
+
+				{/* History Section */}
+				<section className="mb-8">
+					<h2 className="mb-4 font-bold text-lg tracking-tight">History</h2>
+					<HistoryTable
+						items={historyItems}
+						onRetry={(id) => console.log('Retry:', id)}
+						onDelete={(id) => console.log('Delete:', id)}
+						onClearHistory={() => console.log('Clear history')}
+					/>
 				</section>
 			</div>
 		</div>

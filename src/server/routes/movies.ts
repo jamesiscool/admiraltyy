@@ -14,7 +14,16 @@ const idParamSchema = z.object({ id: z.string() })
 const addMovieSchema = z.object({ tmdbId: z.number(), resolution: z.enum(resolutions).optional() })
 const updateMovieSchema = z.object({ monitored: z.boolean().optional() })
 const deleteQuerySchema = z.object({ deleteFiles: z.string().optional() })
-const grabSchema = z.object({ downloadUrl: z.string(), title: z.string() })
+const grabSchema = z.object({
+	guid: z.string(),
+	title: z.string(),
+	downloadUrl: z.string(),
+	infoUrl: z.string().optional(),
+	size: z.number(),
+	publishDate: z.string(),
+	indexerId: z.string(),
+	indexerName: z.string(),
+})
 
 // Preview type for list/card display (minimal fields)
 export interface MoviePreview {
@@ -177,11 +186,12 @@ export const moviesRoutes = new Hono()
 			throw new HTTPException(400, { message: 'Invalid movie ID' })
 		}
 
-		const { downloadUrl, title } = c.req.valid('json')
+		const releaseData = c.req.valid('json')
+		const now = new Date().toISOString()
 
 		try {
 			// Download the NZB file
-			const nzbPath = await downloadNzb(downloadUrl, title)
+			const nzbPath = await downloadNzb(releaseData.downloadUrl, releaseData.title)
 
 			// Read NZB content and encode as base64
 			const nzbFile = Bun.file(nzbPath)
@@ -189,19 +199,51 @@ export const moviesRoutes = new Hono()
 			const base64Content = Buffer.from(nzbContent).toString('base64')
 
 			// Queue to NZBGet
-			const sanitizedFilename = `${title.replace(/[^a-zA-Z0-9._-]/g, '_')}.nzb`
+			const sanitizedFilename = `${releaseData.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.nzb`
 			const nzbId = await appendNzb({
 				filename: sanitizedFilename,
 				nzbContent: base64Content,
 				category: 'movies',
 			})
 
-			if (nzbId > 0) {
-				console.log(`[Movies] NZB queued to NZBGet with ID: ${nzbId}`)
-				return c.json({ nzbPath, nzbId })
+			if (nzbId <= 0) {
+				console.error('[Movies] NZBGet returned invalid ID:', nzbId)
+				throw new HTTPException(500, { message: 'NZBGet failed to queue download' })
 			}
-			console.error('[Movies] NZBGet returned invalid ID:', nzbId)
-			throw new HTTPException(500, { message: 'NZBGet failed to queue download' })
+
+			// Create release record
+			const [release] = await db
+				.insert(schema.releases)
+				.values({
+					movieId: numId,
+					guid: releaseData.guid,
+					title: releaseData.title,
+					downloadUrl: releaseData.downloadUrl,
+					infoUrl: releaseData.infoUrl,
+					size: releaseData.size,
+					publishDate: releaseData.publishDate,
+					indexerId: releaseData.indexerId,
+					indexerName: releaseData.indexerName,
+					nzbPath,
+					grabbedAt: now,
+				})
+				.returning()
+
+			// Create download record
+			const [download] = await db
+				.insert(schema.downloads)
+				.values({
+					releaseId: release.id,
+					nzbId,
+					title: releaseData.title,
+					status: 'queued',
+					size: releaseData.size,
+					queuedAt: now,
+				})
+				.returning()
+
+			console.log(`[Movies] NZB queued (NZBID: ${nzbId}) download: ${download.id}`)
+			return c.json({ release, download })
 		} catch (error) {
 			console.error('[Movies] Failed to grab release:', error)
 			if (error instanceof HTTPException) throw error
@@ -232,8 +274,14 @@ export const moviesRoutes = new Hono()
 		// Delete associated files from db
 		await db.delete(schema.files).where(eq(schema.files.movieId, numId))
 
-		// Delete associated downloads
-		await db.delete(schema.downloads).where(eq(schema.downloads.movieId, numId))
+		// Get releases for this movie to delete their downloads
+		const movieReleases = await db.select({ id: schema.releases.id }).from(schema.releases).where(eq(schema.releases.movieId, numId))
+		for (const release of movieReleases) {
+			await db.delete(schema.downloads).where(eq(schema.downloads.releaseId, release.id))
+		}
+
+		// Delete releases
+		await db.delete(schema.releases).where(eq(schema.releases.movieId, numId))
 
 		// Delete movie
 		await db.delete(schema.movies).where(eq(schema.movies.id, numId))
