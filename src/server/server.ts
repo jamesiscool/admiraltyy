@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { startNzbget } from './nzbget/nzbgetProcess'
 import { activityRoutes } from './routes/activity'
 import { moviesRoutes } from './routes/movies'
 import { searchRoutes } from './routes/search'
@@ -10,6 +11,9 @@ import { initSettings } from './settings'
 
 // Initialize settings before anything else
 initSettings()
+
+// Start NZBGet if enabled
+startNzbget()
 
 const app = new Hono()
 	.use('*', cors())

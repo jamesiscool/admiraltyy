@@ -1,5 +1,35 @@
+import { mkdir } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { ofetch } from 'ofetch'
 import { getSettings, type Indexer } from '../settings'
+
+// Temp directory for NZB downloads
+const TEMP_DIR = join(tmpdir(), 'admiralty')
+
+async function ensureTempDir(): Promise<void> {
+	await mkdir(TEMP_DIR, { recursive: true })
+}
+
+export async function downloadNzb(downloadUrl: string, filename: string): Promise<string> {
+	await ensureTempDir()
+
+	const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+	const nzbPath = join(TEMP_DIR, `${sanitizedFilename}.nzb`)
+
+	console.log(`[Indexer] Downloading NZB from: ${downloadUrl}`)
+
+	const response = await fetch(downloadUrl)
+	if (!response.ok) {
+		throw new Error(`Failed to download NZB: ${response.status} ${response.statusText}`)
+	}
+
+	const content = await response.arrayBuffer()
+	await Bun.write(nzbPath, content)
+
+	console.log(`[Indexer] NZB saved to: ${nzbPath}`)
+	return nzbPath
+}
 
 // Newznab JSON Response Types
 

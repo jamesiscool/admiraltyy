@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator'
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { fetchSeriesPreview, fetchSeriesWithEpisodes } from '../api/tmdb'
 import { db, schema } from '../db'
@@ -202,20 +203,20 @@ export const seriesRoutes = new Hono()
 	// GET /api/series - List all series (preview data for list page)
 	.get('/', async (c) => {
 		const previews = await listSeriesPreviews()
-		return c.json({ data: previews, success: true as const })
+		return c.json(previews)
 	})
 	// GET /api/series/tmdb/:tmdbId - Preview series from TMDB (for add dialog)
 	.get('/tmdb/:tmdbId', zValidator('param', tmdbIdParamSchema), async (c) => {
 		const { tmdbId } = c.req.valid('param')
 		const numId = parseInt(tmdbId, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid TMDB ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid TMDB ID' })
 		}
 		try {
 			const preview = await fetchSeriesPreview(numId)
-			return c.json({ data: preview, success: true as const })
+			return c.json(preview)
 		} catch {
-			return c.json({ success: false as const, error: 'Failed to fetch series from TMDB' }, 500)
+			throw new HTTPException(500, { message: 'Failed to fetch series from TMDB' })
 		}
 	})
 	// GET /api/series/:id - Get single series with nested seasons/episodes/files
@@ -223,13 +224,13 @@ export const seriesRoutes = new Hono()
 		const { id } = c.req.valid('param')
 		const numId = parseInt(id, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid series ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid series ID' })
 		}
 		const seriesWithDetails = await findSeriesWithDetails(numId)
 		if (!seriesWithDetails) {
-			return c.json({ success: false as const, error: 'Series not found' }, 404)
+			throw new HTTPException(404, { message: 'Series not found' })
 		}
-		return c.json({ data: seriesWithDetails, success: true as const })
+		return c.json(seriesWithDetails)
 	})
 	// POST /api/series - Create a new series with seasons and episodes
 	.post('/', zValidator('json', addSeriesSchema), async (c) => {
@@ -238,7 +239,7 @@ export const seriesRoutes = new Hono()
 		// Check if series already exists
 		const existing = await db.select().from(schema.series).where(eq(schema.series.tmdbId, body.tmdbId))
 		if (existing.length > 0) {
-			return c.json({ success: false as const, error: 'Series already exists' }, 409)
+			throw new HTTPException(409, { message: 'Series already exists' })
 		}
 
 		// Fetch full series data with episodes for monitored seasons
@@ -311,38 +312,38 @@ export const seriesRoutes = new Hono()
 			}
 		}
 
-		return c.json({ success: true as const, data: insertedSeries })
+		return c.json(insertedSeries)
 	})
 	// PUT /api/series/:id - Update a series
 	.put('/:id', zValidator('param', idParamSchema), zValidator('json', z.object({ monitored: z.boolean() })), async (c) => {
 		const { id } = c.req.valid('param')
 		const numId = parseInt(id, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid series ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid series ID' })
 		}
 
 		const body = c.req.valid('json')
 		const existing = await db.select().from(schema.series).where(eq(schema.series.id, numId))
 		if (!existing.length) {
-			return c.json({ success: false as const, error: 'Series not found' }, 404)
+			throw new HTTPException(404, { message: 'Series not found' })
 		}
 
 		const [updated] = await db.update(schema.series).set({ monitored: body.monitored }).where(eq(schema.series.id, numId)).returning()
 
-		return c.json({ success: true as const, data: updated })
+		return c.json(updated)
 	})
 	// PUT /api/series/:id/seasons/:seasonId - Update a season
 	.put('/:id/seasons/:seasonId', zValidator('param', z.object({ id: z.string(), seasonId: z.string() })), zValidator('json', z.object({ monitored: z.boolean() })), async (c) => {
 		const { seasonId } = c.req.valid('param')
 		const numId = parseInt(seasonId, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid season ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid season ID' })
 		}
 
 		const body = c.req.valid('json')
 		const existing = await db.select().from(schema.seasons).where(eq(schema.seasons.id, numId))
 		if (!existing.length) {
-			return c.json({ success: false as const, error: 'Season not found' }, 404)
+			throw new HTTPException(404, { message: 'Season not found' })
 		}
 
 		// Update season
@@ -351,39 +352,39 @@ export const seriesRoutes = new Hono()
 		// Also update all episodes in this season
 		await db.update(schema.episodes).set({ monitored: body.monitored }).where(eq(schema.episodes.seasonId, numId))
 
-		return c.json({ success: true as const, data: updated })
+		return c.json(updated)
 	})
 	// PUT /api/series/:id/episodes/:episodeId - Update an episode
 	.put('/:id/episodes/:episodeId', zValidator('param', z.object({ id: z.string(), episodeId: z.string() })), zValidator('json', z.object({ monitored: z.boolean() })), async (c) => {
 		const { episodeId } = c.req.valid('param')
 		const numId = parseInt(episodeId, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid episode ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid episode ID' })
 		}
 
 		const body = c.req.valid('json')
 		const existing = await db.select().from(schema.episodes).where(eq(schema.episodes.id, numId))
 		if (!existing.length) {
-			return c.json({ success: false as const, error: 'Episode not found' }, 404)
+			throw new HTTPException(404, { message: 'Episode not found' })
 		}
 
 		const [updated] = await db.update(schema.episodes).set({ monitored: body.monitored }).where(eq(schema.episodes.id, numId)).returning()
 
-		return c.json({ success: true as const, data: updated })
+		return c.json(updated)
 	})
 	// DELETE /api/series/:id - Delete a series
 	.delete('/:id', zValidator('param', idParamSchema), zValidator('query', deleteQuerySchema), async (c) => {
 		const { id } = c.req.valid('param')
 		const numId = parseInt(id, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid series ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid series ID' })
 		}
 
 		const { deleteFiles } = c.req.valid('query')
 
 		const seriesRecord = await db.select().from(schema.series).where(eq(schema.series.id, numId))
 		if (!seriesRecord.length) {
-			return c.json({ success: false as const, error: 'Series not found' }, 404)
+			throw new HTTPException(404, { message: 'Series not found' })
 		}
 
 		// Get all seasons for this series
@@ -419,5 +420,5 @@ export const seriesRoutes = new Hono()
 		// Delete series
 		await db.delete(schema.series).where(eq(schema.series.id, numId))
 
-		return c.json({ success: true as const })
+		return c.body(null, 204)
 	})

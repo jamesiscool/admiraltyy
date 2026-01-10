@@ -145,6 +145,33 @@ export const insertDownloadSchema = createInsertSchema(downloads)
 export type Download = z.infer<typeof selectDownloadSchema>
 export type DownloadInsert = z.infer<typeof insertDownloadSchema>
 
+// Releases (grabbed indexer results)
+export const releases = sqliteTable('releases', {
+	id: integer('id').primaryKey(),
+	movieId: integer('movie_id').references(() => movies.id),
+	episodeId: integer('episode_id').references(() => episodes.id),
+	downloadId: integer('download_id').references(() => downloads.id),
+
+	// From IndexerRelease
+	guid: text('guid').notNull(),
+	title: text('title').notNull(),
+	downloadUrl: text('download_url').notNull(),
+	infoUrl: text('info_url'),
+	size: integer('size').notNull(),
+	publishDate: text('publish_date').notNull(),
+	indexerId: text('indexer_id').notNull(),
+	indexerName: text('indexer_name').notNull(),
+
+	// Grab metadata
+	nzbPath: text('nzb_path'),
+	grabbedAt: text('grabbed_at').notNull(),
+})
+
+export const selectReleaseSchema = createSelectSchema(releases)
+export const insertReleaseSchema = createInsertSchema(releases)
+export type Release = z.infer<typeof selectReleaseSchema>
+export type ReleaseInsert = z.infer<typeof insertReleaseSchema>
+
 // Indexers
 export const indexers = sqliteTable('indexers', {
 	id: integer('id').primaryKey(),

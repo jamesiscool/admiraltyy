@@ -78,6 +78,13 @@ const usenetServerSchema = z.object({
 	enabled: z.boolean(),
 })
 
+const nzbgetSettingsSchema = z.object({
+	username: z.string(),
+	password: z.string(),
+	host: z.string(),
+	port: z.number(),
+})
+
 export const settingsSchema = z.object({
 	folders: foldersSchema,
 	downloadFolder: z.string().default(''),
@@ -88,6 +95,7 @@ export const settingsSchema = z.object({
 	languageSettings: languageSettingsSchema,
 	formatSettings: formatSettingsSchema,
 	authSettings: authSettingsSchema,
+	nzbgetSettings: nzbgetSettingsSchema,
 	tmdbApiKey: z.string(),
 })
 
@@ -102,6 +110,7 @@ export type LanguageSettings = z.infer<typeof languageSettingsSchema>
 export type FormatPreference = z.infer<typeof formatPreferenceSchema>
 export type FormatSettings = z.infer<typeof formatSettingsSchema>
 export type AuthSettings = z.infer<typeof authSettingsSchema>
+export type NzbgetSettings = z.infer<typeof nzbgetSettingsSchema>
 
 const defaultSettings: Settings = {
 	folders: {
@@ -149,6 +158,12 @@ const defaultSettings: Settings = {
 		username: '',
 		apiKey: generateApiKey(),
 	},
+	nzbgetSettings: {
+		username: 'admiraltyy',
+		password: generateNzbgetPassword(),
+		host: '127.0.0.1',
+		port: 28561,
+	},
 	tmdbApiKey: '431a8708161bcd1f1fbe7536137e61ed',
 }
 
@@ -161,6 +176,16 @@ function generateApiKey(): string {
 		key += chars[Math.floor(Math.random() * chars.length)]
 	}
 	return key
+}
+
+export function generateNzbgetPassword(): string {
+	// Only alphanumeric chars - safe for URLs and terminals without escaping
+	const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+	let password = ''
+	for (let i = 0; i < 32; i++) {
+		password += chars[Math.floor(Math.random() * chars.length)]
+	}
+	return password
 }
 
 // Settings State
@@ -177,7 +202,7 @@ export function updateSettings(updates: Partial<Settings>): Settings {
 	return currentSettings
 }
 
-function saveSettings(): void {
+export function saveSettings(): void {
 	const dir = dirname(paths.settingsPath)
 	if (!existsSync(dir)) {
 		mkdirSync(dir, { recursive: true })

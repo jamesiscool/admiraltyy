@@ -1,9 +1,10 @@
 import { existsSync } from 'node:fs'
 import { eq, isNotNull } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { HTTPException } from 'hono/http-exception'
 import { db } from '../db'
 import { episodes, files, movies, seasons, series } from '../db/schema'
-import { buildTitleMap, listSubfolders, listVideoFiles, listVideoFilesRecursive, matchFolder, parseEpisode, parseQuality, type ScannedFile } from '../lib/scan'
+import { buildTitleMap, listSubfolders, listVideoFiles, listVideoFilesRecursive, matchFolder, parseEpisode, parseQuality, type ScannedFile } from '../lib/fileScan'
 import { getSettings } from '../settings'
 
 export const tasksRoutes = new Hono()
@@ -13,7 +14,7 @@ export const tasksRoutes = new Hono()
 		const movieFolders = settings.folders.movies
 
 		if (movieFolders.length === 0) {
-			return c.json({ error: 'No movie folders configured' }, 400)
+			throw new HTTPException(400, { message: 'No movie folders configured' })
 		}
 
 		// Check for deleted files first
@@ -65,7 +66,7 @@ export const tasksRoutes = new Hono()
 		const tvFolders = settings.folders.tv
 
 		if (tvFolders.length === 0) {
-			return c.json({ error: 'No TV folders configured' }, 400)
+			throw new HTTPException(400, { message: 'No TV folders configured' })
 		}
 
 		// Check for deleted files first

@@ -1,29 +1,32 @@
 import { Hono } from 'hono'
-import { db, schema } from '../db'
+import { HTTPException } from 'hono/http-exception'
+import { fetchNzbgetStatus, fetchNzbgetVersion, listNzbgetQueue } from '../nzbget/nzbgetApi'
 
 export const activityRoutes = new Hono()
-	// GET /api/activity/queue - Get download queue
-	.get('/queue', async (c) => {
-		const downloads = await db.select().from(schema.downloads)
-		return c.json({ data: downloads, success: true as const })
+	// GET /api/activity/nzbget/status - Get NZBGet status
+	.get('/nzbget/status', async (c) => {
+		try {
+			const status = await fetchNzbgetStatus()
+			return c.json(status)
+		} catch (error) {
+			throw new HTTPException(500, { message: String(error) })
+		}
 	})
-	// GET /api/activity/history - Get download history
-	.get('/history', async (c) => {
-		const downloads = await db.select().from(schema.downloads)
-		return c.json({ data: downloads, success: true as const })
+	// GET /api/activity/nzbget/version - Get NZBGet version
+	.get('/nzbget/version', async (c) => {
+		try {
+			const version = await fetchNzbgetVersion()
+			return c.json(version)
+		} catch (error) {
+			throw new HTTPException(500, { message: String(error) })
+		}
 	})
-	// POST /api/activity/queue/:id/pause - Pause a download
-	.post('/queue/:id/pause', async (c) => {
-		// TODO: Implement download pause
-		return c.json({ success: false as const, error: 'Not implemented' }, 501)
-	})
-	// POST /api/activity/queue/:id/resume - Resume a download
-	.post('/queue/:id/resume', async (c) => {
-		// TODO: Implement download resume
-		return c.json({ success: false as const, error: 'Not implemented' }, 501)
-	})
-	// DELETE /api/activity/queue/:id - Cancel a download
-	.delete('/queue/:id', async (c) => {
-		// TODO: Implement download cancellation
-		return c.json({ success: false as const, error: 'Not implemented' }, 501)
+	// GET /api/activity/nzbget/queue - Get NZBGet download queue
+	.get('/nzbget/queue', async (c) => {
+		try {
+			const queue = await listNzbgetQueue()
+			return c.json(queue)
+		} catch (error) {
+			throw new HTTPException(500, { message: String(error) })
+		}
 	})

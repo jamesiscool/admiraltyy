@@ -1,17 +1,20 @@
 import { zValidator } from '@hono/zod-validator'
 import { and, eq, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
 import { fetchMovieDetails } from '../api/tmdb'
 import { db, schema } from '../db'
 import { type Resolution, resolutions } from '../db/schema'
-import { searchMovieReleases } from '../lib/indexer'
+import { downloadNzb, searchMovieReleases } from '../lib/indexer'
 import { logInfo } from '../log/logs'
+import { appendNzb } from '../nzbget/nzbgetApi'
 
 const idParamSchema = z.object({ id: z.string() })
 const addMovieSchema = z.object({ tmdbId: z.number(), resolution: z.enum(resolutions).optional() })
 const updateMovieSchema = z.object({ monitored: z.boolean().optional() })
 const deleteQuerySchema = z.object({ deleteFiles: z.string().optional() })
+const grabSchema = z.object({ downloadUrl: z.string(), title: z.string() })
 
 // Preview type for list/card display (minimal fields)
 export interface MoviePreview {
@@ -54,18 +57,18 @@ export const moviesRoutes = new Hono()
 	// GET /api/movies - List all movies (preview data only)
 	.get('/', async (c) => {
 		const movies = await listMoviePreviews()
-		return c.json({ data: movies, success: true as const })
+		return c.json(movies)
 	})
 	// GET /api/movies/:id - Get a single movie
 	.get('/:id', zValidator('param', idParamSchema), async (c) => {
 		const { id } = c.req.valid('param')
 		const numId = parseInt(id, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid movie ID' })
 		}
 		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, numId))
 		if (!movie.length) {
-			return c.json({ success: false as const, error: 'Movie not found' }, 404)
+			throw new HTTPException(404, { message: 'Movie not found' })
 		}
 		// Get files for this movie
 		const files = await db
@@ -73,7 +76,7 @@ export const moviesRoutes = new Hono()
 			.from(schema.files)
 			.where(and(eq(schema.files.movieId, numId), eq(schema.files.isDeleted, false)))
 		const sizeBytes = files.reduce((sum, f) => sum + f.size, 0) || undefined
-		return c.json({ data: { ...movie[0], sizeBytes, files }, success: true as const })
+		return c.json({ ...movie[0], sizeBytes, files })
 	})
 	// POST /api/movies - Create a new movie
 	.post('/', zValidator('json', addMovieSchema), async (c) => {
@@ -82,7 +85,7 @@ export const moviesRoutes = new Hono()
 		// Check if movie already exists
 		const existing = await db.select().from(schema.movies).where(eq(schema.movies.tmdbId, body.tmdbId))
 		if (existing.length > 0) {
-			return c.json({ success: false as const, error: 'Movie already exists' }, 409)
+			throw new HTTPException(409, { message: 'Movie already exists' })
 		}
 
 		// Fetch movie details from TMDB
@@ -114,21 +117,21 @@ export const moviesRoutes = new Hono()
 			})
 			.returning()
 
-		return c.json({ success: true as const, data: result[0] })
+		return c.json(result[0])
 	})
 	// PUT /api/movies/:id - Update a movie
 	.put('/:id', zValidator('param', idParamSchema), zValidator('json', updateMovieSchema), async (c) => {
 		const { id } = c.req.valid('param')
 		const numId = parseInt(id, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid movie ID' })
 		}
 
 		const body = c.req.valid('json')
 
 		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, numId))
 		if (!movie.length) {
-			return c.json({ success: false as const, error: 'Movie not found' }, 404)
+			throw new HTTPException(404, { message: 'Movie not found' })
 		}
 
 		const updates: Partial<{ monitored: boolean }> = {}
@@ -137,23 +140,23 @@ export const moviesRoutes = new Hono()
 		}
 
 		if (Object.keys(updates).length === 0) {
-			return c.json({ success: true as const, data: movie[0] })
+			return c.json(movie[0])
 		}
 
 		const result = await db.update(schema.movies).set(updates).where(eq(schema.movies.id, numId)).returning()
-		return c.json({ success: true as const, data: result[0] })
+		return c.json(result[0])
 	})
 	// POST /api/movies/:id/search - Manual search for movie releases
 	.post('/:id/search', zValidator('param', idParamSchema), async (c) => {
 		const { id } = c.req.valid('param')
 		const numId = parseInt(id, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid movie ID' })
 		}
 
 		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, numId))
 		if (!movie.length) {
-			return c.json({ success: false as const, error: 'Movie not found' }, 404)
+			throw new HTTPException(404, { message: 'Movie not found' })
 		}
 
 		const m = movie[0]
@@ -164,21 +167,60 @@ export const moviesRoutes = new Hono()
 			year: m.year,
 		})
 
-		return c.json({ success: true as const, data: releases })
+		return c.json(releases)
+	})
+	// POST /api/movies/:id/grab - Download NZB and queue to NZBGet
+	.post('/:id/grab', zValidator('param', idParamSchema), zValidator('json', grabSchema), async (c) => {
+		const { id } = c.req.valid('param')
+		const numId = parseInt(id, 10)
+		if (Number.isNaN(numId)) {
+			throw new HTTPException(400, { message: 'Invalid movie ID' })
+		}
+
+		const { downloadUrl, title } = c.req.valid('json')
+
+		try {
+			// Download the NZB file
+			const nzbPath = await downloadNzb(downloadUrl, title)
+
+			// Read NZB content and encode as base64
+			const nzbFile = Bun.file(nzbPath)
+			const nzbContent = await nzbFile.arrayBuffer()
+			const base64Content = Buffer.from(nzbContent).toString('base64')
+
+			// Queue to NZBGet
+			const sanitizedFilename = `${title.replace(/[^a-zA-Z0-9._-]/g, '_')}.nzb`
+			const nzbId = await appendNzb({
+				filename: sanitizedFilename,
+				nzbContent: base64Content,
+				category: 'movies',
+			})
+
+			if (nzbId > 0) {
+				console.log(`[Movies] NZB queued to NZBGet with ID: ${nzbId}`)
+				return c.json({ nzbPath, nzbId })
+			}
+			console.error('[Movies] NZBGet returned invalid ID:', nzbId)
+			throw new HTTPException(500, { message: 'NZBGet failed to queue download' })
+		} catch (error) {
+			console.error('[Movies] Failed to grab release:', error)
+			if (error instanceof HTTPException) throw error
+			throw new HTTPException(500, { message: 'Failed to download NZB' })
+		}
 	})
 	// DELETE /api/movies/:id - Delete a movie
 	.delete('/:id', zValidator('param', idParamSchema), zValidator('query', deleteQuerySchema), async (c) => {
 		const { id } = c.req.valid('param')
 		const numId = parseInt(id, 10)
 		if (Number.isNaN(numId)) {
-			return c.json({ success: false as const, error: 'Invalid movie ID' }, 400)
+			throw new HTTPException(400, { message: 'Invalid movie ID' })
 		}
 
 		const { deleteFiles } = c.req.valid('query')
 
 		const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, numId))
 		if (!movie.length) {
-			return c.json({ success: false as const, error: 'Movie not found' }, 404)
+			throw new HTTPException(404, { message: 'Movie not found' })
 		}
 
 		// Delete movie folder from disk if requested
@@ -196,5 +238,5 @@ export const moviesRoutes = new Hono()
 		// Delete movie
 		await db.delete(schema.movies).where(eq(schema.movies.id, numId))
 
-		return c.json({ success: true as const })
+		return c.body(null, 204)
 	})

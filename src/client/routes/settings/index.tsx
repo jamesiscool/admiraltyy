@@ -121,7 +121,7 @@ function SettingsPage() {
 										isLast={index === settings.indexers.length - 1}
 										onDelete={() => {
 											updateSettings.mutate({
-												indexers: settings.indexers.filter((i) => i.id !== indexer.id),
+												json: { indexers: settings.indexers.filter((i) => i.id !== indexer.id) },
 											})
 										}}
 										onTest={async () => {
@@ -130,7 +130,7 @@ function SettingsPage() {
 										}}
 										onToggle={(enabled) => {
 											updateSettings.mutate({
-												indexers: settings.indexers.map((i) => (i.id === indexer.id ? { ...i, enabled } : i)),
+												json: { indexers: settings.indexers.map((i) => (i.id === indexer.id ? { ...i, enabled } : i)) },
 											})
 										}}
 										onMoveUp={() => {
@@ -139,7 +139,7 @@ function SettingsPage() {
 												;[newIndexers[index - 1], newIndexers[index]] = [newIndexers[index], newIndexers[index - 1]]
 												// Update priorities to match new order
 												const reordered = newIndexers.map((item, i) => ({ ...item, priority: i }))
-												updateSettings.mutate({ indexers: reordered })
+												updateSettings.mutate({ json: { indexers: reordered } })
 											}
 										}}
 										onMoveDown={() => {
@@ -148,12 +148,12 @@ function SettingsPage() {
 												;[newIndexers[index], newIndexers[index + 1]] = [newIndexers[index + 1], newIndexers[index]]
 												// Update priorities to match new order
 												const reordered = newIndexers.map((item, i) => ({ ...item, priority: i }))
-												updateSettings.mutate({ indexers: reordered })
+												updateSettings.mutate({ json: { indexers: reordered } })
 											}
 										}}
 										onSave={(updated) => {
 											updateSettings.mutate({
-												indexers: settings.indexers.map((i) => (i.id === updated.id ? updated : i)),
+												json: { indexers: settings.indexers.map((i) => (i.id === updated.id ? updated : i)) },
 											})
 										}}
 									/>
@@ -197,7 +197,7 @@ function SettingsPage() {
 										isLast={index === settings.usenetServers.length - 1}
 										onDelete={() => {
 											updateSettings.mutate({
-												usenetServers: settings.usenetServers.filter((s) => s.id !== server.id),
+												json: { usenetServers: settings.usenetServers.filter((s) => s.id !== server.id) },
 											})
 										}}
 										onTest={async () => {
@@ -206,7 +206,7 @@ function SettingsPage() {
 										}}
 										onToggle={(enabled) => {
 											updateSettings.mutate({
-												usenetServers: settings.usenetServers.map((s) => (s.id === server.id ? { ...s, enabled } : s)),
+												json: { usenetServers: settings.usenetServers.map((s) => (s.id === server.id ? { ...s, enabled } : s)) },
 											})
 										}}
 										onMoveUp={() => {
@@ -215,7 +215,7 @@ function SettingsPage() {
 												;[newServers[index - 1], newServers[index]] = [newServers[index], newServers[index - 1]]
 												// Update priorities to match new order
 												const reordered = newServers.map((item, i) => ({ ...item, priority: i }))
-												updateSettings.mutate({ usenetServers: reordered })
+												updateSettings.mutate({ json: { usenetServers: reordered } })
 											}
 										}}
 										onMoveDown={() => {
@@ -224,12 +224,12 @@ function SettingsPage() {
 												;[newServers[index], newServers[index + 1]] = [newServers[index + 1], newServers[index]]
 												// Update priorities to match new order
 												const reordered = newServers.map((item, i) => ({ ...item, priority: i }))
-												updateSettings.mutate({ usenetServers: reordered })
+												updateSettings.mutate({ json: { usenetServers: reordered } })
 											}
 										}}
 										onSave={(updated) => {
 											updateSettings.mutate({
-												usenetServers: settings.usenetServers.map((s) => (s.id === updated.id ? updated : s)),
+												json: { usenetServers: settings.usenetServers.map((s) => (s.id === updated.id ? updated : s)) },
 											})
 										}}
 									/>
@@ -275,7 +275,7 @@ function SettingsPage() {
 									id="download-folder"
 									type="text"
 									value={settings.downloadFolder}
-									onChange={(e) => updateSettings.mutate({ downloadFolder: e.target.value })}
+									onChange={(e) => updateSettings.mutate({ json: { downloadFolder: e.target.value } })}
 									placeholder="/path/to/downloads"
 									className="font-mono"
 								/>
@@ -309,14 +309,14 @@ function SettingsPage() {
 										movies: settings.folders.movies.filter((f) => f.id !== id),
 										tv: settings.folders.tv.filter((f) => f.id !== id),
 									}
-									updateSettings.mutate({ folders: newFolders })
+									updateSettings.mutate({ json: { folders: newFolders } })
 								}}
 								onSetDefault={(id, type) => {
 									const newFolders = {
 										...settings.folders,
 										[type]: settings.folders[type].map((f) => ({ ...f, isDefault: f.id === id })),
 									}
-									updateSettings.mutate({ folders: newFolders })
+									updateSettings.mutate({ json: { folders: newFolders } })
 								}}
 							/>
 						</section>
@@ -352,7 +352,7 @@ function SettingsPage() {
 												}
 											: r,
 									)
-									updateSettings.mutate({ resolutions: newResolutions })
+									updateSettings.mutate({ json: { resolutions: newResolutions } })
 								}}
 							/>
 						</section>
@@ -385,7 +385,7 @@ function SettingsPage() {
 										})
 										.filter((l): l is NonNullable<typeof l> => l !== null)
 									updateSettings.mutate({
-										languageSettings: { ...settings.languageSettings, subtitleLanguages: newLangs },
+										json: { languageSettings: { ...settings.languageSettings, subtitleLanguages: newLangs } },
 									})
 								}}
 								onReorderAudio={(codes) => {
@@ -396,33 +396,37 @@ function SettingsPage() {
 										})
 										.filter((l): l is NonNullable<typeof l> => l !== null)
 									updateSettings.mutate({
-										languageSettings: { ...settings.languageSettings, audioLanguages: newLangs },
+										json: { languageSettings: { ...settings.languageSettings, audioLanguages: newLangs } },
 									})
 								}}
 								onTogglePreferOriginal={(enabled) => {
 									updateSettings.mutate({
-										languageSettings: { ...settings.languageSettings, preferOriginalAudio: enabled },
+										json: { languageSettings: { ...settings.languageSettings, preferOriginalAudio: enabled } },
 									})
 								}}
 								onToggleAcceptFallback={(enabled) => {
 									updateSettings.mutate({
-										languageSettings: { ...settings.languageSettings, acceptAnyAudioFallback: enabled },
+										json: { languageSettings: { ...settings.languageSettings, acceptAnyAudioFallback: enabled } },
 									})
 								}}
 								onAdd={(type, code) => console.log('Add language:', type, code)}
 								onRemove={(type, code) => {
 									if (type === 'subtitle') {
 										updateSettings.mutate({
-											languageSettings: {
-												...settings.languageSettings,
-												subtitleLanguages: settings.languageSettings.subtitleLanguages.filter((l) => l.code !== code),
+											json: {
+												languageSettings: {
+													...settings.languageSettings,
+													subtitleLanguages: settings.languageSettings.subtitleLanguages.filter((l) => l.code !== code),
+												},
 											},
 										})
 									} else {
 										updateSettings.mutate({
-											languageSettings: {
-												...settings.languageSettings,
-												audioLanguages: settings.languageSettings.audioLanguages.filter((l) => l.code !== code),
+											json: {
+												languageSettings: {
+													...settings.languageSettings,
+													audioLanguages: settings.languageSettings.audioLanguages.filter((l) => l.code !== code),
+												},
 											},
 										})
 									}
@@ -458,7 +462,7 @@ function SettingsPage() {
 										})
 										.filter((c): c is NonNullable<typeof c> => c !== null)
 									updateSettings.mutate({
-										formatSettings: { ...settings.formatSettings, codecs: newCodecs },
+										json: { formatSettings: { ...settings.formatSettings, codecs: newCodecs } },
 									})
 								}}
 								onReorderHdr={(ids) => {
@@ -469,7 +473,7 @@ function SettingsPage() {
 										})
 										.filter((f): f is NonNullable<typeof f> => f !== null)
 									updateSettings.mutate({
-										formatSettings: { ...settings.formatSettings, hdrFormats: newFormats },
+										json: { formatSettings: { ...settings.formatSettings, hdrFormats: newFormats } },
 									})
 								}}
 								onReorderAudio={(ids) => {
@@ -480,30 +484,36 @@ function SettingsPage() {
 										})
 										.filter((f): f is NonNullable<typeof f> => f !== null)
 									updateSettings.mutate({
-										formatSettings: { ...settings.formatSettings, audioFormats: newFormats },
+										json: { formatSettings: { ...settings.formatSettings, audioFormats: newFormats } },
 									})
 								}}
 								onAddFormat={(type, name) => console.log('Add format:', type, name)}
 								onRemoveFormat={(type, id) => {
 									if (type === 'codec') {
 										updateSettings.mutate({
-											formatSettings: {
-												...settings.formatSettings,
-												codecs: settings.formatSettings.codecs.filter((c) => c.id !== id),
+											json: {
+												formatSettings: {
+													...settings.formatSettings,
+													codecs: settings.formatSettings.codecs.filter((c) => c.id !== id),
+												},
 											},
 										})
 									} else if (type === 'hdr') {
 										updateSettings.mutate({
-											formatSettings: {
-												...settings.formatSettings,
-												hdrFormats: settings.formatSettings.hdrFormats.filter((f) => f.id !== id),
+											json: {
+												formatSettings: {
+													...settings.formatSettings,
+													hdrFormats: settings.formatSettings.hdrFormats.filter((f) => f.id !== id),
+												},
 											},
 										})
 									} else {
 										updateSettings.mutate({
-											formatSettings: {
-												...settings.formatSettings,
-												audioFormats: settings.formatSettings.audioFormats.filter((f) => f.id !== id),
+											json: {
+												formatSettings: {
+													...settings.formatSettings,
+													audioFormats: settings.formatSettings.audioFormats.filter((f) => f.id !== id),
+												},
 											},
 										})
 									}
@@ -517,23 +527,29 @@ function SettingsPage() {
 								onSaveFormat={(type, id, matchTerms, excludeTerms) => {
 									if (type === 'codec') {
 										updateSettings.mutate({
-											formatSettings: {
-												...settings.formatSettings,
-												codecs: settings.formatSettings.codecs.map((c) => (c.id === id ? { ...c, matchTerms, excludeTerms } : c)),
+											json: {
+												formatSettings: {
+													...settings.formatSettings,
+													codecs: settings.formatSettings.codecs.map((c) => (c.id === id ? { ...c, matchTerms, excludeTerms } : c)),
+												},
 											},
 										})
 									} else if (type === 'hdr') {
 										updateSettings.mutate({
-											formatSettings: {
-												...settings.formatSettings,
-												hdrFormats: settings.formatSettings.hdrFormats.map((f) => (f.id === id ? { ...f, matchTerms, excludeTerms } : f)),
+											json: {
+												formatSettings: {
+													...settings.formatSettings,
+													hdrFormats: settings.formatSettings.hdrFormats.map((f) => (f.id === id ? { ...f, matchTerms, excludeTerms } : f)),
+												},
 											},
 										})
 									} else {
 										updateSettings.mutate({
-											formatSettings: {
-												...settings.formatSettings,
-												audioFormats: settings.formatSettings.audioFormats.map((f) => (f.id === id ? { ...f, matchTerms, excludeTerms } : f)),
+											json: {
+												formatSettings: {
+													...settings.formatSettings,
+													audioFormats: settings.formatSettings.audioFormats.map((f) => (f.id === id ? { ...f, matchTerms, excludeTerms } : f)),
+												},
 											},
 										})
 									}
