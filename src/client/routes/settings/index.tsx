@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Download, FileVideo, FolderOpen, Gauge, Languages, Loader2, Plus, Radar, Server } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Input } from '@/client/components/ui/input'
-import { useSettings, useUpdateSettings } from '@/client/lib/api'
+import { useSettings, useTestUsenetServer, useUpdateSettings } from '@/client/lib/api'
 import { FolderSection } from './-folder-section'
 import { FormatsSection } from './-formats-section'
 import { IndexerCard } from './-indexer-card'
@@ -28,6 +28,7 @@ function SettingsPage() {
 	const [activeSection, setActiveSection] = useState<string>('indexers')
 	const { data: settings, isLoading, error } = useSettings()
 	const updateSettings = useUpdateSettings()
+	const testUsenetServer = useTestUsenetServer()
 
 	const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
@@ -201,8 +202,16 @@ function SettingsPage() {
 											})
 										}}
 										onTest={async () => {
-											await new Promise((r) => setTimeout(r, 1500))
-											return Math.random() > 0.2
+											const res = await testUsenetServer.mutateAsync({
+												json: {
+													host: server.host,
+													port: server.port,
+													username: server.username,
+													password: server.password,
+													ssl: server.ssl,
+												},
+											})
+											return res.success
 										}}
 										onToggle={(enabled) => {
 											updateSettings.mutate({

@@ -199,7 +199,7 @@ export function useHealth() {
 export function useNzbgetStatus() {
 	return useQuery(
 		api.activity.nzbget.status.$get.queryOptions({
-			refetchInterval: 2000,
+			refetchInterval: 1000,
 			retry: false,
 		}),
 	)
@@ -216,7 +216,7 @@ export function useNzbgetVersion() {
 export function useNzbgetQueue() {
 	return useQuery(
 		api.activity.nzbget.queue.$get.queryOptions({
-			refetchInterval: 2000,
+			refetchInterval: 1000,
 			retry: false,
 		}),
 	)
@@ -230,4 +230,9 @@ export function useScanMovies() {
 
 export function useScanSeries() {
 	return useMutation(api.tasks['scan-series-files'].$post.mutationOptions({}))
+}
+
+// Test Usenet Server
+export function useTestUsenetServer() {
+	return useMutation(api.settings['test-usenet-server'].$post.mutationOptions({}))
 }

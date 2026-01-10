@@ -234,6 +234,25 @@ export function ServerCard({ server, isFirst, isLast, onDelete, onTest, onToggle
 				<span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${server.enabled ? 'left-5' : 'left-1'}`} />
 			</button>
 
+			{/* Test Connection Button */}
+			<button
+				type="button"
+				onClick={handleTest}
+				disabled={isTesting}
+				className="rounded-sm p-1.5 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-50"
+				title="Test Connection"
+			>
+				{isTesting ? (
+					<Loader2 className="h-4 w-4 animate-spin" />
+				) : testResult === true ? (
+					<Check className="h-4 w-4 text-emerald-500" />
+				) : testResult === false ? (
+					<X className="h-4 w-4 text-destructive" />
+				) : (
+					<Zap className="h-4 w-4" />
+				)}
+			</button>
+
 			{/* Reorder Buttons */}
 			<div className="flex items-center gap-0.5">
 				<button
