@@ -1,4 +1,6 @@
+import { and, eq, notInArray } from 'drizzle-orm'
 import { type $Fetch, ofetch } from 'ofetch'
+import { db, schema } from '../db'
 import { getSettings, type UsenetServer } from '../settings'
 import type { NzbgetConfigOption, NzbgetHistoryItem, NzbgetQueueItem, NzbgetRpcResponse, NzbgetStatus } from './nzbgetSchema'
 
@@ -168,4 +170,81 @@ export async function testUsenetServer(server: { host: string; port: number; use
 export async function clearNzbgetHistory(nzbIds: number[]): Promise<boolean> {
 	if (nzbIds.length === 0) return true
 	return rpcCall<boolean>('editqueue', ['HistoryFinalDelete', '', nzbIds])
+}
+
+// Map NZBGet status to our download status
+function mapNzbgetStatus(item: NzbgetHistoryItem): 'completed' | 'failed' {
+	// SUCCESS, FAILURE, DELETED, or prefixed variants like SUCCESS/GOOD
+	if (item.Status.startsWith('SUCCESS')) return 'completed'
+	return 'failed'
+}
+
+// Sync NZBGet history to database and clear it
+export async function syncNzbgetHistory(): Promise<{ synced: number; orphans: number; cleared: number }> {
+	const history = await listNzbgetHistory()
+
+	if (history.length === 0) {
+		return { synced: 0, orphans: 0, cleared: 0 }
+	}
+
+	console.log(`[NZBGet Sync] Processing ${history.length} history item(s)`)
+
+	let synced = 0
+	let orphans = 0
+	const syncedNzbIds: number[] = []
+
+	for (const item of history) {
+		console.log(`[NZBGet Sync] History item NZBID=${item.NZBID}: "${item.Name}" | Status=${item.Status}`)
+
+		// Find download by nzbId (only match active downloads, not already completed/failed)
+		const download = await db.query.downloads.findFirst({
+			where: and(eq(schema.downloads.nzbId, item.NZBID), notInArray(schema.downloads.status, ['completed', 'failed'])),
+		})
+
+		if (!download) {
+			console.log(`[NZBGet Sync] No DB download found for NZBID=${item.NZBID}`)
+			orphans++
+			// Still track for clearing - we don't want orphans cluttering history
+			syncedNzbIds.push(item.NZBID)
+			continue
+		}
+
+		console.log(`[NZBGet Sync] Matched DB download id=${download.id}, nzbId=${download.nzbId}, title="${download.title}"`)
+
+		// Sanity check: warn if titles don't match
+		if (!item.Name.includes(download.title.substring(0, 20)) && !download.title.includes(item.Name.substring(0, 20))) {
+			console.warn(`[NZBGet Sync] ⚠️ TITLE MISMATCH! NZBGet="${item.Name}" vs DB="${download.title}"`)
+		}
+
+		// Update download with final state
+		const status = mapNzbgetStatus(item)
+		const completedAt = new Date(item.HistoryTime * 1000).toISOString()
+
+		await db
+			.update(schema.downloads)
+			.set({
+				status,
+				parStatus: item.ParStatus,
+				unpackStatus: item.UnpackStatus,
+				finalDir: item.FinalDir || null,
+				downloadedSizeMb: item.DownloadedSizeMB,
+				downloadTimeSec: item.DownloadTimeSec,
+				completedAt,
+				progress: 100,
+				nzbId: null, // Clear to prevent stale matches (NZBGet reuses IDs)
+			})
+			.where(eq(schema.downloads.id, download.id))
+
+		syncedNzbIds.push(item.NZBID)
+		synced++
+		console.log(`[NZBGet Sync] Updated download id=${download.id}: ${status} (par=${item.ParStatus}, unpack=${item.UnpackStatus})`)
+	}
+
+	// Clear synced history items from NZBGet
+	if (syncedNzbIds.length > 0) {
+		await clearNzbgetHistory(syncedNzbIds)
+		console.log(`[NZBGet Sync] Cleared ${syncedNzbIds.length} history items from NZBGet`)
+	}
+
+	return { synced, orphans, cleared: syncedNzbIds.length }
 }

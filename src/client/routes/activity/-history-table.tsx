@@ -1,7 +1,5 @@
-import { CheckCircle2, History, RefreshCw, Search, Trash2, XCircle } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { Button } from '@/client/components/ui/button'
-import { Input } from '@/client/components/ui/input'
+import { CheckCircle2, History, RefreshCw, Trash2, XCircle } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 export type HistoryStatus = 'completed' | 'failed' | 'removed'
 
@@ -16,16 +14,13 @@ export interface HistoryItem {
 	errorMessage?: string
 }
 
-type FilterTab = 'all' | 'completed' | 'failed' | 'removed'
-
 interface HistoryTableProps {
 	items: HistoryItem[]
 	onRetry?: (id: string) => void
 	onDelete?: (id: string) => void
-	onClearHistory?: () => void
 }
 
-function StatusBadge({ status }: { status: HistoryStatus }) {
+function StatusBadge({ status }: { status: HistoryStatus }): ReactNode {
 	// biome-ignore lint/nursery/noUnnecessaryConditions: switch is cleaner than if/else chain
 	switch (status) {
 		case 'completed':
@@ -52,92 +47,18 @@ function StatusBadge({ status }: { status: HistoryStatus }) {
 	}
 }
 
-function FilterTabs({ activeTab, onTabChange }: { activeTab: FilterTab; onTabChange: (tab: FilterTab) => void }) {
-	const tabs: { id: FilterTab; label: string }[] = [
-		{ id: 'all', label: 'All' },
-		{ id: 'completed', label: 'Completed' },
-		{ id: 'failed', label: 'Failed' },
-		{ id: 'removed', label: 'Removed' },
-	]
-
-	return (
-		<div className="flex items-center gap-1">
-			{tabs.map((tab) => (
-				<button
-					key={tab.id}
-					type="button"
-					onClick={() => onTabChange(tab.id)}
-					className={`rounded-sm px-3 py-1.5 font-medium text-sm transition-colors ${activeTab === tab.id ? 'bg-blue-100 text-blue-700' : 'text-navy-600 hover:bg-navy-100'}`}
-				>
-					{tab.label}
-				</button>
-			))}
-		</div>
-	)
-}
-
-export function HistoryTable({ items, onRetry, onDelete, onClearHistory }: HistoryTableProps) {
-	const [activeTab, setActiveTab] = useState<FilterTab>('all')
-	const [searchQuery, setSearchQuery] = useState('')
-
-	// Filter items
-	const filteredItems = useMemo(() => {
-		let result = items
-
-		// Filter by tab
-		if (activeTab !== 'all') {
-			result = result.filter((item) => item.status === activeTab)
-		}
-
-		// Filter by search
-		if (searchQuery.trim()) {
-			const query = searchQuery.toLowerCase()
-			result = result.filter((item) => item.title.toLowerCase().includes(query))
-		}
-
-		return result
-	}, [items, activeTab, searchQuery])
-
+export function HistoryTable({ items, onRetry, onDelete }: HistoryTableProps) {
 	return (
 		<div>
-			{/* Header with filters */}
-			<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-				<FilterTabs
-					activeTab={activeTab}
-					onTabChange={setActiveTab}
-				/>
-
-				<div className="flex items-center gap-3">
-					<div className="relative">
-						<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-navy-400" />
-						<Input
-							type="text"
-							placeholder="Search history..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							className="w-56 pl-9"
-						/>
-					</div>
-					{onClearHistory && (
-						<Button
-							variant="outline"
-							onClick={onClearHistory}
-						>
-							Clear History
-						</Button>
-					)}
-				</div>
-			</div>
-
 			{/* Table */}
 			<div className="overflow-hidden rounded-sm border border-navy-200 bg-white">
-				{filteredItems.length === 0 ? (
+				{items.length === 0 ? (
 					<div className="flex flex-col items-center justify-center py-16 text-center">
 						<div className="mb-4 rounded-sm bg-navy-100 p-4">
 							<History className="h-10 w-10 text-navy-400" />
 						</div>
 						<h3 className="mb-1 font-semibold text-lg text-navy-700">No history</h3>
-						<p className="max-w-sm text-navy-500 text-sm">{searchQuery ? 'No items match your search.' : 'Completed downloads will appear here.'}</p>
+						<p className="max-w-sm text-navy-500 text-sm">Completed downloads will appear here.</p>
 					</div>
 				) : (
 					<div className="overflow-x-auto">
@@ -153,10 +74,10 @@ export function HistoryTable({ items, onRetry, onDelete, onClearHistory }: Histo
 								</tr>
 							</thead>
 							<tbody>
-								{filteredItems.map((item, index) => (
+								{items.map((item, index) => (
 									<tr
 										key={item.id}
-										className={`transition-colors hover:bg-navy-100/30 ${index !== filteredItems.length - 1 ? 'border-navy-200 border-b' : ''}`}
+										className={`transition-colors hover:bg-navy-100/30 ${index !== items.length - 1 ? 'border-navy-200 border-b' : ''}`}
 									>
 										{/* Title */}
 										<td className="px-4 py-3">

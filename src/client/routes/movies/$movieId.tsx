@@ -356,54 +356,56 @@ function MovieDetailPage() {
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										{searchResults.map((release) => (
-											<TableRow key={release.guid}>
-												<TableCell className="max-w-0">
-													<div
-														className="truncate font-medium"
-														title={release.title}
-													>
-														{release.title}
-													</div>
-												</TableCell>
-												<TableCell className="text-muted-foreground">{release.indexerName}</TableCell>
-												<TableCell className="whitespace-nowrap text-size">{formatSize(release.size)}</TableCell>
-												<TableCell className="whitespace-nowrap text-muted-foreground">{formatAge(release.publishDate)}</TableCell>
-												<TableCell>
-													<Button
-														variant="ghost"
-														size="sm"
-														className="h-7 px-2"
-														title="Grab release"
-														disabled={grabRelease.isPending}
-														onClick={() => {
-															grabRelease.mutate(
-																{
-																	param: { id: movieId },
-																	json: {
-																		guid: release.guid,
-																		title: release.title,
-																		downloadUrl: release.downloadUrl,
-																		infoUrl: release.infoUrl,
-																		size: release.size,
-																		publishDate: release.publishDate,
-																		indexerId: release.indexerId,
-																		indexerName: release.indexerName,
+										{[...searchResults]
+											.sort((a, b) => a.size - b.size)
+											.map((release) => (
+												<TableRow key={release.guid}>
+													<TableCell className="max-w-0">
+														<div
+															className="truncate font-medium"
+															title={release.title}
+														>
+															{release.title}
+														</div>
+													</TableCell>
+													<TableCell className="text-muted-foreground">{release.indexerName}</TableCell>
+													<TableCell className="whitespace-nowrap text-size">{formatSize(release.size)}</TableCell>
+													<TableCell className="whitespace-nowrap text-muted-foreground">{formatAge(release.publishDate)}</TableCell>
+													<TableCell>
+														<Button
+															variant="ghost"
+															size="sm"
+															className="h-7 px-2"
+															title="Grab release"
+															disabled={grabRelease.isPending}
+															onClick={() => {
+																grabRelease.mutate(
+																	{
+																		param: { id: movieId },
+																		json: {
+																			guid: release.guid,
+																			title: release.title,
+																			downloadUrl: release.downloadUrl,
+																			infoUrl: release.infoUrl,
+																			size: release.size,
+																			publishDate: release.publishDate,
+																			indexerId: release.indexerId,
+																			indexerName: release.indexerName,
+																		},
 																	},
-																},
-																{
-																	onSuccess: (data) => {
-																		console.log('[Grab] Download queued:', data.download.id)
+																	{
+																		onSuccess: (data) => {
+																			console.log('[Grab] Download queued:', data.download.id)
+																		},
 																	},
-																},
-															)
-														}}
-													>
-														{grabRelease.isPending ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-													</Button>
-												</TableCell>
-											</TableRow>
-										))}
+																)
+															}}
+														>
+															{grabRelease.isPending ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+														</Button>
+													</TableCell>
+												</TableRow>
+											))}
 									</TableBody>
 								</Table>
 							) : (

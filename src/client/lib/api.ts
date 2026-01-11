@@ -252,6 +252,18 @@ export function useSyncNzbget() {
 	)
 }
 
+export function useDeleteDownload() {
+	const queryClient = useQueryClient()
+
+	return useMutation(
+		api.activity.downloads[':id'].$delete.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: api.activity.downloads.$get.queryOptions({}).queryKey })
+			},
+		}),
+	)
+}
+
 // Tasks
 
 export function useScanMovies() {

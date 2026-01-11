@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { RefreshCw } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
-import { useDownloads, useNzbgetHistory, useNzbgetQueue, useNzbgetStatus, useSyncNzbget } from '@/client/lib/api'
+import { useDeleteDownload, useDownloads, useNzbgetHistory, useNzbgetQueue, useNzbgetStatus, useSyncNzbget } from '@/client/lib/api'
 import { type ActivityAlert, AlertBanner } from './-alert-banner'
 import { DownloadsTable } from './-downloads-table'
 import { type HistoryItem, type HistoryStatus, HistoryTable } from './-history-table'
@@ -87,12 +87,19 @@ interface SpeedSample {
 	value: number
 }
 
+const SPEED_MAX_KEY = 'admiraltyy:maxSpeedMBps'
+
+function getStoredMaxSpeed(): number {
+	const stored = localStorage.getItem(SPEED_MAX_KEY)
+	return stored ? Number.parseFloat(stored) : 0
+}
+
 // Speed histogram component
-function SpeedHistogram({ samples }: { samples: SpeedSample[] }) {
+function SpeedHistogram({ samples, maxSpeed }: { samples: SpeedSample[]; maxSpeed: number }) {
 	if (samples.length === 0) return null
-	const max = Math.max(...samples.map((s) => s.value), 1)
+	const max = Math.max(maxSpeed, 1)
 	return (
-		<div className="flex h-5 items-end gap-px overflow-hidden rounded-b-xs">
+		<div className="flex h-5 items-end overflow-hidden rounded-b-xs">
 			{samples.map((sample) => (
 				<div
 					key={sample.id}
@@ -110,6 +117,7 @@ function RouteComponent() {
 	const { data: history, error: historyError } = useNzbgetHistory()
 	const { data: downloads } = useDownloads()
 	const syncNzbget = useSyncNzbget()
+	const deleteDownload = useDeleteDownload()
 
 	// Dismissed alerts state
 	const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
@@ -117,14 +125,19 @@ function RouteComponent() {
 	// Speed history for histogram (last 36 samples)
 	const speedHistoryRef = useRef<SpeedSample[]>([])
 	const sampleIdRef = useRef(0)
+	const maxSpeedRef = useRef(getStoredMaxSpeed())
 	const currentSpeedMBps = status ? status.DownloadRate / 1024 / 1024 : 0
 
-	// Update speed history
+	// Update speed history and max
 	if (status) {
 		const history = speedHistoryRef.current
 		sampleIdRef.current += 1
 		history.push({ id: sampleIdRef.current, value: currentSpeedMBps })
 		if (history.length > 36) history.shift()
+		if (currentSpeedMBps > maxSpeedRef.current) {
+			maxSpeedRef.current = currentSpeedMBps
+			localStorage.setItem(SPEED_MAX_KEY, String(currentSpeedMBps))
+		}
 	}
 
 	// Build alerts from errors
@@ -220,7 +233,10 @@ function RouteComponent() {
 						<h2 className="font-bold text-lg tracking-tight">Queue</h2>
 						{hasActiveDownloads && (
 							<div className="flex items-center gap-3">
-								<SpeedHistogram samples={speedHistoryRef.current} />
+								<SpeedHistogram
+									samples={speedHistoryRef.current}
+									maxSpeed={maxSpeedRef.current}
+								/>
 								<div className="text-lg text-navy-600">
 									<span className="font-semibold text-foreground">{currentSpeedMBps.toFixed(1)} MB/s</span>
 								</div>
@@ -256,20 +272,15 @@ function RouteComponent() {
 					</div>
 					<DownloadsTable
 						items={downloads ?? []}
-						onDelete={(id) => console.log('Delete download:', id)}
+						onDelete={(id) => deleteDownload.mutate({ param: { id: String(id) } })}
 						onRetry={(id) => console.log('Retry download:', id)}
 					/>
 				</section>
 
-				{/* History Section */}
+				{/* NZBGet History - Debugging Only */}
 				<section className="mb-8">
-					<h2 className="mb-4 font-bold text-lg tracking-tight">History</h2>
-					<HistoryTable
-						items={historyItems}
-						onRetry={(id) => console.log('Retry:', id)}
-						onDelete={(id) => console.log('Delete:', id)}
-						onClearHistory={() => console.log('Clear history')}
-					/>
+					<h2 className="mb-4 font-bold text-lg tracking-tight">Nzbget history (debugging only)</h2>
+					<HistoryTable items={historyItems} />
 				</section>
 			</div>
 		</div>

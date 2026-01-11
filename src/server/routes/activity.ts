@@ -1,9 +1,12 @@
-import { desc } from 'drizzle-orm'
+import { zValidator } from '@hono/zod-validator'
+import { desc, eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
+import { z } from 'zod'
 import { db, schema } from '../db'
-import { fetchNzbgetStatus, fetchNzbgetVersion, listNzbgetHistory, listNzbgetQueue } from '../nzbget/nzbgetApi'
-import { syncNzbgetHistory } from '../nzbget/nzbgetSync'
+import { fetchNzbgetStatus, fetchNzbgetVersion, listNzbgetHistory, listNzbgetQueue, syncNzbgetHistory } from '../nzbget/nzbgetApi'
+
+const idParamSchema = z.object({ id: z.string() })
 
 export const activityRoutes = new Hono()
 	// GET /api/activity/downloads - Get tracked downloads from database
@@ -61,4 +64,20 @@ export const activityRoutes = new Hono()
 		} catch (error) {
 			throw new HTTPException(500, { message: String(error) })
 		}
+	})
+	// DELETE /api/activity/downloads/:id - Delete a download record
+	.delete('/downloads/:id', zValidator('param', idParamSchema), async (c) => {
+		const { id } = c.req.valid('param')
+		const numId = parseInt(id, 10)
+		if (Number.isNaN(numId)) {
+			throw new HTTPException(400, { message: 'Invalid download ID' })
+		}
+
+		const existing = await db.select().from(schema.downloads).where(eq(schema.downloads.id, numId))
+		if (!existing.length) {
+			throw new HTTPException(404, { message: 'Download not found' })
+		}
+
+		await db.delete(schema.downloads).where(eq(schema.downloads.id, numId))
+		return c.body(null, 204)
 	})

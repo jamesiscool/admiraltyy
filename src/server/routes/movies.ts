@@ -9,6 +9,7 @@ import { type Resolution, resolutions } from '../db/schema'
 import { downloadNzb, searchMovieReleases } from '../lib/indexer'
 import { logInfo } from '../log/logs'
 import { appendNzb } from '../nzbget/nzbgetApi'
+import { notifyDownloadActivity } from '../nzbget/nzbgetPoller'
 
 const idParamSchema = z.object({ id: z.string() })
 const addMovieSchema = z.object({ tmdbId: z.number(), resolution: z.enum(resolutions).optional() })
@@ -211,6 +212,9 @@ export const moviesRoutes = new Hono()
 				throw new HTTPException(500, { message: 'NZBGet failed to queue download' })
 			}
 
+			// Trigger fast polling for download progress
+			notifyDownloadActivity()
+
 			// Create release record
 			const [release] = await db
 				.insert(schema.releases)
@@ -242,7 +246,7 @@ export const moviesRoutes = new Hono()
 				})
 				.returning()
 
-			console.log(`[Movies] NZB queued (NZBID: ${nzbId}) download: ${download.id}`)
+			console.log(`[Movies] NZB queued: NZBID=${nzbId}, downloadId=${download.id}, title="${releaseData.title}"`)
 			return c.json({ release, download })
 		} catch (error) {
 			console.error('[Movies] Failed to grab release:', error)

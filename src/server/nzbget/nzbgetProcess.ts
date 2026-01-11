@@ -1,11 +1,7 @@
-import { dirname, join } from 'node:path'
 import type { Subprocess } from 'bun'
 import { generateNzbgetPassword, getSettings, saveSettings, type UsenetServer, updateSettings } from '../settings'
 import { clearNzbgetQueue, initNzbgetApi } from './nzbgetApi'
-
-// Get path to the scripts folder (relative to project root)
-const projectRoot = join(dirname(import.meta.dir), '..')
-const scriptsDir = join(projectRoot, 'scripts')
+import { startNzbgetPoller, stopNzbgetPoller } from './nzbgetPoller'
 
 let nzbgetProcess: Subprocess | null = null
 
@@ -99,7 +95,8 @@ export async function startNzbget() {
 
 	// Skip if NZBGet is already running (e.g. from previous run or hot reload)
 	if (await isNzbgetPortInUse(settings.nzbgetSettings.port)) {
-		initNzbgetApi() // Ensure API client is initialized
+		initNzbgetApi()
+		startNzbgetPoller()
 		console.log('✓ NZBGet already running on port, skipping start')
 		return
 	}
@@ -126,9 +123,6 @@ export async function startNzbget() {
 
 	const serverArgs = buildServerArgs(settings.usenetServers)
 
-	// API URL for post-processing script to call back
-	const apiUrl = `http://127.0.0.1:2829`
-
 	const args = [
 		'nzbget',
 		'-n', // run without config file
@@ -147,13 +141,6 @@ export async function startNzbget() {
 		`DestDir=${downloadFolder}`,
 		'-o',
 		`InterDir=${downloadFolder}/.incomplete`,
-		// Post-processing extension config
-		'-o',
-		`ScriptDir=${scriptsDir}`,
-		'-o',
-		'Extensions=nzbget-sync',
-		'-o',
-		`AdmiraltyySync:ApiUrl=${apiUrl}`,
 		...serverArgs,
 	]
 
@@ -181,6 +168,7 @@ export async function startNzbget() {
 
 		// Initialize the API client now that NZBGet is running
 		initNzbgetApi()
+		startNzbgetPoller()
 
 		console.log(`✓ NZBGet started (pid: ${nzbgetProcess.pid})`)
 
@@ -196,6 +184,7 @@ export async function startNzbget() {
 }
 
 export async function stopNzbget(): Promise<void> {
+	stopNzbgetPoller()
 	const port = getSettings().nzbgetSettings.port
 
 	// If we have a reference to the process, use it
