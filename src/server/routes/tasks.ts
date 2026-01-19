@@ -4,7 +4,7 @@ import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { db } from '../db'
 import { episodes, files, movies, seasons, series } from '../db/schema'
-import { buildTitleMap, listSubfolders, listVideoFiles, listVideoFilesRecursive, matchFolder, parseEpisode, parseQuality, type ScannedFile } from '../lib/fileScan'
+import { buildTitleMap, listSubfolders, listVideoFiles, listVideoFilesRecursive, matchFolder, parseEpisode, parseQuality, type ScannedFile } from '../services/fileScan'
 import { getSettings } from '../settings'
 
 export const tasksRoutes = new Hono()

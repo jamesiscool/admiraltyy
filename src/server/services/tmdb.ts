@@ -1,7 +1,9 @@
+import { CacheMode, FileSystemCache, fastForward } from '@with-logic/fast-forward'
+import { env } from 'bun'
 import { ofetch } from 'ofetch'
 import { getSettings } from '../settings'
 
-const tmdbFetch = ofetch.create({
+const tmdbFetchBase = ofetch.create({
 	baseURL: 'https://api.themoviedb.org/3',
 	query: {
 		api_key: getSettings().tmdbApiKey,
@@ -12,6 +14,25 @@ const tmdbFetch = ofetch.create({
 		console.log('tmdbFetch', `${request.options.baseURL}${request.request}?${new URLSearchParams(query).toString()}`)
 	},
 })
+
+console.log('NODE_ENV', Bun.env.NODE_ENV)
+
+// Wrap fetch in object so fast-forward can intercept method calls via Proxy
+const tmdbApi = {
+	// biome-ignore lint/suspicious/noExplicitAny: passthrough wrapper
+	fetch: <T>(url: string, opts?: any): Promise<T> => tmdbFetchBase<T>(url, opts),
+}
+const tmdbClient =
+	env.BUN_ENV !== 'production'
+		? fastForward(tmdbApi, {
+				cache: new FileSystemCache({ cacheDir: './test/fixtures/http', namespace: 'tmdb' }),
+				mode: env.BUN_ENV === 'test' ? CacheMode.READ_ONLY : CacheMode.ON,
+			})
+		: tmdbApi
+
+// Wrapper that always goes through the proxy
+// biome-ignore lint/suspicious/noExplicitAny: passthrough wrapper
+const tmdbFetch = <T>(url: string, opts?: any): Promise<T> => tmdbClient.fetch<T>(url, opts)
 
 function mapMovieResult(movie: TmdbMovieResult): SearchResult {
 	return {
@@ -136,7 +157,7 @@ export async function searchMulti(query: string, page = 1): Promise<SearchRespon
 export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
 	const [data, altTitlesData] = await Promise.all([
 		tmdbFetch<TmdbMovieDetailsResponse>(`/movie/${tmdbId}`, {
-			query: { append_to_response: 'credits,release_dates' },
+			query: { append_to_response: 'release_dates' },
 		}),
 		tmdbFetch<{ id: number; titles: Array<{ iso_3166_1: string; title: string; type: string }> }>(`/movie/${tmdbId}/alternative_titles`).catch(() => ({ id: tmdbId, titles: [] })),
 	])
@@ -146,12 +167,6 @@ export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
 
 	// Map genre objects to names
 	const genres = data.genres.map((g) => g.name)
-
-	// Get top 10 cast members by order (with character names)
-	const cast = (data.credits?.cast ?? [])
-		.sort((a, b) => a.order - b.order)
-		.slice(0, 10)
-		.map((c) => ({ name: c.name, character: c.character }))
 
 	// Extract US release dates (cinema = type 3, digital = type 4)
 	let cinemaReleaseDate: string | undefined
@@ -207,7 +222,6 @@ export async function fetchMovieDetails(tmdbId: number): Promise<MovieDetails> {
 		synopsis: data.overview || undefined,
 		runtimeMins: data.runtime,
 		genres,
-		cast,
 		cinemaReleaseDate,
 		digitalReleaseDate,
 		contentRating,
@@ -311,14 +325,6 @@ interface TmdbGenre {
 	name: string
 }
 
-interface TmdbCastMember {
-	id: number
-	name: string
-	character: string
-	order: number
-	profile_path?: string
-}
-
 interface TmdbReleaseDate {
 	certification: string
 	release_date: string
@@ -342,20 +348,12 @@ interface TmdbMovieDetailsResponse {
 	runtime?: number
 	genres: TmdbGenre[]
 	vote_average: number
-	credits?: {
-		cast: TmdbCastMember[]
-	}
 	release_dates?: {
 		results: TmdbReleaseDatesResult[]
 	}
 }
 
 // Movie details result type (exported for use in routes)
-export interface CastMember {
-	name: string
-	character: string
-}
-
 export interface MovieDetails {
 	tmdbId: number
 	imdbId?: string
@@ -366,7 +364,6 @@ export interface MovieDetails {
 	synopsis?: string
 	runtimeMins?: number
 	genres: string[]
-	cast: CastMember[]
 	cinemaReleaseDate?: string
 	digitalReleaseDate?: string
 	contentRating?: string
@@ -619,5 +616,38 @@ export async function fetchSeriesWithEpisodes(tmdbId: number, seasonNumbers: num
 	return {
 		...preview,
 		seasonsWithEpisodes,
+	}
+}
+
+// TMDB search response for TV shows
+interface TmdbSearchTvResponse {
+	page: number
+	total_results: number
+	total_pages: number
+	results: Array<{
+		id: number
+		name: string
+		first_air_date?: string
+	}>
+}
+
+// Check if a series name needs year disambiguation (other series share same name)
+export async function checkNeedsYearDisambiguation(seriesName: string, excludeTmdbId?: number): Promise<boolean> {
+	try {
+		const data = await tmdbFetch<TmdbSearchTvResponse>('/search/tv', {
+			query: { query: seriesName, include_adult: 'false' },
+		})
+
+		// Count series with exact same name (case-insensitive), excluding the current series
+		const nameLower = seriesName.toLowerCase().trim()
+		const exactMatches = data.results.filter((s) => {
+			if (excludeTmdbId && s.id === excludeTmdbId) return false
+			return s.name.toLowerCase().trim() === nameLower
+		})
+
+		return exactMatches.length > 0
+	} catch {
+		// On error, default to not needing disambiguation
+		return false
 	}
 }

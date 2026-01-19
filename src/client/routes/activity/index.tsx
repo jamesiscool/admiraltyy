@@ -272,7 +272,7 @@ function RouteComponent() {
 					</div>
 					<DownloadsTable
 						items={downloads ?? []}
-						onDelete={(id) => deleteDownload.mutate({ param: { id: String(id) } })}
+						onDelete={(id) => deleteDownload.mutate({ param: { downloadId: String(id) } })}
 						onRetry={(id) => console.log('Retry download:', id)}
 					/>
 				</section>

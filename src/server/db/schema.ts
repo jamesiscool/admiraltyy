@@ -6,7 +6,7 @@ import type { z } from 'zod'
 export const resolutions = ['480p', '720p', '1080p', '2160p'] as const
 export type Resolution = (typeof resolutions)[number]
 
-export const downloadStatuses = ['queued', 'downloading', 'paused', 'unpacking', 'verifying', 'completed', 'failed'] as const
+export const downloadStatuses = ['queued', 'downloading', 'paused', 'unpacking', 'verifying', 'importing', 'completed', 'imported', 'failed'] as const
 export type DownloadStatus = (typeof downloadStatuses)[number]
 
 export const seriesStatuses = ['continuing', 'ended'] as const
@@ -24,7 +24,6 @@ export const movies = sqliteTable('movies', {
 	synopsis: text('synopsis'),
 	runtimeMins: integer('runtime_mins'),
 	genres: text('genres'), // JSON array
-	cast: text('cast'), // JSON array
 	cinemaReleaseDate: text('cinema_release_date'),
 	digitalReleaseDate: text('digital_release_date'),
 	contentRating: text('content_rating'),
@@ -67,6 +66,7 @@ export const series = sqliteTable('series', {
 	rtId: text('rt_id'),
 	rtVanity: text('rt_vanity'),
 	alternateTitles: text('alternate_titles'), // JSON array
+	useYearInFolder: integer('use_year_in_folder', { mode: 'boolean' }).default(false), // True if other series share same name
 })
 
 export const selectSeriesSchema = createSelectSchema(series)

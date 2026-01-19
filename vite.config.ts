@@ -23,7 +23,6 @@ export default defineConfig({
 		alias: {
 			'@/client': resolve(__dirname, './src/client'),
 			'@/server': resolve(__dirname, './src/server'),
-			'@/shared': resolve(__dirname, './src/shared'),
 		},
 	},
 	build: {

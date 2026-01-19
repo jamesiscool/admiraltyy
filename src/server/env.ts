@@ -10,6 +10,7 @@ export const env = createEnv({
 		SETTINGS_PATH: z.string().default(join(configDirectory, 'admiraltyy.settings.json')),
 		DATABASE_PATH: z.string().default(join(configDirectory, 'admiraltyy.db')),
 		LOG_DIRECTORY: z.string().default(join(configDirectory, 'logs')),
+		BUN_ENV: z.enum(['development', 'test', 'production']).default('production'),
 	},
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,

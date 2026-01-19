@@ -1,0 +1,58 @@
+{
+	"key": "fetch:[\"/collection/1368781\",null]",
+	"value": {
+		"__ff_promise_result": true,
+		"value": {
+			"id": 1368781,
+			"name": "Hello, Love... Collection",
+			"original_language": "tl",
+			"original_name": "Hello, Love... Collection",
+			"overview": "A collection of movies starring Kathryn Bernardo's Joy and Alden Richards' Ethan.",
+			"poster_path": null,
+			"backdrop_path": null,
+			"parts": [
+				{
+					"adult": false,
+					"backdrop_path": "/7HD80No4QO71recMEgmkwuZWl99.jpg",
+					"id": 1292359,
+					"title": "Hello, Love, Again",
+					"original_title": "Hello, Love, Again",
+					"overview": "Five years on from when Joy said goodbye to Ethan and Hong Kong to pursue her dreams in Canada. After fighting for their love to conquer the time, distance and a global shutdown that kept them apart, Joy and Ethan meet again in Canada but realize that they have also changed a lot, individually.",
+					"poster_path": "/7R940b9RNNKLDrAI1GmCjOd5ta.jpg",
+					"media_type": "movie",
+					"original_language": "tl",
+					"genre_ids": [
+						10749,
+						18
+					],
+					"popularity": 1.2521,
+					"release_date": "2024-11-13",
+					"video": false,
+					"vote_average": 6.188,
+					"vote_count": 16
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/ptijXES6uMuKfKolTbAeV2LvEVN.jpg",
+					"id": 593961,
+					"title": "Hello, Love, Goodbye",
+					"original_title": "Hello, Love, Goodbye",
+					"overview": "A bartender and a domestic helper of Filipino origin living in Hong Kong find themselves falling in love, but they each have different plans for their future.",
+					"poster_path": "/sJFouUfCgHFSUh5OKVSQBSfrfA1.jpg",
+					"media_type": "movie",
+					"original_language": "tl",
+					"genre_ids": [
+						10749,
+						18
+					],
+					"popularity": 0.6357,
+					"release_date": "2019-07-31",
+					"video": false,
+					"vote_average": 6.259,
+					"vote_count": 114
+				}
+			]
+		}
+	},
+	"timestamp": 1768782771909
+}

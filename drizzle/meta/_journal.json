@@ -29,6 +29,13 @@
 			"when": 1736524800000,
 			"tag": "0003_download_tracking",
 			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "6",
+			"when": 1736611200000,
+			"tag": "0004_series_year_disambiguation",
+			"breakpoints": true
 		}
 	]
 }

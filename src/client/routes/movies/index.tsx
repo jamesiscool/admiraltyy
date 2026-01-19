@@ -3,10 +3,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Film, Search, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { DeleteConfirmationModal, type DeleteTarget } from '@/client/components/delete-confirmation-modal'
+import { MovieManualSearchDialog } from '@/client/components/movie-manual-search-dialog'
 import { Button } from '@/client/components/ui/button'
 import { Input } from '@/client/components/ui/input'
 import { useDeleteMovie, useMovies } from '@/client/lib/api'
 import type { Resolution } from '@/server/db/schema'
+import type { MoviePreview } from '@/server/routes/movies'
 import { MovieCard } from './-movie-card'
 import { type MonitoredFilter, MovieFilters, type SortOption, type StatusFilter } from './-movie-filters'
 import { MoviesFooter } from './-movies-footer'
@@ -30,6 +32,9 @@ function MoviesIndexPage() {
 	// Delete modal state
 	const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
 	const deleteMovie = useDeleteMovie({ onSuccess: () => setDeleteTarget(null) })
+
+	// Manual search dialog state
+	const [manualSearchTarget, setManualSearchTarget] = useState<MoviePreview | null>(null)
 
 	// Fetch movies from API
 	const { data: moviesData, isLoading, error } = useMovies()
@@ -214,10 +219,7 @@ function MoviesIndexPage() {
 										// TODO: Trigger auto search
 										console.log('Auto search:', movie.id)
 									}}
-									onManualSearch={() => {
-										// TODO: Open manual search
-										console.log('Manual search:', movie.id)
-									}}
+									onManualSearch={() => setManualSearchTarget(movie)}
 									onDelete={() => {
 										setDeleteTarget({
 											type: 'movie',
@@ -258,6 +260,15 @@ function MoviesIndexPage() {
 				onClose={() => setDeleteTarget(null)}
 				onConfirm={handleDeleteConfirm}
 				isPending={deleteMovie.isPending}
+			/>
+
+			{/* Manual Search Dialog */}
+			<MovieManualSearchDialog
+				movieId={String(manualSearchTarget?.id ?? '')}
+				movieTitle={manualSearchTarget?.title ?? ''}
+				movieYear={manualSearchTarget?.year}
+				open={manualSearchTarget !== null}
+				onOpenChange={(open) => !open && setManualSearchTarget(null)}
 			/>
 		</div>
 	)

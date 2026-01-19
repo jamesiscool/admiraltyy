@@ -1,0 +1,34 @@
+{
+	"key": "fetch:[\"/search/collection\",{\"query\":{\"include_adult\":\"false\",\"query\":\"top gun\"}}]",
+	"value": {
+		"__ff_promise_result": true,
+		"value": {
+			"page": 1,
+			"results": [
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 986568,
+					"name": "Top Gunner Collection",
+					"original_language": "en",
+					"original_name": "Top Gunner Collection",
+					"overview": "Top Gunner Collection",
+					"poster_path": "/wpljwAJEeE9OyysHSkGu0OoVzZ7.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/9MGm0XT04ob99MyGQfMT7I8y3UE.jpg",
+					"id": 531330,
+					"name": "Top Gun Collection",
+					"original_language": "en",
+					"original_name": "Top Gun Collection",
+					"overview": "Top Gun is an American action drama multimedia franchise based on the 1983 article \"Top Guns\" by Ehud Yonay, which was adapted into the eponymous 1986 film, written by Jim Cash and Jack Epps Jr.",
+					"poster_path": "/wtpIx0Gsra1IGHH8af5kNK90Xy8.jpg"
+				}
+			],
+			"total_pages": 1,
+			"total_results": 2
+		}
+	},
+	"timestamp": 1768783911991
+}

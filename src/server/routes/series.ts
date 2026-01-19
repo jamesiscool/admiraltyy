@@ -3,10 +3,10 @@ import { and, eq, inArray, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
-import { fetchSeriesPreview, fetchSeriesWithEpisodes } from '../api/tmdb'
 import { db, schema } from '../db'
 import { type Episode, type File, resolutions, type Season, type Series } from '../db/schema'
-import { logInfo } from '../log/logs'
+import { logInfo } from '../services/logs'
+import { checkNeedsYearDisambiguation, fetchSeriesPreview, fetchSeriesWithEpisodes } from '../services/tmdb'
 
 const idParamSchema = z.object({ id: z.string() })
 const tmdbIdParamSchema = z.object({ tmdbId: z.string() })
@@ -120,6 +120,7 @@ async function findSeriesWithDetails(seriesId: number): Promise<SeriesWithDetail
 			s.rt_id as rtId,
 			s.rt_vanity as rtVanity,
 			s.alternate_titles as alternateTitles,
+			s.use_year_in_folder as useYearInFolder,
 			COALESCE(file_stats.size_bytes, 0) as sizeBytes,
 			COALESCE(ep_stats.episode_count, 0) as episodeCount,
 			COALESCE(ep_stats.missing_episode_count, 0) as missingEpisodeCount
@@ -247,6 +248,9 @@ export const seriesRoutes = new Hono()
 		const details = await fetchSeriesWithEpisodes(body.tmdbId, monitoredSeasons)
 		const now = new Date().toISOString()
 
+		// Check if other series share the same name (for folder disambiguation)
+		const useYearInFolder = await checkNeedsYearDisambiguation(details.title, details.tmdbId)
+
 		// Compute next airing date from episodes (earliest future air date)
 		const today = new Date().toISOString().split('T')[0]
 		let nextAiring: string | undefined
@@ -281,6 +285,7 @@ export const seriesRoutes = new Hono()
 				dateAdded: now,
 				nextAiring,
 				lastInfoSync: now,
+				useYearInFolder,
 			})
 			.returning()
 

@@ -1,0 +1,80 @@
+{
+	"key": "fetch:[\"/collection/622397\",null]",
+	"value": {
+		"__ff_promise_result": true,
+		"value": {
+			"id": 622397,
+			"name": "Hello Carbot the Movie: Collection",
+			"original_language": "ko",
+			"original_name": "Hello Carbot the Movie: Collection",
+			"overview": "",
+			"poster_path": "/b3oo7jh2Dhp6SwliAqlDLYnTKHd.jpg",
+			"backdrop_path": "/oDd2hL56sESjMhEAIhrpWLxM8mD.jpg",
+			"parts": [
+				{
+					"adult": false,
+					"backdrop_path": "/oDd2hL56sESjMhEAIhrpWLxM8mD.jpg",
+					"id": 536000,
+					"title": "Hello Carbot the Movie: The Cretaceous Period",
+					"original_title": "극장판 헬로카봇: 백악기 시대",
+					"overview": "",
+					"poster_path": "/jQ0TQWcvB0XIHqTcdqL0TXzOTlq.jpg",
+					"media_type": "movie",
+					"original_language": "ko",
+					"genre_ids": [
+						16,
+						12,
+						878
+					],
+					"popularity": 1.3604,
+					"release_date": "2018-08-01",
+					"video": false,
+					"vote_average": 6,
+					"vote_count": 2
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/A2zFbcaIzlorXoGkU0OKpvQ5UMp.jpg",
+					"id": 577205,
+					"title": "Hello Carbot the Movie: The Secret of Omphalos Island",
+					"original_title": "극장판 헬로카봇: 옴파로스 섬의 비밀",
+					"overview": "",
+					"poster_path": "/zt2Hc5tVdS3lq71MjLBFckLuzcO.jpg",
+					"media_type": "movie",
+					"original_language": "ko",
+					"genre_ids": [
+						16,
+						12,
+						10751,
+						878
+					],
+					"popularity": 0.889,
+					"release_date": "2019-01-31",
+					"video": false,
+					"vote_average": 6,
+					"vote_count": 2
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/w1l053rM85bS69fmRY02rlP0ESb.jpg",
+					"id": 636283,
+					"title": "Hello Carbot the Movie: Save the Moon",
+					"original_title": "극장판 헬로카봇: 달나라를 구해줘!",
+					"overview": "When a rabbit village on the moon falls under the attack of alien robots, Chatan and the Carbots set out to save the day.",
+					"poster_path": "/n3WKBFtiTZkchu0jSiRe0vf0ppw.jpg",
+					"media_type": "movie",
+					"original_language": "ko",
+					"genre_ids": [
+						16
+					],
+					"popularity": 0.4558,
+					"release_date": "2019-09-04",
+					"video": false,
+					"vote_average": 4,
+					"vote_count": 1
+				}
+			]
+		}
+	},
+	"timestamp": 1768782771907
+}

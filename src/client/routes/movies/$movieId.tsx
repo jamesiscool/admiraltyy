@@ -1,25 +1,11 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Bookmark, Download, Film, Loader2, Search, Settings2, Trash2 } from 'lucide-react'
+import { ArrowLeft, Bookmark, Film, Search, Settings2, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { DeleteConfirmationModal, type DeleteTarget } from '@/client/components/delete-confirmation-modal'
+import { MovieManualSearchDialog } from '@/client/components/movie-manual-search-dialog'
 import { Button } from '@/client/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/client/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/client/components/ui/table'
-import { useDeleteMovie, useGrabMovieRelease, useMovie, useSearchMovieReleases, useUpdateMovie } from '@/client/lib/api'
-
-// Release type from API (publishDate is serialized as string)
-interface Release {
-	guid: string
-	title: string
-	downloadUrl: string
-	infoUrl?: string
-	size: number
-	publishDate: string
-	indexerId: string
-	indexerName: string
-	seeders?: number
-	leechers?: number
-}
+import { useDeleteMovie, useMovie, useUpdateMovie } from '@/client/lib/api'
 
 export const Route = createFileRoute('/movies/$movieId')({
 	component: MovieDetailPage,
@@ -31,11 +17,9 @@ function MovieDetailPage() {
 
 	const { data: movie, isLoading, error } = useMovie(movieId)
 	const updateMovie = useUpdateMovie(movieId)
-	const searchReleases = useSearchMovieReleases()
-	const grabRelease = useGrabMovieRelease()
 
-	// Search results state
-	const [searchResults, setSearchResults] = useState<Release[] | null>(null)
+	// Manual search dialog state
+	const [manualSearchOpen, setManualSearchOpen] = useState(false)
 
 	// Delete modal state
 	const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
@@ -76,10 +60,6 @@ function MovieDetailPage() {
 
 	// Parse JSON fields
 	const genres: string[] = movie.genres ? JSON.parse(movie.genres) : []
-
-	// Handle both old format (string[]) and new format ({name, character}[])
-	const rawCast = movie.cast ? JSON.parse(movie.cast) : []
-	const cast: Array<{ name: string; character: string }> = rawCast.map((c: string | { name: string; character: string }) => (typeof c === 'string' ? { name: c, character: '' } : c))
 
 	// Get file details from files table
 	const hasFile = movie.files && movie.files.length > 0
@@ -213,17 +193,9 @@ function MovieDetailPage() {
 								<Button
 									variant="outline"
 									className="h-9 px-4"
-									disabled={searchReleases.isPending}
-									onClick={() => {
-										searchReleases.mutate(
-											{ param: { id: movieId } },
-											{
-												onSuccess: (data) => setSearchResults(data),
-											},
-										)
-									}}
+									onClick={() => setManualSearchOpen(true)}
 								>
-									{searchReleases.isPending ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
+									<Search className="size-4" />
 									Manual Search
 								</Button>
 								<Button
@@ -256,165 +228,59 @@ function MovieDetailPage() {
 
 			{/* Details section */}
 			<div className="container py-8">
-				<div className="grid gap-6 lg:grid-cols-2">
-					{/* File Details */}
-					<Card>
-						<CardHeader>
-							<CardTitle>File Details</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{fileDetails ? (
-								<div className="space-y-4">
-									<div>
-										<div className="mb-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">Path</div>
-										<code className="block break-all rounded bg-muted px-2 py-1.5 font-mono text-sm">{fileDetails.path}</code>
-									</div>
-									<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-										<DetailItem
-											label="Quality"
-											value={fileDetails.quality}
-											highlight
-										/>
-										<DetailItem
-											label="Source"
-											value={fileDetails.source}
-										/>
-										<DetailItem
-											label="Codec"
-											value={fileDetails.codec}
-										/>
-										<DetailItem
-											label="Size"
-											value={fileDetails.size}
-										/>
-									</div>
-									<div>
-										<DetailItem
-											label="Date Imported"
-											value={fileDetails.dateImported}
-										/>
-									</div>
+				{/* File Details */}
+				<Card>
+					<CardHeader>
+						<CardTitle>File Details</CardTitle>
+					</CardHeader>
+					<CardContent>
+						{fileDetails ? (
+							<div className="space-y-4">
+								<div>
+									<div className="mb-1 font-medium text-muted-foreground text-xs uppercase tracking-wider">Path</div>
+									<code className="block break-all rounded bg-muted px-2 py-1.5 font-mono text-sm">{fileDetails.path}</code>
 								</div>
-							) : (
-								<div className="py-6 text-center text-muted-foreground">No file associated with this movie yet.</div>
-							)}
-						</CardContent>
-					</Card>
-
-					{/* Cast */}
-					<Card>
-						<CardHeader>
-							<CardTitle>Cast</CardTitle>
-						</CardHeader>
-						<CardContent className="p-0!">
-							{cast.length > 0 ? (
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead>Actor</TableHead>
-											<TableHead>Character</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{cast.slice(0, 6).map((member) => (
-											<TableRow key={member.name}>
-												<TableCell className="font-medium">{member.name}</TableCell>
-												<TableCell className="text-primary">{member.character}</TableCell>
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
-							) : (
-								<div className="py-6 text-center text-muted-foreground">No cast information available.</div>
-							)}
-						</CardContent>
-					</Card>
-				</div>
+								<div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+									<DetailItem
+										label="Quality"
+										value={fileDetails.quality}
+										highlight
+									/>
+									<DetailItem
+										label="Source"
+										value={fileDetails.source}
+									/>
+									<DetailItem
+										label="Codec"
+										value={fileDetails.codec}
+									/>
+									<DetailItem
+										label="Size"
+										value={fileDetails.size}
+									/>
+								</div>
+								<div>
+									<DetailItem
+										label="Date Imported"
+										value={fileDetails.dateImported}
+									/>
+								</div>
+							</div>
+						) : (
+							<div className="py-6 text-center text-muted-foreground">No file associated with this movie yet.</div>
+						)}
+					</CardContent>
+				</Card>
 			</div>
 
-			{/* Search Results */}
-			{searchResults !== null && (
-				<div className="container pb-8">
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Search className="size-5" />
-								Search Results
-								<span className="ml-1 font-normal text-muted-foreground text-sm">({searchResults.length} releases)</span>
-							</CardTitle>
-						</CardHeader>
-						<CardContent className="p-0!">
-							{searchResults.length > 0 ? (
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead className="w-[50%]">Release</TableHead>
-											<TableHead>Indexer</TableHead>
-											<TableHead>Size</TableHead>
-											<TableHead>Age</TableHead>
-											<TableHead className="w-[80px]" />
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{[...searchResults]
-											.sort((a, b) => a.size - b.size)
-											.map((release) => (
-												<TableRow key={release.guid}>
-													<TableCell className="max-w-0">
-														<div
-															className="truncate font-medium"
-															title={release.title}
-														>
-															{release.title}
-														</div>
-													</TableCell>
-													<TableCell className="text-muted-foreground">{release.indexerName}</TableCell>
-													<TableCell className="whitespace-nowrap text-size">{formatSize(release.size)}</TableCell>
-													<TableCell className="whitespace-nowrap text-muted-foreground">{formatAge(release.publishDate)}</TableCell>
-													<TableCell>
-														<Button
-															variant="ghost"
-															size="sm"
-															className="h-7 px-2"
-															title="Grab release"
-															disabled={grabRelease.isPending}
-															onClick={() => {
-																grabRelease.mutate(
-																	{
-																		param: { id: movieId },
-																		json: {
-																			guid: release.guid,
-																			title: release.title,
-																			downloadUrl: release.downloadUrl,
-																			infoUrl: release.infoUrl,
-																			size: release.size,
-																			publishDate: release.publishDate,
-																			indexerId: release.indexerId,
-																			indexerName: release.indexerName,
-																		},
-																	},
-																	{
-																		onSuccess: (data) => {
-																			console.log('[Grab] Download queued:', data.download.id)
-																		},
-																	},
-																)
-															}}
-														>
-															{grabRelease.isPending ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
-														</Button>
-													</TableCell>
-												</TableRow>
-											))}
-									</TableBody>
-								</Table>
-							) : (
-								<div className="py-8 text-center text-muted-foreground">No releases found for this movie.</div>
-							)}
-						</CardContent>
-					</Card>
-				</div>
-			)}
+			{/* Movie Manual Search Dialog */}
+			<MovieManualSearchDialog
+				movieId={movieId}
+				movieTitle={movie.title}
+				movieYear={movie.year}
+				open={manualSearchOpen}
+				onOpenChange={setManualSearchOpen}
+			/>
 
 			{/* Delete Confirmation Modal */}
 			<DeleteConfirmationModal
@@ -447,25 +313,4 @@ function formatDate(dateStr: string | null | undefined): string {
 	} catch {
 		return dateStr
 	}
-}
-
-function formatSize(bytes: number): string {
-	if (bytes === 0) return '—'
-	const gb = bytes / 1073741824
-	if (gb >= 1) return `${gb.toFixed(1)} GB`
-	const mb = bytes / 1048576
-	return `${mb.toFixed(0)} MB`
-}
-
-function formatAge(date: Date | string): string {
-	const d = typeof date === 'string' ? new Date(date) : date
-	const now = new Date()
-	const diffMs = now.getTime() - d.getTime()
-	const diffDays = Math.floor(diffMs / 86400000)
-
-	if (diffDays === 0) return 'Today'
-	if (diffDays === 1) return '1 day'
-	if (diffDays < 30) return `${diffDays} days`
-	if (diffDays < 365) return `${Math.floor(diffDays / 30)} mo`
-	return `${Math.floor(diffDays / 365)} yr`
 }

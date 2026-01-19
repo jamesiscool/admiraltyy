@@ -1,0 +1,61 @@
+{
+	"key": "fetch:[\"/collection/305120\",null]",
+	"value": {
+		"__ff_promise_result": true,
+		"value": {
+			"id": 305120,
+			"name": "Top Gear: The Perfect Road Trip Collection",
+			"original_language": "en",
+			"original_name": "Top Gear: The Perfect Road Trip Collection",
+			"overview": "Jeremy Clarkson and Richard Hammond embark on what they hope will be perfect road trips.",
+			"poster_path": "/uRx4mUHqFxU9mKXxjUN9Jwmiu95.jpg",
+			"backdrop_path": "/PQW9Bwv2JGhUN0FMZUweEoVg0k.jpg",
+			"parts": [
+				{
+					"adult": false,
+					"backdrop_path": "/u8yPRoCAhCzLKhqI2h4U6kOqWMt.jpg",
+					"id": 238234,
+					"title": "Top Gear: The Perfect Road Trip",
+					"original_title": "Top Gear: The Perfect Road Trip",
+					"overview": "The aim: to select the ideal mode of transport for each leg of a pilgrimage from Venice, Italy to Pau in France – home to a legendary street circuit and the origins of Grand Prix racing. On the way we prepare by taking to the track at Monza – the home of Italian Formula One. We try to get noticed on the road course in Monaco in a Bugatti, a Lamborghini and a Model T Ford. After cruising the canals in Venice we take to the tarmac and things look good - thanks to the Ferrari F12 Berlinetta and Mercedes SLS Black. Throw in a Pagani Huayra, Porsche Cayman S and a GT3 as well as the Aston Martin Vanquish centenary edition, Bentley V8 convertible, Rolls Royce Phantom coupe and the face-bending BAC Mono all seems pretty perfect to us.",
+					"poster_path": "/xqgjNxenML4ISLuXZMKMKqd1Tnf.jpg",
+					"media_type": "movie",
+					"original_language": "en",
+					"genre_ids": [
+						10770,
+						28,
+						12,
+						99
+					],
+					"popularity": 0.4849,
+					"release_date": "2013-11-17",
+					"video": false,
+					"vote_average": 6.859,
+					"vote_count": 85
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/tkMyM1hxdmnShIYlqgftKXnmWmP.jpg",
+					"id": 301235,
+					"title": "Top Gear: The Perfect Road Trip 2",
+					"original_title": "Top Gear: The Perfect Road Trip 2",
+					"overview": "In 2013 Jeremy Clarkson and Richard Hammond embarked on what they hoped would be the perfect road trip. It started well and ended, quite frankly, very badly.  Unbowed, the Top Gear pair are back for another crack and this time they're hoping to avoid inconveniences like apprehension by the French police. Welcome, then, to The Perfect Road Trip... 2.  Once again, Clarkson and Hammond are seeking joy and perfection wherever it may be with a range of fast, beautiful and exciting cars unleashed on glorious roads amongst gorgeous scenery and drenched in Mediterranean sunshine.  As part of their arduous research into perfection, the duo will also undertake some ridiculous challenges and hilarious stunts culminating in a strangely literal car race on the island of Capri.  Top Gear - The Perfect Road Trip 2. This time it really is perfect. Except for the bits that aren't.",
+					"poster_path": "/mJNm9MwNGnJy1Zw8OMVd3mgM4kO.jpg",
+					"media_type": "movie",
+					"original_language": "en",
+					"genre_ids": [
+						99,
+						12,
+						35
+					],
+					"popularity": 0.1464,
+					"release_date": "2014-11-17",
+					"video": false,
+					"vote_average": 7.022,
+					"vote_count": 45
+				}
+			]
+		}
+	},
+	"timestamp": 1768783906750
+}

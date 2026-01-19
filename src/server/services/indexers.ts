@@ -85,9 +85,6 @@ export interface IndexerRelease {
 	tvdbId?: number
 	season?: number
 	episode?: number
-	// Torznab-specific (for future)
-	seeders?: number
-	leechers?: number
 }
 
 // Helper Functions
@@ -146,8 +143,6 @@ function normalizeRelease(item: NewznabItem, indexer: Indexer): IndexerRelease {
 		tvdbId: Number.parseInt(getAttrValue(attrs, 'tvdbid') ?? '', 10) || undefined,
 		season: Number.parseInt(getAttrValue(attrs, 'season') ?? '', 10) || undefined,
 		episode: Number.parseInt(getAttrValue(attrs, 'episode') ?? '', 10) || undefined,
-		seeders: Number.parseInt(getAttrValue(attrs, 'seeders') ?? '', 10) || undefined,
-		leechers: Number.parseInt(getAttrValue(attrs, 'leechers') ?? '', 10) || undefined,
 	}
 }
 

@@ -7,10 +7,10 @@ export interface DownloadItem extends Download {
 	releaseTitle?: string
 }
 
-type FilterTab = 'all' | 'completed' | 'failed'
+type FilterTab = 'all' | 'imported' | 'completed' | 'failed'
 
 // Statuses that appear in queue section, not in downloads
-const queueStatuses = ['queued', 'downloading', 'paused', 'unpacking', 'verifying']
+const queueStatuses = ['queued', 'downloading', 'paused', 'unpacking', 'verifying', 'importing']
 
 interface DownloadsTableProps {
 	items: DownloadItem[]
@@ -21,6 +21,7 @@ interface DownloadsTableProps {
 function FilterTabs({ activeTab, onTabChange }: { activeTab: FilterTab; onTabChange: (tab: FilterTab) => void }) {
 	const tabs: { id: FilterTab; label: string }[] = [
 		{ id: 'all', label: 'All' },
+		{ id: 'imported', label: 'Imported' },
 		{ id: 'completed', label: 'Completed' },
 		{ id: 'failed', label: 'Failed' },
 	]
@@ -43,8 +44,12 @@ function FilterTabs({ activeTab, onTabChange }: { activeTab: FilterTab; onTabCha
 
 function StatusBadge({ status }: { status: string }) {
 	switch (status) {
+		case 'importing':
+			return <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-1 font-medium text-blue-700 text-xs">Importing...</span>
+		case 'imported':
+			return <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 font-medium text-green-700 text-xs">Imported</span>
 		case 'completed':
-			return <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 font-medium text-green-700 text-xs">Completed</span>
+			return <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-100 px-2.5 py-1 font-medium text-xs text-yellow-700">Completed</span>
 		case 'failed':
 			return <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-1 font-medium text-red-700 text-xs">Failed</span>
 		default:

@@ -141,6 +141,17 @@ export async function startNzbget() {
 		`DestDir=${downloadFolder}`,
 		'-o',
 		`InterDir=${downloadFolder}/.incomplete`,
+		// // Unpacking settings
+		// '-o',
+		// 'Unpack=yes',
+		// '-o',
+		// 'UnrarCmd=unrar',
+		// '-o',
+		// 'SevenZipCmd=7z',
+		// '-o',
+		// 'DirectUnpack=yes',
+		// '-o',
+		// 'UnpackCleanupDisk=yes',
 		...serverArgs,
 	]
 
@@ -229,7 +240,8 @@ async function streamOutput(stream: ReadableStream<Uint8Array>, prefix: string):
 			if (done) break
 			const text = decoder.decode(value, { stream: true })
 			for (const line of text.split('\n')) {
-				if (line.trim()) {
+				// Skip verbose DETAIL logs (per-article status)
+				if (line.trim() && !line.includes('[DETAIL]')) {
 					console.log(`[${prefix}] ${line}`)
 				}
 			}

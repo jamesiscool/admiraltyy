@@ -256,7 +256,7 @@ export function useDeleteDownload() {
 	const queryClient = useQueryClient()
 
 	return useMutation(
-		api.activity.downloads[':id'].$delete.mutationOptions({
+		api.activity.downloads[':downloadId'].$delete.mutationOptions({
 			onSuccess: () => {
 				queryClient.invalidateQueries({ queryKey: api.activity.downloads.$get.queryOptions({}).queryKey })
 			},

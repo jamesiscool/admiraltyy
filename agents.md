@@ -39,8 +39,6 @@
 
 Use these rules when generating, editing, or suggesting code. Keep them consistent.
 
-Use kebab case for React component file names
-
 ### Function prefixes
 
 - `find*`: may return null.  
@@ -68,7 +66,7 @@ Use kebab case for React component file names
 ### File/component naming
 
 - Non component files: short names, one or two words.  
-- React components: one component per file; file name matches component name.
+- React components: one component per file; file name matches component name, use kebab case
 
 ### Consistency
 
@@ -86,12 +84,8 @@ Use kebab case for React component file names
 - Implement `findX` as the core lookup.  
 - Implement `getX` by calling `findX` and applying a shared null check (e.g., `ensure`).
 
-### Comments
+### Route param naming
 
-When adding code comments, only add a single line. Do not add like this. 
-
-```
-// =============================================================================
-// Title Matching
-// =============================================================================
-```
+- Use descriptive param names: `:movieId`, `:downloadId`, not generic `:id`
+- Inline zod schemas in validators: `zValidator('param', z.object({ movieId: z.string() }))`
+- Don't extract param schemas to constants

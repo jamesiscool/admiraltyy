@@ -1,8 +1,21 @@
-Generate a commit message
-- run `bun fix` without the sandbox to fix and lint and format all files
-- If there are no staged changes, create the message based off all unstaged changes 
-- Use the conventional commit naming standard
-- If there is only one change and the change is relatively simple, do not have a message body 
-- Make the message body extremely concise. Sacrifice grammar for the sake of concision. Do not add "for" or other change explanation
+## Context
 
-Show me the message in a multi-line box. Ask me if it's OK and if I say "y" or "yes,". If there is staged changes commit and push them, if there isn't add all untracked files and stage all changes and commit and push that
+- Lint fix: !`bun run fix`
+- Current git status: !`git status`
+- Staged changes: !`git diff --cached`
+- Unstaged changes: !`git diff`
+- Current branch: !`git branch --show-current`
+- Recent commits: !`git log --oneline -10`
+
+## Your task
+
+1. Check if there are staged changes (from `git diff --cached`)
+   - If staged changes exist: use ONLY staged changes for the commit message, do NOT stage additional files
+   - If no staged changes: use all unstaged changes and stage them before committing
+2. Analyze the relevant diff to understand the nature and purpose of the changes
+3. Generate 3 commit message candidates based on the changes
+   - Each candidate should be concise, clear, and capture the essence of the changes
+   - Prefer Conventional Commits format (feat:, fix:, docs:, refactor:, etc.)
+4. Select the most appropriate commit message from the 3 candidates and explain the reasoning for your choice
+5. Stage changes if necessary (only if no staged changes existed)
+6. Execute git commit using the selected commit message

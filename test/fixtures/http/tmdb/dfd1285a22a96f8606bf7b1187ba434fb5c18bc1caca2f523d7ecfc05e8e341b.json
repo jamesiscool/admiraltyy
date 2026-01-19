@@ -1,0 +1,64 @@
+{
+	"key": "fetch:[\"/search/collection\",{\"query\":{\"include_adult\":\"false\",\"query\":\"hello\"}}]",
+	"value": {
+		"__ff_promise_result": true,
+		"value": {
+			"page": 1,
+			"results": [
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 936958,
+					"name": "Hello Yasothorn Collection",
+					"original_language": "en",
+					"original_name": "แหยม ยโสธร คอลเลคชั่น",
+					"overview": "The story is set in 1967 in Yasothon Province, Thailand, where Yam is a hard-working, humble, and kind farmer—kind, that is, except when it comes to the attentions of Joei, the homely maid of Soy, who is the girlfriend of Yam's cousin, Tong. Yam nurses stray and injured animals of all kinds, but he never has nice things to say to Joei. Despite this, she persists in flirting with Yam and making unwanted physical advances. Meanwhile, Soy and Tong cuddle, kiss and hug each other at every opportunity.",
+					"poster_path": "/4ShuMSNTddreskqFL0Va4Ev0gmk.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 985723,
+					"name": "Hello Dracula Collection",
+					"original_language": "zh",
+					"original_name": "幽幻道士（系列）",
+					"overview": "Series of children's kung-fu/comedy films featuring jiangshi (taoist hopping vampires).",
+					"poster_path": "/4vQ82c1BGUFc7h0NO9QCH9vgt5x.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 1368781,
+					"name": "Hello, Love... Collection",
+					"original_language": "tl",
+					"original_name": "Hello, Love... Collection",
+					"overview": "A collection of movies starring Kathryn Bernardo's Joy and Alden Richards' Ethan.",
+					"poster_path": null
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 1420799,
+					"name": "Hello Titty Collection",
+					"original_language": "en",
+					"original_name": "Hello Titty Collection",
+					"overview": "porn series",
+					"poster_path": null
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/oDd2hL56sESjMhEAIhrpWLxM8mD.jpg",
+					"id": 622397,
+					"name": "Hello Carbot the Movie: Collection",
+					"original_language": "ko",
+					"original_name": "Hello Carbot the Movie: Collection",
+					"overview": "",
+					"poster_path": "/b3oo7jh2Dhp6SwliAqlDLYnTKHd.jpg"
+				}
+			],
+			"total_pages": 1,
+			"total_results": 5
+		}
+	},
+	"timestamp": 1768782771128
+}

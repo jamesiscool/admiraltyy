@@ -3,13 +3,13 @@ import { and, eq, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { z } from 'zod'
-import { fetchMovieDetails } from '../api/tmdb'
 import { db, schema } from '../db'
 import { type Resolution, resolutions } from '../db/schema'
-import { downloadNzb, searchMovieReleases } from '../lib/indexer'
-import { logInfo } from '../log/logs'
 import { appendNzb } from '../nzbget/nzbgetApi'
 import { notifyDownloadActivity } from '../nzbget/nzbgetPoller'
+import { downloadNzb, searchMovieReleases } from '../services/indexers'
+import { logInfo } from '../services/logs'
+import { fetchMovieDetails } from '../services/tmdb'
 
 const idParamSchema = z.object({ id: z.string() })
 const addMovieSchema = z.object({ tmdbId: z.number(), resolution: z.enum(resolutions).optional() })
@@ -115,7 +115,6 @@ export const moviesRoutes = new Hono()
 				synopsis: details.synopsis,
 				runtimeMins: details.runtimeMins,
 				genres: JSON.stringify(details.genres),
-				cast: JSON.stringify(details.cast),
 				cinemaReleaseDate: details.cinemaReleaseDate,
 				digitalReleaseDate: details.digitalReleaseDate,
 				contentRating: details.contentRating,

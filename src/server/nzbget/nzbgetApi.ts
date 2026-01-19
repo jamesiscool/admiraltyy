@@ -1,6 +1,7 @@
 import { and, eq, notInArray } from 'drizzle-orm'
 import { type $Fetch, ofetch } from 'ofetch'
 import { db, schema } from '../db'
+import { fileImport } from '../services/fileImport'
 import { getSettings, type UsenetServer } from '../settings'
 import type { NzbgetConfigOption, NzbgetHistoryItem, NzbgetQueueItem, NzbgetRpcResponse, NzbgetStatus } from './nzbgetSchema'
 
@@ -217,13 +218,13 @@ export async function syncNzbgetHistory(): Promise<{ synced: number; orphans: nu
 		}
 
 		// Update download with final state
-		const status = mapNzbgetStatus(item)
+		const nzbgetStatus = mapNzbgetStatus(item)
 		const completedAt = new Date(item.HistoryTime * 1000).toISOString()
 
 		await db
 			.update(schema.downloads)
 			.set({
-				status,
+				status: nzbgetStatus,
 				parStatus: item.ParStatus,
 				unpackStatus: item.UnpackStatus,
 				finalDir: item.FinalDir || null,
@@ -237,7 +238,24 @@ export async function syncNzbgetHistory(): Promise<{ synced: number; orphans: nu
 
 		syncedNzbIds.push(item.NZBID)
 		synced++
-		console.log(`[NZBGet Sync] Updated download id=${download.id}: ${status} (par=${item.ParStatus}, unpack=${item.UnpackStatus})`)
+		console.log(`[NZBGet Sync] Updated download id=${download.id}: ${nzbgetStatus} (par=${item.ParStatus}, unpack=${item.UnpackStatus})`)
+
+		// Auto-import if completed with finalDir
+		// UnpackStatus: SUCCESS = unpacked, NONE = no archives to unpack
+		const canImport = nzbgetStatus === 'completed' && item.FinalDir && (item.UnpackStatus === 'SUCCESS' || item.UnpackStatus === 'NONE')
+		if (canImport) {
+			console.log(`[NZBGet Sync] Starting import for download id=${download.id}`)
+			await db.update(schema.downloads).set({ status: 'importing' }).where(eq(schema.downloads.id, download.id))
+
+			const importResult = await fileImport(download.id)
+			if (importResult.success) {
+				await db.update(schema.downloads).set({ status: 'imported' }).where(eq(schema.downloads.id, download.id))
+				console.log(`[NZBGet Sync] Import complete: ${importResult.filesImported} file(s)`)
+			} else {
+				await db.update(schema.downloads).set({ status: 'failed', errorMessage: importResult.error }).where(eq(schema.downloads.id, download.id))
+				console.log(`[NZBGet Sync] Import failed: ${importResult.error}`)
+			}
+		}
 	}
 
 	// Clear synced history items from NZBGet

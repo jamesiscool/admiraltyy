@@ -6,8 +6,6 @@ import { z } from 'zod'
 import { db, schema } from '../db'
 import { fetchNzbgetStatus, fetchNzbgetVersion, listNzbgetHistory, listNzbgetQueue, syncNzbgetHistory } from '../nzbget/nzbgetApi'
 
-const idParamSchema = z.object({ id: z.string() })
-
 export const activityRoutes = new Hono()
 	// GET /api/activity/downloads - Get tracked downloads from database
 	.get('/downloads', async (c) => {
@@ -65,19 +63,17 @@ export const activityRoutes = new Hono()
 			throw new HTTPException(500, { message: String(error) })
 		}
 	})
-	// DELETE /api/activity/downloads/:id - Delete a download record
-	.delete('/downloads/:id', zValidator('param', idParamSchema), async (c) => {
-		const { id } = c.req.valid('param')
-		const numId = parseInt(id, 10)
+	// DELETE /api/activity/downloads/:downloadId - Delete a download record
+	.delete('/downloads/:downloadId', zValidator('param', z.object({ downloadId: z.string() })), async (c) => {
+		const { downloadId } = c.req.valid('param')
+		const numId = parseInt(downloadId, 10)
 		if (Number.isNaN(numId)) {
 			throw new HTTPException(400, { message: 'Invalid download ID' })
 		}
-
 		const existing = await db.select().from(schema.downloads).where(eq(schema.downloads.id, numId))
 		if (!existing.length) {
 			throw new HTTPException(404, { message: 'Download not found' })
 		}
-
 		await db.delete(schema.downloads).where(eq(schema.downloads.id, numId))
 		return c.body(null, 204)
 	})

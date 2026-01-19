@@ -1,0 +1,184 @@
+{
+	"key": "fetch:[\"/search/collection\",{\"query\":{\"include_adult\":\"false\",\"query\":\"top\"}}]",
+	"value": {
+		"__ff_promise_result": true,
+		"value": {
+			"page": 1,
+			"results": [
+				{
+					"adult": false,
+					"backdrop_path": "/AeQ8HsW7EO1nWskAOd94iYCVjYe.jpg",
+					"id": 633455,
+					"name": "At The Top Collection",
+					"original_language": "en",
+					"original_name": "At the Top Collection",
+					"overview": "Room at the Top is a 1959 British drama film based on the 1957 novel of the same name by John Braine. The film was widely lauded, and was nominated for six Academy Awards, winning two. Room at the Top is seen as the first of the British New Wave of kitchen-sink-realism film dramas. It was followed by a sequel in 1965 entitled Life at the Top.",
+					"poster_path": "/TYRbgO1lmrZKdiySF8e4abYKNr.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/eROMVhYCm1v1UCt1kA6E1nuLSfA.jpg",
+					"id": 23453,
+					"name": "Tengen Toppa Gurren Lagann Collection",
+					"original_language": "en",
+					"original_name": "天元突破グレンラガン シリーズ",
+					"overview": "Two teenagers, Simon and Kamina, who live in a subterranean village wish to go to the surface and maybe someday reach the heavens.",
+					"poster_path": "/z97KYWVjxwMJuUvN1kMKElMouI3.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/ysyPMmhgZ9Z4heU7vdUBP7L5zCl.jpg",
+					"id": 165679,
+					"name": "Girls on Top Collection",
+					"original_language": "de",
+					"original_name": "Mädchen Mädchen Filmreihe",
+					"overview": "These films explore growing up and navigating relationships, focusing on romantic experiences and self-discovery. The protagonists, adolescent girls, face pressures of coming of age, navigating relationships, and dealing with friendship, romance, and family dynamics. They encounter financial struggles, dysfunctional relationships, and loneliness, reflecting challenges in seeking stability and love. The films include comedic elements, highlighting the girls' bold and reckless escapades leading to humorous self-discovery moments. Central themes include female friendships, romantic complexities, jealousy, betrayal, and personal fulfillment. As the stories progress, characters undergo growth and transformation, gaining self-understanding. These heartfelt, humorous films resonate with audiences, portraying adolescence and young adulthood struggles. They emphasize self-discovery, relationships, courage, and embracing fears during life's adventures.",
+					"poster_path": "/1rCfQ6SCglnxLTFcwxrxw8TQlRN.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/PQW9Bwv2JGhUN0FMZUweEoVg0k.jpg",
+					"id": 305120,
+					"name": "Top Gear: The Perfect Road Trip Collection",
+					"original_language": "en",
+					"original_name": "Top Gear: The Perfect Road Trip Collection",
+					"overview": "Jeremy Clarkson and Richard Hammond embark on what they hope will be perfect road trips.",
+					"poster_path": "/uRx4mUHqFxU9mKXxjUN9Jwmiu95.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/oZll8O2qZiGHHEM5ATcfROCMNkK.jpg",
+					"id": 438087,
+					"name": "Topper Collection",
+					"original_language": "en",
+					"original_name": "Topper Collection",
+					"overview": "Topper (1937) is an American supernatural comedy film starring Constance Bennett and Cary Grant and featuring Roland Young, which tells the story of a stuffy, stuck-in-his-ways man, Cosmo Topper (Roland Young) who is haunted by the ghosts of a fun-loving married couple. Topper was followed by the sequels Topper Takes a Trip (1938) and Topper Returns (1941).",
+					"poster_path": "/w9JhmToZlitUENBQIUToFXijbiA.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 1325732,
+					"name": "Top Wet Girls Collection",
+					"original_language": "en",
+					"original_name": "Top Wet Girls Collection",
+					"overview": "Top Wet Girls Collection  by  Evil Angel",
+					"poster_path": null
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 1378705,
+					"name": "America's Next Top Tranny Collection",
+					"original_language": "en",
+					"original_name": "America's Next Top Tranny Collection",
+					"overview": "porn series",
+					"poster_path": null
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/sihpiX6Q5ID8RWq63KsQejJg3r3.jpg",
+					"id": 1150976,
+					"name": "Top Cat Collection",
+					"original_language": "es",
+					"original_name": "Top Cat Collection",
+					"overview": "Collection of the animated saga of Top Cat made in Mexico by Ánima Estudios.",
+					"poster_path": "/qvBXT5PPbExJfi07W1AJLQHuEJO.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 708181,
+					"name": "Top Gear: The U.S. Special",
+					"original_language": "en",
+					"original_name": "Top Gear: The U.S. Special",
+					"overview": "In their not quite biggest adventures yet, the boys visit the good old US of A and former Eastern Bloc Albania for two action packed road trips. In America our trio, armed with the hottest new supercars - the Mercedes SLS, Ferrari 458 and the Porsche 911 GT3RS - head through NASCAR country and enjoy a dancing Mayor, a Stig on a drive by shooting range, and the white knuckle Virginia Raceway, with their adventure climaxing in a race across New York.",
+					"poster_path": "/nfHUsM8tsGqyVUnSwXsFdzyRRK3.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/9MGm0XT04ob99MyGQfMT7I8y3UE.jpg",
+					"id": 531330,
+					"name": "Top Gun Collection",
+					"original_language": "en",
+					"original_name": "Top Gun Collection",
+					"overview": "Top Gun is an American action drama multimedia franchise based on the 1983 article \"Top Guns\" by Ehud Yonay, which was adapted into the eponymous 1986 film, written by Jim Cash and Jack Epps Jr.",
+					"poster_path": "/wtpIx0Gsra1IGHH8af5kNK90Xy8.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 986568,
+					"name": "Top Gunner Collection",
+					"original_language": "en",
+					"original_name": "Top Gunner Collection",
+					"overview": "Top Gunner Collection",
+					"poster_path": "/wpljwAJEeE9OyysHSkGu0OoVzZ7.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 1599308,
+					"name": "Porn's Top Black Models Collection",
+					"original_language": "en",
+					"original_name": "Porn's Top Black Models Collection",
+					"overview": "porn series",
+					"poster_path": null
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 1077595,
+					"name": "BEAUTY VENUS",
+					"original_language": "ja",
+					"original_name": "BEAUTY VENUS",
+					"overview": "",
+					"poster_path": null
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/6C45RILM1SotLPQa5hMRviqBTI6.jpg",
+					"id": 284100,
+					"name": "The Inspector Wears Skirts Collection",
+					"original_language": "en",
+					"original_name": "霸王花（系列）",
+					"overview": "The Inspector Wears Skirts films are a series of Hong Kong martial arts-action comedies directed by Wellson Chin.",
+					"poster_path": "/xBN8dvXq43FFPPjJ89UIKo7BABs.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 224529,
+					"name": "Hairy Tooth Fairy Collection",
+					"original_language": "fr",
+					"original_name": "La petite souris (colléction)",
+					"overview": "",
+					"poster_path": "/vsKlGNCZdzyuDLpYkwZdkPXpadL.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": "/lKoEEg7Nf1FUPSzRR0oMtPIqiyX.jpg",
+					"id": 52988,
+					"name": "Hot Shots! Collection",
+					"original_language": "en",
+					"original_name": "Hot Shots! Collection",
+					"overview": "Hot Shots! is a 1991 comedy spoof film starring Charlie Sheen, Cary Elwes, Valeria Golino, Lloyd Bridges, Kevin Dunn, Jon Cryer and Ryan Stiles. It was directed by Jim Abrahams, and was written by Abrahams and Pat Proft. Carrying the same comedic vein as Airplane!, a film Abrahams co-directed, the film primarily spoofs the 1986 action film Top Gun, but also draws material from films like Rocky and Superman. It spawned a sequel in 1993, Hot Shots! Part Deux. Sheen and Cryer would later co-star in the television series Two and a Half Men, in which Stiles also went on to play a recurring role.",
+					"poster_path": "/dQkeiYHYvPIRVmXcuB3b6cgPo7B.jpg"
+				},
+				{
+					"adult": false,
+					"backdrop_path": null,
+					"id": 1264823,
+					"name": "Cats in the Museum",
+					"original_language": "ru",
+					"original_name": "Коты в музее",
+					"overview": "",
+					"poster_path": null
+				}
+			],
+			"total_pages": 1,
+			"total_results": 17
+		}
+	},
+	"timestamp": 1768783906035
+}
