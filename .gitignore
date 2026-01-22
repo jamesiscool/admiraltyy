@@ -1,36 +1,33 @@
-# dependencies (bun install)
+# Dependencies
 node_modules
 
-# reference files and projects
-reference
-design
-data
-
-# generated files
-src/client/routeTree.gen.ts
-
-# output
-out
+# Build outputs
 dist
-*.tgz
+.output
+.nitro
+.vinxi
+.tanstack
 
-# code coverage
-coverage
-*.lcov
-
-# logs
-logs
-_.log
-report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
-
-# local dotenv environment variable files
-.env.*.local
-.env.local
-
-# caches
+# Cache & temp
 .cache
 *.tsbuildinfo
+
+# Generated
+src/routeTree.gen.ts
+
+# Tools
 .playwright-mcp
 
-# Finder (MacOS) folder config
+# OS
 .DS_Store
+
+# Local/env
+*.local
+
+# Archives
+*.tgz
+
+# Project dirs
+data
+design
+reference

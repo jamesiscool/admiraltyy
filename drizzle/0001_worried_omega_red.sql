@@ -1,1 +1,0 @@
-ALTER TABLE `files` ADD `series_id` integer REFERENCES series(id);

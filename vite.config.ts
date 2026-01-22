@@ -1,37 +1,31 @@
-import { resolve } from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import { devtools } from '@tanstack/devtools-vite'
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
-import react from '@vitejs/plugin-react'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
+import { nitro } from 'nitro/vite'
+import { fileURLToPath, URL } from 'url'
 import { defineConfig } from 'vite'
+import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
-	plugins: [
-		devtools(),
-		tanstackRouter({
-			target: 'react',
-			autoCodeSplitting: true,
-			routesDirectory: './src/client/routes',
-			generatedRouteTree: './src/client/routeTree.gen.ts',
-		}),
-		react(),
-		tailwindcss(),
-	],
-	root: '.',
-	publicDir: 'public',
 	resolve: {
 		alias: {
-			'@/client': resolve(__dirname, './src/client'),
-			'@/server': resolve(__dirname, './src/server'),
+			'@': fileURLToPath(new URL('./src', import.meta.url)),
 		},
 	},
-	build: {
-		outDir: 'dist/client',
-	},
-	server: {
-		port: 2828,
-		proxy: {
-			'/api': 'http://localhost:2829',
-		},
-	},
+	plugins: [
+		devtools(),
+		nitro(),
+		// this is the plugin that enables path aliases
+		viteTsConfigPaths({
+			projects: ['./tsconfig.json'],
+		}),
+		tailwindcss(),
+		tanstackStart(),
+		viteReact({
+			babel: {
+				plugins: ['babel-plugin-react-compiler'],
+			},
+		}),
+	],
 })

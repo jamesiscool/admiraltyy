@@ -1,1 +1,0 @@
-ALTER TABLE `files` ADD `is_deleted` integer DEFAULT false;

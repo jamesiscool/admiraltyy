@@ -1,15 +1,22 @@
 # admiraltyy
 
-To install dependencies:
-
 ```bash
+
 bun install
+bun --bun run dev
+bun --bun run build
+bun --bun run test
+
+bun --bun run lint
+bun --bun run format
+bun --bun run check
 ```
 
-To run:
+
+## Shadcn
+
+Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
 
 ```bash
-bun run index.ts
+pnpm dlx shadcn@latest add button
 ```
-
-This project was created using `bun init` in bun v1.3.3. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
