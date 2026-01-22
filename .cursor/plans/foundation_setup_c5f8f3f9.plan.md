@@ -75,8 +75,6 @@ graph TB
     Drizzle --> SQLite
 ```
 
-
-
 ## Project Structure
 
 ```javascript
@@ -106,8 +104,6 @@ admiraltyy/
 ├── vite.config.ts
 └── drizzle.config.ts
 ```
-
-
 
 ## Implementation Steps
 

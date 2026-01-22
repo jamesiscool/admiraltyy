@@ -42,8 +42,6 @@ flowchart TD
     end
 ```
 
-
-
 ## Changes
 
 ### 1. Schema: Add seriesId to files table
@@ -73,8 +71,6 @@ const RESOLUTION_REGEX = /\b(480p|720p|1080p|2160p|4k)\b/i
 const SOURCE_REGEX = /\b(bluray|blu-ray|bdrip|brrip|hdtv|web-dl|webdl|webrip|web|dvdrip|dvd|hdcam|cam|ts|telesync)\b/i
 const CODEC_REGEX = /\b(x264|h\.?264|avc|x265|h\.?265|hevc|xvid|divx|av1)\b/i
 ```
-
-
 
 ### 3. New scan routes: `src/server/routes/scan.ts`
 
@@ -107,8 +103,6 @@ const CODEC_REGEX = /\b(x264|h\.?264|avc|x265|h\.?265|hevc|xvid|divx|av1)\b/i
 const EPISODE_REGEX = /(?:S(?<season>\d{1,2})E(?<episode>\d{1,3}))|(?:(?<seasonAlt>\d{1,2})x(?<episodeAlt>\d{2,3}))/i
 ```
 
-
-
 ## File Structure
 
 ```javascript
@@ -118,8 +112,6 @@ src/server/
   routes/
     scan.ts          # Scan endpoints
 ```
-
-
 
 ## Key Decisions
 
