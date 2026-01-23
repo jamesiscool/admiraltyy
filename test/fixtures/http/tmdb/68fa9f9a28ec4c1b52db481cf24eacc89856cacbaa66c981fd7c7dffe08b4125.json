@@ -1,0 +1,94 @@
+{
+  "key": "fetch:[\"/search/collection\",{\"query\":{\"include_adult\":\"false\",\"query\":\"Gone\"}}]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "page": 1,
+      "results": [
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 829687,
+          "name": "Go Goa Gone Collection",
+          "original_language": "en",
+          "original_name": "Go Goa Gone Collection",
+          "overview": "A collection of India's first zom-com movies.",
+          "poster_path": null
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 1016358,
+          "name": "..... Is Gone",
+          "original_language": "en",
+          "original_name": "..... Is Gone",
+          "overview": "... Is Gone collection",
+          "poster_path": null
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 1062467,
+          "name": "Girls Getaway Gone Wrong Collection",
+          "original_language": "en",
+          "original_name": "Girls Getaway Gone Wrong Collection",
+          "overview": "A collection of thrillers about girls trips that result in murder.",
+          "poster_path": null
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 1369462,
+          "name": "Anal Babysitters Gone Black Collection",
+          "original_language": "en",
+          "original_name": "Anal Babysitters Gone Black Collection",
+          "overview": "Anal Babysitters Gone Black Collection  by  Zero Tolerance Films",
+          "poster_path": null
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/yPzntG6px2V2Muyu4zx22iWRgwt.jpg",
+          "id": 391040,
+          "name": "Gone in 60 Seconds Trilogy",
+          "original_language": "en",
+          "original_name": "Gone in 60 Seconds Trilogy",
+          "overview": "Legendary trilogy based on H.B. Halicki's original Gone in Sixty Seconds.",
+          "poster_path": "/2o6d9kc6uBs4v3WkRmKP3TsUBSC.jpg"
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/jiki5U5RhiX1pFJCfUakp5logzD.jpg",
+          "id": 773768,
+          "name": "Ooops! Noah is Gone... Collection",
+          "original_language": "es",
+          "original_name": "Ooops! Noah is Gone... Collection",
+          "overview": "",
+          "poster_path": "/yEJrkNKTHYrMp2NjLQeVPv2tGoI.jpg"
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 1595754,
+          "name": "Girls Gone Wild Girl Power",
+          "original_language": "en",
+          "original_name": "Girls Gone Wild Girl Power",
+          "overview": "Girls Gone Wild Girl Power lesbian movie series",
+          "poster_path": null
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 1608417,
+          "name": "Girls Gone Wild: Sorority Girl Orgy Collection",
+          "original_language": "en",
+          "original_name": "Girls Gone Wild: Sorority Girl Orgy Collection",
+          "overview": "The Girls Gone Wild: Sorority Girl Orgy Collection",
+          "poster_path": null
+        }
+      ],
+      "total_pages": 1,
+      "total_results": 8
+    }
+  },
+  "timestamp": 1769171560197
+}

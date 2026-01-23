@@ -1,0 +1,56 @@
+{
+  "key": "fetch:[\"/collection/360112\",null]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "id": 360112,
+      "name": "He Who Dares Collection",
+      "original_language": "fr",
+      "original_name": "He Who Dares Collection",
+      "overview": "These films follow the daring missions of a Counter-Terrorism Special Air Service (CT-SAS) team in London, led by Christopher Lowe. The team confronts ruthless terrorists with masterful skills and exhaustive training, often saving the country from disaster. Despite their success, they struggle with bureaucratic hindrances that threaten their effectiveness. The CT-SAS faces notorious terrorists linked to foreign extremist organizations, creating suspenseful and high-stakes scenarios.  The team includes distinct characters: \"Admiral,\" the courageous leader with a strategic mind; \"CaptainTEMP,\" the witty tech specialist; \"Hillford,\" the strong combat specialist; \"Angel,\" the sharp-eyed sniper with a mysterious background; and \"Wise,\" the loyal explosives expert with unconventional methods. Their interplay of brawn and brains adds to the films' entertainment value.",
+      "poster_path": "/4qnJAKPAzpyFgKu1stNg4G2YDEk.jpg",
+      "backdrop_path": null,
+      "parts": [
+        {
+          "adult": false,
+          "backdrop_path": "/mux9bprMIolksyczZHNTlDtR37k.jpg",
+          "id": 233487,
+          "title": "He Who Dares",
+          "original_title": "He Who Dares",
+          "overview": "On Christmas Eve a group of ruthless masked terrorists kidnap the Prime Ministers daughter, fortifying themselves in an underground car park rigged with explosives. Crack SAS operative Chris Lowe and his team are sent in and must take the building one level at a time. \"The Raid meets Die Hard\" in this explosive action thriller.",
+          "poster_path": "/xw8rnORUO56U4IOwYQeTHJu3mFb.jpg",
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            28
+          ],
+          "popularity": 1.1017,
+          "release_date": "2014-01-31",
+          "video": false,
+          "vote_average": 3.79,
+          "vote_count": 31
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/5TDdKK8KlxNz5fd1mkYe693Nma4.jpg",
+          "id": 307251,
+          "title": "He Who Dares: Downing Street Siege",
+          "original_title": "He Who Dares: Downing Street Siege",
+          "overview": "The sequel to Paul Tanter's \"He Who Dares\" will continue to follow the Special Air Service (SAS) anti–hijacking counter–terrorism team. In the thriller, Christopher Lowe finds himself summoned to 10 Downing Street to be dishonorably discharged from the SAS for disobeying a direct order, despite the fact that he saved the Prime Minister’s only daughter.",
+          "poster_path": "/7w162ymoYki91iANBk7bNQojtR8.jpg",
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            28
+          ],
+          "popularity": 1.1049,
+          "release_date": "2014-12-02",
+          "video": false,
+          "vote_average": 3.405,
+          "vote_count": 21
+        }
+      ]
+    }
+  },
+  "timestamp": 1769171520028
+}

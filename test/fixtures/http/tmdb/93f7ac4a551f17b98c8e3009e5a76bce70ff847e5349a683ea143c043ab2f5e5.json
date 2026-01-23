@@ -1,0 +1,1024 @@
+{
+  "key": "fetch:[\"/movie/770\",{\"query\":{\"append_to_response\":\"release_dates\"}}]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "adult": false,
+      "backdrop_path": "/4FHcxMtVruMr7ltU2cItWssLjTP.jpg",
+      "belongs_to_collection": null,
+      "budget": 4000000,
+      "genres": [
+        {
+          "id": 18,
+          "name": "Drama"
+        },
+        {
+          "id": 10752,
+          "name": "War"
+        },
+        {
+          "id": 10749,
+          "name": "Romance"
+        }
+      ],
+      "homepage": "",
+      "id": 770,
+      "imdb_id": "tt0031381",
+      "origin_country": [
+        "US"
+      ],
+      "original_language": "en",
+      "original_title": "Gone with the Wind",
+      "overview": "The spoiled daughter of a Georgia plantation owner conducts a tumultuous romance with a cynical profiteer during the American Civil War and Reconstruction Era.",
+      "popularity": 8.2132,
+      "poster_path": "/lNz2Ow0wGCAvzckW7EOjE03KcYv.jpg",
+      "production_companies": [
+        {
+          "id": 1553,
+          "logo_path": null,
+          "name": "Selznick International Pictures",
+          "origin_country": "US"
+        },
+        {
+          "id": 21,
+          "logo_path": "/usUnaYV6hQnlVAXP6r4HwrlLFPG.png",
+          "name": "Metro-Goldwyn-Mayer",
+          "origin_country": "US"
+        }
+      ],
+      "production_countries": [
+        {
+          "iso_3166_1": "US",
+          "name": "United States of America"
+        }
+      ],
+      "release_date": "1939-12-15",
+      "revenue": 402352579,
+      "runtime": 233,
+      "spoken_languages": [
+        {
+          "english_name": "English",
+          "iso_639_1": "en",
+          "name": "English"
+        }
+      ],
+      "status": "Released",
+      "tagline": "The greatest romance of all time!",
+      "title": "Gone with the Wind",
+      "video": false,
+      "vote_average": 7.9,
+      "vote_count": 4279,
+      "release_dates": {
+        "results": [
+          {
+            "iso_3166_1": "AR",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-09-26T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1967-11-01T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "AT",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1953-01-30T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "AU",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Sydney",
+                "release_date": "1940-04-30T00:00:00.000Z",
+                "type": 1
+              },
+              {
+                "certification": "PG",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-05-01T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1950-06-02T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "BE",
+            "release_dates": [
+              {
+                "certification": "9",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Brussels",
+                "release_date": "1945-04-17T00:00:00.000Z",
+                "type": 1
+              },
+              {
+                "certification": "9",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1968-11-14T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "9",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1949-03-03T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "BR",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-09-12T00:00:00.000Z",
+                "type": 1
+              },
+              {
+                "certification": "L",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-09-19T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "L",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1967-09-18T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "L",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1972-02-28T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "L",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1976-04-19T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "L",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "VHS & DVD",
+                "release_date": "2004-12-30T00:00:00.000Z",
+                "type": 5
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1983-09-09T00:00:00.000Z",
+                "type": 6
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "CA",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-02-16T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "CN",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Beijing International Film Festival",
+                "release_date": "2017-04-15T00:00:00.000Z",
+                "type": 1
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "CZ",
+            "release_dates": [
+              {
+                "certification": "15+",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "2001-01-15T00:00:00.000Z",
+                "type": 5
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "DE",
+            "release_dates": [
+              {
+                "certification": "12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "West Germany ",
+                "release_date": "1953-01-15T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "West Germany",
+                "release_date": "1990-03-29T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "DK",
+            "release_dates": [
+              {
+                "certification": "7",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1958-09-11T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "EE",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1990-12-24T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "ES",
+            "release_dates": [
+              {
+                "certification": "12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "2001-07-13T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1950-11-17T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1962-10-15T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1970-10-09T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1986-06-27T00:00:00.000Z",
+                "type": 6
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "FI",
+            "release_dates": [
+              {
+                "certification": "K-16",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1961-12-29T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "K-12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1950-09-15T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "FR",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Cinémathèque Française",
+                "release_date": "1944-08-22T00:00:00.000Z",
+                "type": 1
+              },
+              {
+                "certification": "TP",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Paris Le Berlitz premiere",
+                "release_date": "1950-05-20T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1968-05-10T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1954-09-15T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "fr",
+                "note": "Paris Le Grand Rex premiere",
+                "release_date": "1950-12-29T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "fr",
+                "note": "T18",
+                "release_date": "2025-12-29T00:00:00.000Z",
+                "type": 6
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "GB",
+            "release_dates": [
+              {
+                "certification": "PG",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-04-18T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1969-03-12T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1968-09-10T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "GR",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1953-02-02T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "HK",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1949-06-16T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "IE",
+            "release_dates": [
+              {
+                "certification": "G",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1942-09-04T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1968-12-20T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1943-03-26T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "IN",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "2020-07-08T00:00:00.000Z",
+                "type": 4
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "IT",
+            "release_dates": [
+              {
+                "certification": "T",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1949-03-12T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1977-11-10T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "JP",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1972-02-05T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1952-09-04T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "KR",
+            "release_dates": [
+              {
+                "certification": "12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1972-12-23T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1995-05-05T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1957-03-25T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "KZ",
+            "release_dates": [
+              {
+                "certification": "Б14",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "2010-07-10T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "MX",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "2014-10-30T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "B-15",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1941-01-22T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "NL",
+            "release_dates": [
+              {
+                "certification": "6",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "2014-12-18T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "6",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1949-03-03T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "6",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "DVD",
+                "release_date": "2014-07-14T00:00:00.000Z",
+                "type": 5
+              },
+              {
+                "certification": "6",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Net 5",
+                "release_date": "2001-12-24T00:00:00.000Z",
+                "type": 6
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "NO",
+            "release_dates": [
+              {
+                "certification": "15",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1947-12-15T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "NZ",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "2000-01-28T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "PE",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "2014-09-04T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-10-10T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "PH",
+            "release_dates": [
+              {
+                "certification": "PG",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "re-release via SM Cinema",
+                "release_date": "1993-06-23T00:00:00.000Z",
+                "type": 2
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-03-01T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "PL",
+            "release_dates": [
+              {
+                "certification": "12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1963-01-01T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "2009-02-27T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "DVD",
+                "release_date": "2004-12-03T00:00:00.000Z",
+                "type": 5
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "PT",
+            "release_dates": [
+              {
+                "certification": "M/12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1943-09-20T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "M/12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1972-07-21T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "RO",
+            "release_dates": [
+              {
+                "certification": "12",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1939-12-15T00:00:00.000Z",
+                "type": 2
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "RU",
+            "release_dates": [
+              {
+                "certification": "0+",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "DVD",
+                "release_date": "2002-08-07T00:00:00.000Z",
+                "type": 5
+              },
+              {
+                "certification": "0+",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Blu-ray",
+                "release_date": "2009-12-01T00:00:00.000Z",
+                "type": 5
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "SE",
+            "release_dates": [
+              {
+                "certification": "11",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1941-10-06T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "SI",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1954-09-05T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "SU",
+            "release_dates": [
+              {
+                "certification": "12+",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Premiere in Moscow",
+                "release_date": "1990-10-19T00:00:00.000Z",
+                "type": 2
+              },
+              {
+                "certification": "12+",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1990-09-19T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "TR",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1953-01-14T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1974-02-01T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "TW",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "2019-08-30T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1952-04-25T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "US",
+            "release_dates": [
+              {
+                "certification": "G",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Atlanta, Georgia",
+                "release_date": "1939-12-15T00:00:00.000Z",
+                "type": 2
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1998-06-26T00:00:00.000Z",
+                "type": 2
+              },
+              {
+                "certification": "G",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "2025-01-31T00:00:00.000Z",
+                "type": 2
+              },
+              {
+                "certification": "G",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-06-17T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "G",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "Re-release",
+                "release_date": "1942-03-31T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "G",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1967-10-14T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "G",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1976-06-11T00:00:00.000Z",
+                "type": 6
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "UY",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "70 mm re-release",
+                "release_date": "1968-09-05T00:00:00.000Z",
+                "type": 3
+              },
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-09-25T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "XC",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1992-01-12T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          },
+          {
+            "iso_3166_1": "ZA",
+            "release_dates": [
+              {
+                "certification": "",
+                "descriptors": [],
+                "iso_639_1": "",
+                "note": "",
+                "release_date": "1940-04-12T00:00:00.000Z",
+                "type": 3
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "timestamp": 1769171565523
+}

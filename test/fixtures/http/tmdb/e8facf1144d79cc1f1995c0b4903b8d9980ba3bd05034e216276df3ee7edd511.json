@@ -1,0 +1,57 @@
+{
+  "key": "fetch:[\"/collection/1016358\",null]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "id": 1016358,
+      "name": "..... Is Gone",
+      "original_language": "en",
+      "original_name": "..... Is Gone",
+      "overview": "... Is Gone collection",
+      "poster_path": null,
+      "backdrop_path": null,
+      "parts": [
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 689435,
+          "title": "Grace is Gone",
+          "original_title": "Grace is Gone",
+          "overview": "In a post-apocalyptic wasteland filled with thrills that kill, Jericho is responsible for the protection of his family against local gang tyrant king Black Jack.",
+          "poster_path": "/8lRpgIo8M4WGJup1uLmWlrKal8W.jpg",
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            28,
+            878
+          ],
+          "popularity": 0.6466,
+          "release_date": "2019-04-09",
+          "video": false,
+          "vote_average": 1,
+          "vote_count": 1
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 1016353,
+          "title": "Yesterday Is Gone",
+          "original_title": "Yesterday Is Gone",
+          "overview": "In a fallen world, ravaged by an incurable epidemic and violence, a nomadic figure (Jericho) seeks revenge at all costs, for the murder of his family by a ruthless gang called the \"Sandflies\".",
+          "poster_path": null,
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            18
+          ],
+          "popularity": 0.3328,
+          "release_date": "2023-11-24",
+          "video": false,
+          "vote_average": 0,
+          "vote_count": 0
+        }
+      ]
+    }
+  },
+  "timestamp": 1769171560601
+}

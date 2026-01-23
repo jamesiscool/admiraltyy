@@ -1,0 +1,95 @@
+{
+  "key": "fetch:[\"/collection/662064\",null]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "id": 662064,
+      "name": "Ryo Moroe Horror Series",
+      "original_language": "ja",
+      "original_name": "Ryo Moroe Horror Short Series",
+      "overview": "Ryo Moroe is a Japanese director who released 4 shorts following different horror scenarios. The link between them has yet to be found.",
+      "poster_path": null,
+      "backdrop_path": null,
+      "parts": [
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 662065,
+          "title": "Mr. Yamauchi Ozawa",
+          "original_title": "小沢くん露木さん山﨑さん",
+          "overview": "A woman waits at a funeral home to discuss the plan for her daughter's funeral with Mr. Yamauchi Ozawa. Suddenly, Ozawa is overcome with fear and panic, demanding to know the circumstances surrounding her daughter's death.",
+          "poster_path": "/fhrn4O8WXvQhvzFJfowD6gXcXAB.jpg",
+          "media_type": "movie",
+          "original_language": "ja",
+          "genre_ids": [
+            27
+          ],
+          "popularity": 0.4963,
+          "release_date": "2015-07-01",
+          "video": false,
+          "vote_average": 5,
+          "vote_count": 1
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 666725,
+          "title": "Spirit Heart",
+          "original_title": "スピリット·ハート",
+          "overview": "The first part of the short horror film series by Ryo Moroe. Two nurses are working the night shift at the hospital; rumours go round that the hospital is haunted, scaring one of the nurses. He finally begins to work after scaring his co-worker, Yoko. Yoko starts talking to a young girl who seems to be lost and can't find her room.",
+          "poster_path": null,
+          "media_type": "movie",
+          "original_language": "ja",
+          "genre_ids": [
+            27
+          ],
+          "popularity": 0.4359,
+          "release_date": "2015-06-27",
+          "video": false,
+          "vote_average": 5,
+          "vote_count": 1
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 655435,
+          "title": "FEEL",
+          "original_title": "フェール",
+          "overview": "A woman is drying her hair after a shower; when she looks up, she finds two men in her apartment, watching her.",
+          "poster_path": "/o67B6afCxY3EuuRMMAJUtww4M33.jpg",
+          "media_type": "movie",
+          "original_language": "ja",
+          "genre_ids": [
+            27,
+            35
+          ],
+          "popularity": 2.3732,
+          "release_date": "2016-05-10",
+          "video": false,
+          "vote_average": 8,
+          "vote_count": 1
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 662060,
+          "title": "Brother",
+          "original_title": "兄",
+          "overview": "After a woman's brother is killed in an accident, she hires the help of a psychic to prove that it was murder and to save her brother's soul.",
+          "poster_path": null,
+          "media_type": "movie",
+          "original_language": "ja",
+          "genre_ids": [
+            27
+          ],
+          "popularity": 0.1583,
+          "release_date": "2016-08-29",
+          "video": false,
+          "vote_average": 6,
+          "vote_count": 1
+        }
+      ]
+    }
+  },
+  "timestamp": 1769171520191
+}

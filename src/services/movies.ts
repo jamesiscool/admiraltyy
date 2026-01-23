@@ -228,9 +228,9 @@ export const grabMovieRelease = createServerFn({ method: 'POST' })
 		const nzbPath = await downloadNzb(data.downloadUrl, data.title)
 
 		// Read NZB content and encode as base64
-		const nzbFile = Bun.file(nzbPath)
-		const nzbContent = await nzbFile.arrayBuffer()
-		const base64Content = Buffer.from(nzbContent).toString('base64')
+		const { readFile } = await import('node:fs/promises')
+		const nzbContent = await readFile(nzbPath)
+		const base64Content = nzbContent.toString('base64')
 
 		// Queue to NZBGet
 		const sanitizedFilename = `${data.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.nzb`

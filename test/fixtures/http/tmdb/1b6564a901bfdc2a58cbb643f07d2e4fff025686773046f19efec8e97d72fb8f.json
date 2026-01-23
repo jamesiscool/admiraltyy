@@ -1,0 +1,60 @@
+{
+  "key": "fetch:[\"/collection/546208\",null]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "id": 546208,
+      "name": "Hitler's Clone Collection",
+      "original_language": "en",
+      "original_name": "El clon de Hitler Collección",
+      "overview": "",
+      "poster_path": null,
+      "backdrop_path": null,
+      "parts": [
+        {
+          "adult": false,
+          "backdrop_path": "/devrXjTsQomXHjlrgvGwvZI0Z1T.jpg",
+          "id": 113466,
+          "title": "Hitler's Clone",
+          "original_title": "El clon de Hitler",
+          "overview": "“Cuando el Hitler aparece, todos corren. Cuando el Hitler habla, todos se quedan callados. Unos dicen que es brujo, otros dicen que es un hijo del diablo y otros de plano no dicen nada. Lo que sí es cierto es que es el más pesado de los que han pasado por ahí. Y las hijas…esas son las peores. Y son capaces de todo por conseguir lo que ellas quieren, ya ni se diga por defender a su padre.”",
+          "poster_path": "/qDhoQBPbA6M8meZycaEkBPAeDTm.jpg",
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            28,
+            80,
+            53
+          ],
+          "popularity": 0.855,
+          "release_date": "2003-08-20",
+          "video": false,
+          "vote_average": 5.5,
+          "vote_count": 7
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/nczj8hrjkVJeLU6GfGgkRNQvvnc.jpg",
+          "id": 113472,
+          "title": "Darketos",
+          "original_title": "Darketos",
+          "overview": "Sequel of the legendary \"El Clon de Hitler\" where Hitler's daughters decide to avenge their father's death with an army of goths.",
+          "poster_path": "/q7FH4UkabkETk1tEXDJpbihzyiD.jpg",
+          "media_type": "movie",
+          "original_language": "es",
+          "genre_ids": [
+            28,
+            80,
+            53
+          ],
+          "popularity": 0.1009,
+          "release_date": "2004-03-12",
+          "video": false,
+          "vote_average": 5.3,
+          "vote_count": 3
+        }
+      ]
+    }
+  },
+  "timestamp": 1769171519655
+}

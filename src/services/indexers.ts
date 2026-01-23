@@ -25,8 +25,9 @@ export async function downloadNzb(downloadUrl: string, filename: string): Promis
 		throw new Error(`Failed to download NZB: ${response.status} ${response.statusText}`)
 	}
 
+	const { writeFile } = await import('node:fs/promises')
 	const content = await response.arrayBuffer()
-	await Bun.write(nzbPath, content)
+	await writeFile(nzbPath, Buffer.from(content))
 
 	console.log(`[Indexer] NZB saved to: ${nzbPath}`)
 	return nzbPath

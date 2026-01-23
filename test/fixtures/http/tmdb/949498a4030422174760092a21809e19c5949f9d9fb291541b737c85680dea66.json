@@ -1,0 +1,458 @@
+{
+  "key": "fetch:[\"/search/multi\",{\"query\":{\"include_adult\":\"false\",\"page\":\"1\",\"query\":\"h\"}}]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "page": 1,
+      "results": [
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 299271,
+          "title": "H",
+          "original_title": "H",
+          "overview": "A junkie couple board themselves in their apartment while they try to kick their heroin habit.",
+          "poster_path": "/kOq5wUE8E9s81QLkpWuJkysW3ch.jpg",
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            18
+          ],
+          "popularity": 0.2507,
+          "release_date": "1990-09-28",
+          "video": false,
+          "vote_average": 5.267,
+          "vote_count": 15
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/wQQfRsqA5RXcksxBgXmDv2cdAg8.jpg",
+          "id": 20169,
+          "name": "H",
+          "original_name": "H",
+          "overview": "At a dysfunctional hospital in Paris, three bumbling, eccentric medical employees embark on zany misadventures with surgical imprecision.",
+          "poster_path": "/66hVd2EmV3WhcJTfhSHb0E8SMuF.jpg",
+          "media_type": "tv",
+          "original_language": "fr",
+          "genre_ids": [
+            35
+          ],
+          "popularity": 3.3628,
+          "first_air_date": "1998-10-24",
+          "vote_average": 7.093,
+          "vote_count": 70,
+          "origin_country": [
+            "FR"
+          ]
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 1371001,
+          "title": "H",
+          "original_title": "H",
+          "overview": "",
+          "poster_path": null,
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            35,
+            80
+          ],
+          "popularity": 0.1002,
+          "release_date": "2023-04-02",
+          "video": false,
+          "vote_average": 0,
+          "vote_count": 0
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/mI668vRnmLA4DZtXnBV2YJoTctO.jpg",
+          "id": 951191,
+          "title": "H",
+          "original_title": "H",
+          "overview": "During the San Fermín celebrations in Pamplona in 1969, a man died when the bulls were let loose. There was nothing to identify him, except for the letter “H” on his keyring. Carlos Pardo Ros imagines this man’s last night: a drunken nocturnal stroll with the ghosts of H, at one of the world’s biggest folk festivals.",
+          "poster_path": "/k9cl3Q0phAdSmGGFg30pYUTnEde.jpg",
+          "media_type": "movie",
+          "original_language": "es",
+          "genre_ids": [
+            99
+          ],
+          "popularity": 0.1796,
+          "release_date": "2023-06-23",
+          "video": false,
+          "vote_average": 7.091,
+          "vote_count": 11
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/ppz5gBuRctVAPsA4F9oy5M7cyn.jpg",
+          "id": 450730,
+          "title": "H",
+          "original_title": "H",
+          "overview": "",
+          "poster_path": "/spYxfhYlk48i2yxN0a7XFG90nm6.jpg",
+          "media_type": "movie",
+          "original_language": "ca",
+          "genre_ids": [
+            36,
+            18
+          ],
+          "popularity": 0.2775,
+          "release_date": "2014-10-10",
+          "video": false,
+          "vote_average": 5.1,
+          "vote_count": 14
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/2fwoBrUYMK0PZVaFqesx2CoRF6H.jpg",
+          "id": 1471345,
+          "title": "Homo Argentum",
+          "original_title": "Homo Argentum",
+          "overview": "The film consists of 16 shorts that explore, with humor and social criticism, the characteristics of the Argentine identity.",
+          "poster_path": "/21WlZtv1GZgiD2qAVHOkg63LRmU.jpg",
+          "media_type": "movie",
+          "original_language": "es",
+          "genre_ids": [
+            35
+          ],
+          "popularity": 45.688,
+          "release_date": "2025-08-14",
+          "video": false,
+          "vote_average": 5.589,
+          "vote_count": 45
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/gsLYR8uALrt2p33iOpqReNW6XyQ.jpg",
+          "id": 1282440,
+          "title": "Happy Patel: Khatarnak Jasoos",
+          "original_title": "Happy Patel: Khatarnak Jasoos",
+          "overview": "Happy Patel, a chronically unsuccessful MI7 operative, is finally assigned a mission in Goa, where he uncovers his Indian roots and must rescue a high-profile scientist from crime lord Mama. Unaware of his Indian heritage and armed with a comically British accent, Happy’s blunders trigger a string of chaotic mishaps that could lead him to expose a criminal network.",
+          "poster_path": "/vsCkxiY2c26C6y4RyTVkpdXIfCW.jpg",
+          "media_type": "movie",
+          "original_language": "hi",
+          "genre_ids": [
+            35,
+            28,
+            10749
+          ],
+          "popularity": 45.5499,
+          "release_date": "2026-01-16",
+          "video": false,
+          "vote_average": 8.1,
+          "vote_count": 6
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/6U0e6OHklJAcMAuIoGXjTBS5zsI.jpg",
+          "id": 46298,
+          "name": "Hunter x Hunter",
+          "original_name": "HUNTER×HUNTER",
+          "overview": "To fulfill his dreams of becoming a legendary Hunter like his dad, a young boy must pass a rigorous examination and find his missing father.",
+          "poster_path": "/i2EEr2uBvRlAwJ8d8zTG2Y19mIa.jpg",
+          "media_type": "tv",
+          "original_language": "ja",
+          "genre_ids": [
+            16,
+            10759,
+            10765
+          ],
+          "popularity": 41.143,
+          "first_air_date": "2011-10-02",
+          "vote_average": 8.665,
+          "vote_count": 2012,
+          "origin_country": [
+            "JP"
+          ]
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/vjiIuR3XGpoGSumQ7DziPAmxIYR.jpg",
+          "id": 117465,
+          "name": "Hell's Paradise",
+          "original_name": "地獄楽",
+          "overview": "For a chance at a pardon, a ninja assassin joins other condemned criminals on a journey to a mysterious island to retrieve an elixir of immortality.",
+          "poster_path": "/1V9I7SvZbYoMbSvdtnlkkq9SB1k.jpg",
+          "media_type": "tv",
+          "original_language": "ja",
+          "genre_ids": [
+            16,
+            18,
+            10759,
+            10765
+          ],
+          "popularity": 78.4181,
+          "first_air_date": "2023-04-01",
+          "vote_average": 8.153,
+          "vote_count": 373,
+          "origin_country": [
+            "JP"
+          ]
+        },
+        {
+          "adult": false,
+          "id": 5674535,
+          "name": "H",
+          "original_name": "H",
+          "media_type": "person",
+          "popularity": 0.0071,
+          "gender": 0,
+          "known_for_department": null,
+          "profile_path": null,
+          "known_for": []
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/efvyyRoFHwOhWLx15emwfaHUBid.jpg",
+          "id": 289180,
+          "title": "H.",
+          "original_title": "H.",
+          "overview": "Two women, each named Helen, live out their mirrored lives in the town of Troy, NY.  The first Helen is in her 60s, is married, and takes care of a small, extremely lifelike baby doll, which she treats as a living baby.  The second Helen is in her 30s, has a successful art career and is four months pregnant.  One night, something falls from the sky and explodes over the town. In the aftermath of this event, bizarre and unexplainable things begin to happen.",
+          "poster_path": "/zxRz4wFGXtsgcoVQ4wGSNO3PCtD.jpg",
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            878,
+            53,
+            18
+          ],
+          "popularity": 0.6459,
+          "release_date": "2014-08-28",
+          "video": false,
+          "vote_average": 5.3,
+          "vote_count": 39
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/me3SisKfnxwBP69aOVKAVMw9vDM.jpg",
+          "id": 1149167,
+          "title": "High Rollers",
+          "original_title": "High Rollers",
+          "overview": "A master thief must pull off a dangerous casino heist when his nemesis kidnaps his lover. Caught between rival criminals and FBI pursuit, he risks all to save her and score big.",
+          "poster_path": "/hHowAaChDjwueySmwVbsjHmpWa.jpg",
+          "media_type": "movie",
+          "original_language": "en",
+          "genre_ids": [
+            28,
+            80,
+            53
+          ],
+          "popularity": 28.399,
+          "release_date": "2025-03-14",
+          "video": false,
+          "vote_average": 6.6,
+          "vote_count": 101
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/8lqfrOBQ2EcY7znD3LxTYcvlh25.jpg",
+          "id": 949709,
+          "title": "High Forces",
+          "original_title": "危机航线",
+          "overview": "\"Anyone? There is ......\" A mysterious message from Gao Haojun comes from ten thousand meters in the air. A five-star A380 ultra-luxury airliner was hijacked on its international maiden voyage, and international security expert Gao Haojun stood up to a group of thugs, his daughter Xiaojun was trapped in the cabin, and Mike, the leader of the hijackers, threatened the lives of more than 800 people in the plane as a bargaining chip, and Xiaojun's mother, Fu Yuan, was also in danger. ...... Will the passengers on board be able to land safely and how should this crisis be resolved?",
+          "poster_path": "/v8ySgr4CE45SrrIt4PqqYc1diW6.jpg",
+          "media_type": "movie",
+          "original_language": "zh",
+          "genre_ids": [
+            28,
+            80
+          ],
+          "popularity": 19.1046,
+          "release_date": "2024-09-29",
+          "video": false,
+          "vote_average": 5.952,
+          "vote_count": 31
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/yPf0rHXOiudd95otYcAiQUWHY5w.jpg",
+          "id": 1147266,
+          "title": "You Will Die in 6 Hours",
+          "original_title": "6시간 후 너는 죽는다",
+          "overview": "Jung-yoon was approached by a random stranger named Jun-woo, who told her she'd be dead in six hours. As she follows him for answers, she begins to question whether he's her savior or the one trying to put her in danger.",
+          "poster_path": "/2HSvt2PF2tSyKL4GRRniwE1URGI.jpg",
+          "media_type": "movie",
+          "original_language": "ko",
+          "genre_ids": [
+            53,
+            9648
+          ],
+          "popularity": 19.3933,
+          "release_date": "2024-10-16",
+          "video": false,
+          "vote_average": 6.4,
+          "vote_count": 21
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/575sxZXNNulSlIz7DvtWH5r4lkC.jpg",
+          "id": 45952,
+          "name": "Hunter x Hunter",
+          "original_name": "HUNTER×HUNTER",
+          "overview": "Gon Freecss discovers that the father he had always been told was dead was actually alive the whole time. Ging is a famous Hunter: an individual who has proven themself an elite member of humanity. Gon becomes determined to follow in his father's footsteps, pass the rigorous Hunter Examination.",
+          "poster_path": "/eobAuhCJA8oRp814V67WhezVXtQ.jpg",
+          "media_type": "tv",
+          "original_language": "ja",
+          "genre_ids": [
+            10765,
+            10759,
+            16,
+            35,
+            18
+          ],
+          "popularity": 20.0898,
+          "first_air_date": "1999-10-16",
+          "vote_average": 8.477,
+          "vote_count": 199,
+          "origin_country": [
+            "JP"
+          ]
+        },
+        {
+          "adult": false,
+          "id": 5532631,
+          "name": "H",
+          "original_name": "H",
+          "media_type": "person",
+          "popularity": 0.0071,
+          "gender": 0,
+          "known_for_department": "Acting",
+          "profile_path": null,
+          "known_for": [
+            {
+              "adult": false,
+              "backdrop_path": "/l5VXxHDCOzHNlD8f3NpMwsTahdM.jpg",
+              "id": 1504250,
+              "title": "Den Forsvundne",
+              "original_title": "Den Forsvundne",
+              "overview": "When a guy disappears his friends set out to find him, with the killer on their tails. As clues unfold and the guys don't stick to their fate, the killer must do what is needed to keep the masks legacy in place. But as obstacles occurs both sides find themselves struggling.",
+              "poster_path": "/4J9LY1mHTQ1miV0f6qMQfs1suOR.jpg",
+              "media_type": "movie",
+              "original_language": "da",
+              "genre_ids": [
+                53,
+                27,
+                9648
+              ],
+              "popularity": 0.1021,
+              "release_date": "2024-09-17",
+              "video": false,
+              "vote_average": 10,
+              "vote_count": 1
+            }
+          ]
+        },
+        {
+          "adult": false,
+          "id": 5944074,
+          "name": "H",
+          "original_name": "H",
+          "media_type": "person",
+          "popularity": 0.0256,
+          "gender": 0,
+          "known_for_department": "Acting",
+          "profile_path": null,
+          "known_for": [
+            {
+              "adult": false,
+              "backdrop_path": null,
+              "id": 311227,
+              "name": "Tres Acordes",
+              "original_name": "Tres Acordes",
+              "overview": "",
+              "poster_path": "/qnujYtluJtfZ1YcJgaSNKFB07jg.jpg",
+              "media_type": "tv",
+              "original_language": "es",
+              "genre_ids": [
+                16,
+                35,
+                10765,
+                18
+              ],
+              "popularity": 0.2158,
+              "first_air_date": "2009-09-24",
+              "vote_average": 0,
+              "vote_count": 0,
+              "origin_country": [
+                "ES"
+              ]
+            }
+          ]
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/5QFtLmg5A6lnuowk1OGVlQKDiud.jpg",
+          "id": 111453,
+          "name": "Ghum Hai Kisikey Pyaar Meiin",
+          "original_name": "घुम है किसिकी प्यार में",
+          "overview": "Sai Joshi, a fearless girl who aspires to become a doctor, marries an IPS officer, Virat Chavan, pretending to be a deal. The story revolves around the life of Sai in orthodox joint family of Virat and how Sai and Virat fall in love.",
+          "poster_path": "/u3NVGYCpkAgBArXogLuHPfpSNwG.jpg",
+          "media_type": "tv",
+          "original_language": "hi",
+          "genre_ids": [
+            18,
+            10766,
+            10751
+          ],
+          "popularity": 41.305,
+          "first_air_date": "2020-10-05",
+          "vote_average": 5.7,
+          "vote_count": 70,
+          "origin_country": [
+            "IN"
+          ]
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/4QrmsUEZgIjzr64MpHprZYEChUN.jpg",
+          "id": 1048,
+          "name": "The Colgate Comedy Hour",
+          "original_name": "The Colgate Comedy Hour",
+          "overview": "The Colgate Comedy Hour is an American comedy-musical variety series that aired live on the NBC network from 1950 to 1955. The show starred many notable comedians and entertainers of the era, including Eddie Cantor, Dean Martin and Jerry Lewis, Fred Allen, Donald O'Connor, Bud Abbott and Lou Costello, Bob Hope, Jimmy Durante, Ray Bolger, Gordon MacRae, Ben Blue, Robert Paige, Tony Curtis, Burt Lancaster, Broadway dancer Wayne Lamb and Spike Jones and His City Slickers.",
+          "poster_path": "/oWvIOn94vgsrius8HYTreQgJtjp.jpg",
+          "media_type": "tv",
+          "original_language": "en",
+          "genre_ids": [
+            35
+          ],
+          "popularity": 8.0055,
+          "first_air_date": "1950-09-10",
+          "vote_average": 6.8,
+          "vote_count": 12,
+          "origin_country": [
+            "US"
+          ]
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/gzv2AMfw7EElnsN7bbr1KGL4QLD.jpg",
+          "id": 112738,
+          "name": "HIP - High Intellectual Potential",
+          "original_name": "HPI : Haut Potentiel Intellectuel",
+          "overview": "Morgane is 38-years old, has three children, two exes and an IQ of 160; her destiny as a cleaner is turned upside-down when her extraordinary abilities are spotted by the police who offer her a job as a consultant.",
+          "poster_path": "/93PXzpXC0i5RVBEAGFR76NC1ylT.jpg",
+          "media_type": "tv",
+          "original_language": "fr",
+          "genre_ids": [
+            35,
+            9648,
+            80,
+            10751
+          ],
+          "popularity": 23.3893,
+          "first_air_date": "2021-04-29",
+          "vote_average": 7.581,
+          "vote_count": 118,
+          "origin_country": [
+            "FR"
+          ]
+        }
+      ],
+      "total_pages": 500,
+      "total_results": 10000
+    }
+  },
+  "timestamp": 1769171519318
+}

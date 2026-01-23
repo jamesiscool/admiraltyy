@@ -1,0 +1,56 @@
+{
+  "key": "fetch:[\"/collection/921310\",null]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "id": 921310,
+      "name": "Once a Year Can't Hurt Collection",
+      "original_language": "en",
+      "original_name": "Uno al año no hace daño Colección",
+      "overview": "",
+      "poster_path": null,
+      "backdrop_path": null,
+      "parts": [
+        {
+          "adult": false,
+          "backdrop_path": "/1x6MsAN1ASZWAu2ZBfLNObgSNzK.jpg",
+          "id": 375548,
+          "title": "Once a Year Can't Hurt",
+          "original_title": "Uno al año no hace daño",
+          "overview": "It tells the story of a university student who makes a documentary to find out if Colombia is a country of drinkers or not. In the midst of everyday and comic situations, the young man will obtain interesting and entertaining material for his research.",
+          "poster_path": "/eKsPXxODoYh8xwC7fnmHjZL61au.jpg",
+          "media_type": "movie",
+          "original_language": "es",
+          "genre_ids": [
+            35
+          ],
+          "popularity": 0.1761,
+          "release_date": "2014-12-25",
+          "video": false,
+          "vote_average": 5.5,
+          "vote_count": 13
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/uqrWA6dPV3DX4Oyl3uLDJ6pxs7q.jpg",
+          "id": 437222,
+          "title": "Once a Year Can't Hurt 2",
+          "original_title": "Uno al año no hace daño 2",
+          "overview": "A sequel to more traditions of a typical Colombian family, this time we will see a bachelor party, Halloween, a heartbreak and much more.",
+          "poster_path": "/cYXFNxWyuXri5hufWL6GXfBJzq7.jpg",
+          "media_type": "movie",
+          "original_language": "es",
+          "genre_ids": [
+            35
+          ],
+          "popularity": 0.3269,
+          "release_date": "2015-12-25",
+          "video": false,
+          "vote_average": 6.1,
+          "vote_count": 5
+        }
+      ]
+    }
+  },
+  "timestamp": 1769171519723
+}

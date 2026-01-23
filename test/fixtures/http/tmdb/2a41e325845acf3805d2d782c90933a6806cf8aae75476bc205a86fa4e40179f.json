@@ -1,0 +1,78 @@
+{
+  "key": "fetch:[\"/collection/1077964\",null]",
+  "value": {
+    "__ff_promise_result": true,
+    "value": {
+      "id": 1077964,
+      "name": "HE-LOW",
+      "original_language": "en",
+      "original_name": "HE-LOW",
+      "overview": "HE-LOW is a tokusatsu self-made comedy trilogy created and directed by Hassei Takano about three heroes who live in a world where being good is bad and being bad is good.",
+      "poster_path": "/yOaCLHb2yQk5VkGHIkC9w4XforF.jpg",
+      "backdrop_path": null,
+      "parts": [
+        {
+          "adult": false,
+          "backdrop_path": "/4aWAkfxOTAOpLLU5i4lWTuaZwnR.jpg",
+          "id": 571022,
+          "title": "HE-LOW",
+          "original_title": "HE-LOW",
+          "overview": "HE-LOW is a tokusatsu self-made film created and directed by Hassei Takano.",
+          "poster_path": "/kaNYMQou5PJwe0wLWJqnQeTmMpP.jpg",
+          "media_type": "movie",
+          "original_language": "ja",
+          "genre_ids": [
+            35,
+            28
+          ],
+          "popularity": 0.3257,
+          "release_date": "2018-03-03",
+          "video": false,
+          "vote_average": 0,
+          "vote_count": 0
+        },
+        {
+          "adult": false,
+          "backdrop_path": null,
+          "id": 876630,
+          "title": "HE-LOW THE SECOND",
+          "original_title": "ヒーロゥ THE SECOND",
+          "overview": "Sequel to HE-LOW (2018)",
+          "poster_path": "/34dpvDNvlVBAT8dEb0Qkx2BrIbn.jpg",
+          "media_type": "movie",
+          "original_language": "ja",
+          "genre_ids": [
+            28,
+            35
+          ],
+          "popularity": 2.5895,
+          "release_date": "2019-01-28",
+          "video": false,
+          "vote_average": 6,
+          "vote_count": 2
+        },
+        {
+          "adult": false,
+          "backdrop_path": "/e23Tvz5u51ZhaZ0Wk8gZoeojVxc.jpg",
+          "id": 1004430,
+          "title": "HE -LOW THE FINAL",
+          "original_title": "ヒーロゥ THE FINAL",
+          "overview": "The last movie of HE-LOW trilogy.",
+          "poster_path": "/AcQdgjhaq38dBmuvMol9LQCVA0v.jpg",
+          "media_type": "movie",
+          "original_language": "ja",
+          "genre_ids": [
+            35,
+            28
+          ],
+          "popularity": 0.2295,
+          "release_date": "2022-05-27",
+          "video": false,
+          "vote_average": 0,
+          "vote_count": 0
+        }
+      ]
+    }
+  },
+  "timestamp": 1769171520028
+}

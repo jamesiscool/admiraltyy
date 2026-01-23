@@ -16,6 +16,14 @@ export const getRouter = () => {
 		},
 		scrollRestoration: true,
 		defaultPreloadStaleTime: 0,
+		defaultNotFoundComponent: () => (
+			<div className="flex h-screen items-center justify-center">
+				<div className="text-center">
+					<h1 className="font-bold text-4xl">404</h1>
+					<p className="mt-2 text-muted-foreground">Page not found</p>
+				</div>
+			</div>
+		),
 	})
 	setupRouterSsrQueryIntegration({ router, queryClient })
 
