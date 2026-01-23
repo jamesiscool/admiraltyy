@@ -10,7 +10,9 @@
 		"includes": [
 			"**",
 			"!product-plan",
-			"!**/*.gen.ts"
+			"!**/*.gen.ts",
+			"!**/*.css",
+			"!src_old"
 		]
 	},
 	"formatter": {
@@ -27,7 +29,8 @@
 				"noUnusedImports": {
 					"level": "warn",
 					"fix": "safe"
-				}
+				},
+				"useUniqueElementIds": "off"
 			},
 			"style": {
 				"noEnum": "error"
@@ -75,8 +78,11 @@
 		}
 	},
 	"css": {
-		"parser": {
-			"tailwindDirectives": true
+		"linter": {
+			"enabled": false
+		},
+		"formatter": {
+			"enabled": false
 		}
 	},
 	"assist": {

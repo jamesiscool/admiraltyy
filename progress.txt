@@ -1,0 +1,64 @@
+# TanStack Start Migration Progress
+
+See `.cursor/plans/tanstack_start_migration_c7250f54.plan.md` for full architecture and migration plan.
+
+## Completed
+
+### Foundation
+- ✅ Database schema + connection (`src/db/`)
+- ✅ UI components (27 shadcn/ui) + CSS (`src/components/ui/`, `src/styles.css`)
+- ✅ Environment config (`src/env.ts`)
+
+### Services (all `createServerFn` pattern)
+- ✅ `movies.ts` - list, get, create, update, delete, search releases, grab
+- ✅ `series.ts` - list, get, create, update seasons/episodes, delete
+- ✅ `activity.ts` - downloads, NZBGet status/queue/history, sync
+- ✅ `search.ts` - TMDB multi-search
+- ✅ `tasks.ts` - file scanning
+- ✅ `settings.ts` - get/update settings, test usenet
+- ✅ Fixed `.validator()` -> `.inputValidator()` for TanStack Start API
+
+### Pure Utilities (copied)
+- ✅ `tmdb.ts`, `fileScan.ts`, `fileImport.ts`, `indexers.ts`, `logs.ts`
+- ✅ `nzbget/*` (api, poller, process, schema)
+
+### Routes
+- ✅ `__root.tsx` - header, layout
+- ✅ `/movies` - index + $movieId + collocated components
+- ✅ `/tv` - index + $seriesId + collocated components
+- ✅ `/activity` - index.tsx with polling + collocated components
+- ✅ `/settings` - index.tsx + collocated components (folder, formats, indexer, languages, quality, server)
+- ✅ `/tasks` - tasks.tsx with scan functions
+- ✅ `/` (dashboard) - basic dashboard placeholder
+
+### Shared Components
+- ✅ `header.tsx`
+- ✅ `delete-confirmation-modal.tsx`
+- ✅ `movie-manual-search-dialog.tsx`
+
+### Config
+- ✅ Updated `biome.json` - excluded CSS/src_old, disabled useUniqueElementIds
+- ✅ Updated `tsconfig.json` - excluded src_old and reference folders
+- ✅ Updated `vite.config.ts` - node:url import protocol
+- ✅ Fixed nzbgetPoller.ts module-level boolean types
+
+## Remaining (TypeScript errors)
+
+### Implicit `any` type errors (~40 errors)
+Files needing type annotations for callback parameters:
+- `src/routes/activity/index.tsx` - queueItems/historyItems mapping
+- `src/routes/movies/index.tsx` - stats calculations
+- `src/routes/tv/index.tsx` - stats calculations
+- `src/routes/tv/$seriesId.tsx` - season/episode mapping
+- `src/routes/settings/index.tsx` - indexers/servers/folders/languages/formats mapping
+
+### Type mismatch errors
+- `src/components/movie-manual-search-dialog.tsx` - IndexerRelease vs Release type
+- `src/routes/settings/index.tsx` - testUsenetServer return type (string vs boolean)
+
+## Next Steps
+1. Add explicit type annotations to callback parameters in route files
+2. Fix Release type compatibility in movie-manual-search-dialog
+3. Fix testUsenetServer return type handling
+4. Run `bun fix && bun tsc` to verify
+5. Test in browser at http://localhost:2828

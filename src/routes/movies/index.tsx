@@ -1,0 +1,271 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { Film, Search, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { DeleteConfirmationModal, type DeleteTarget } from '@/components/delete-confirmation-modal'
+import { MovieManualSearchDialog } from '@/components/movie-manual-search-dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import type { Resolution } from '@/db/schema'
+import { deleteMovie, listMoviesQueryOptions, type MoviePreview, updateMovie } from '@/services/movies'
+import { MovieCard } from './-movie-card'
+import { type MonitoredFilter, MovieFilters, type SortOption, type StatusFilter } from './-movie-filters'
+import { MoviesFooter } from './-movies-footer'
+
+export const Route = createFileRoute('/movies/')({
+	loader: ({ context }) => context.queryClient.ensureQueryData(listMoviesQueryOptions()),
+	component: MoviesIndexPage,
+})
+
+function MoviesIndexPage() {
+	const router = useRouter()
+	const { data: movies } = useSuspenseQuery(listMoviesQueryOptions())
+
+	// Search and filter state
+	const [searchQuery, setSearchQuery] = useState('')
+	const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+	const [qualityFilter, setQualityFilter] = useState<Resolution | 'all'>('all')
+	const [monitoredFilter, setMonitoredFilter] = useState<MonitoredFilter>('all')
+	const [yearRange, setYearRange] = useState<[number, number]>([1900, 2030])
+	const [sortBy, setSortBy] = useState<SortOption>('dateAdded')
+	const [sortDesc, setSortDesc] = useState(true)
+
+	// Delete modal state
+	const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
+	const [isDeleting, setIsDeleting] = useState(false)
+
+	// Manual search dialog state
+	const [manualSearchTarget, setManualSearchTarget] = useState<MoviePreview | null>(null)
+
+	// Filter and sort movies
+	const filteredMovies = useMemo(() => {
+		let result = [...movies]
+
+		// Search filter
+		if (searchQuery) {
+			const query = searchQuery.toLowerCase()
+			result = result.filter((m) => m.title.toLowerCase().includes(query))
+		}
+
+		// Status filter
+		if (statusFilter === 'downloaded') {
+			result = result.filter((m) => m.sizeBytes > 0)
+		} else if (statusFilter === 'wanted') {
+			result = result.filter((m) => m.sizeBytes === 0 && m.monitored)
+		}
+
+		// Quality filter
+		if (qualityFilter !== 'all') {
+			result = result.filter((m) => m.resolution === qualityFilter)
+		}
+
+		// Monitored filter
+		if (monitoredFilter === 'monitored') {
+			result = result.filter((m) => m.monitored)
+		} else if (monitoredFilter === 'unmonitored') {
+			result = result.filter((m) => !m.monitored)
+		}
+
+		// Year range filter
+		result = result.filter((m) => m.year >= yearRange[0] && m.year <= yearRange[1])
+
+		// Sort
+		result.sort((a, b) => {
+			let comparison = 0
+			switch (sortBy) {
+				case 'title':
+					comparison = a.title.localeCompare(b.title)
+					break
+				case 'releaseDate':
+					comparison = new Date(a.cinemaReleaseDate ?? '').getTime() - new Date(b.cinemaReleaseDate ?? '').getTime()
+					break
+				case 'dateAdded':
+					comparison = new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime()
+					break
+				case 'year':
+					comparison = a.year - b.year
+					break
+			}
+			return sortDesc ? -comparison : comparison
+		})
+
+		return result
+	}, [movies, searchQuery, statusFilter, qualityFilter, monitoredFilter, yearRange, sortBy, sortDesc])
+
+	// Stats
+	const totalMovies = movies.length
+	const downloadedMovies = movies.filter((m: MoviePreview) => m.sizeBytes > 0).length
+	const wantedMovies = movies.filter((m: MoviePreview) => m.sizeBytes === 0 && m.monitored).length
+
+	// Size stats
+	const totalSizeBytes = movies.reduce((sum: number, m: MoviePreview) => sum + m.sizeBytes, 0)
+	const filteredSizeBytes = filteredMovies.reduce((sum, m) => sum + m.sizeBytes, 0)
+	const totalSize = totalSizeBytes / 1073741824 // Convert to GB
+	const filteredSize = filteredSizeBytes / 1073741824
+
+	// Active filter count for clearing
+	const hasActiveFilters = searchQuery || statusFilter !== 'all' || qualityFilter !== 'all' || monitoredFilter !== 'all' || yearRange[0] !== 1900 || yearRange[1] !== 2030
+
+	const clearAllFilters = () => {
+		setSearchQuery('')
+		setStatusFilter('all')
+		setQualityFilter('all')
+		setMonitoredFilter('all')
+		setYearRange([1900, 2030])
+	}
+
+	const handleDeleteConfirm = async (deleteFiles: boolean) => {
+		if (!deleteTarget) return
+		setIsDeleting(true)
+		try {
+			await deleteMovie({ data: { movieId: String(deleteTarget.id), deleteFiles } })
+			router.invalidate()
+			setDeleteTarget(null)
+		} finally {
+			setIsDeleting(false)
+		}
+	}
+
+	const handleToggleMonitored = async (movie: MoviePreview, monitored: boolean) => {
+		await updateMovie({ data: { movieId: String(movie.id), monitored } })
+		router.invalidate()
+	}
+
+	return (
+		<div className="flex h-full flex-col">
+			{/* Header */}
+			<div className="shrink-0 border-b">
+				<div className="container pt-0!">
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+						{/* Title */}
+						<h1>Movies</h1>
+
+						{/* Search */}
+						<div className="relative flex-1 sm:w-64 sm:flex-initial">
+							<Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
+							<Input
+								type="text"
+								placeholder="Search movies..."
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className="pr-8 pl-10"
+							/>
+							{searchQuery && (
+								<button
+									type="button"
+									onClick={() => setSearchQuery('')}
+									className="-translate-y-1/2 absolute top-1/2 right-2.5 rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+								>
+									<X className="size-3.5" />
+								</button>
+							)}
+						</div>
+					</div>
+
+					{/* Filters */}
+					<div className="mt-4">
+						<MovieFilters
+							statusFilter={statusFilter}
+							onStatusFilterChange={setStatusFilter}
+							qualityFilter={qualityFilter}
+							onQualityFilterChange={setQualityFilter}
+							monitoredFilter={monitoredFilter}
+							onMonitoredFilterChange={setMonitoredFilter}
+							yearRange={yearRange}
+							onYearRangeChange={setYearRange}
+							sortBy={sortBy}
+							onSortByChange={setSortBy}
+							sortDesc={sortDesc}
+							onSortDescChange={setSortDesc}
+						/>
+					</div>
+				</div>
+			</div>
+
+			{/* Content */}
+			<div className="grow overflow-y-auto">
+				<div className="container py-8">
+					{/* Empty State */}
+					{filteredMovies.length === 0 && (
+						<div className="flex flex-col items-center justify-center py-24 text-center">
+							<div className="mb-4 rounded bg-muted p-4">
+								<Film className="size-12 text-muted-foreground" />
+							</div>
+							<h3 className="mb-2 font-semibold text-xl">No movies found</h3>
+							<p className="max-w-md text-muted-foreground">
+								{searchQuery
+									? `No movies match "${searchQuery}". Try a different search term.`
+									: movies.length === 0
+										? 'You haven\'t added any movies yet. Click "Add Movie" to get started.'
+										: 'No movies match the current filters. Try adjusting your filters.'}
+							</p>
+							{hasActiveFilters && (
+								<Button
+									variant="outline"
+									onClick={clearAllFilters}
+									className="mt-4"
+								>
+									Clear search & filters
+								</Button>
+							)}
+						</div>
+					)}
+
+					{/* Movie Grid */}
+					{filteredMovies.length > 0 && (
+						<div className="grid grid-cols-[repeat(auto-fill,minmax(175px,1fr))] gap-4">
+							{filteredMovies.map((movie) => (
+								<MovieCard
+									key={movie.id}
+									movie={movie}
+									onAutoSearch={() => {
+										// TODO: Trigger auto search
+										console.log('Auto search:', movie.id)
+									}}
+									onManualSearch={() => setManualSearchTarget(movie)}
+									onDelete={() => {
+										setDeleteTarget({
+											type: 'movie',
+											id: movie.id,
+											title: movie.title,
+											sizeBytes: movie.sizeBytes,
+										})
+									}}
+									onToggleMonitored={(monitored) => handleToggleMonitored(movie, monitored)}
+								/>
+							))}
+						</div>
+					)}
+				</div>
+			</div>
+
+			{/* Footer */}
+			<MoviesFooter
+				totalMovies={totalMovies}
+				downloadedMovies={downloadedMovies}
+				wantedMovies={wantedMovies}
+				filteredCount={filteredMovies.length}
+				filteredSize={filteredSize}
+				totalSize={totalSize}
+				hasActiveFilters={!!hasActiveFilters}
+			/>
+
+			{/* Delete Confirmation Modal */}
+			<DeleteConfirmationModal
+				target={deleteTarget}
+				onClose={() => setDeleteTarget(null)}
+				onConfirm={handleDeleteConfirm}
+				isPending={isDeleting}
+			/>
+
+			{/* Manual Search Dialog */}
+			<MovieManualSearchDialog
+				movieId={String(manualSearchTarget?.id ?? '')}
+				movieTitle={manualSearchTarget?.title ?? ''}
+				movieYear={manualSearchTarget?.year}
+				open={manualSearchTarget !== null}
+				onOpenChange={(open) => !open && setManualSearchTarget(null)}
+			/>
+		</div>
+	)
+}

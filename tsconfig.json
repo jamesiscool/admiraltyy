@@ -3,6 +3,12 @@
 		"**/*.ts",
 		"**/*.tsx"
 	],
+	"exclude": [
+		"src_old/**",
+		"node_modules/**",
+		"reference/**",
+		"design/**"
+	],
 	"compilerOptions": {
 		"target": "ES2022",
 		"jsx": "react-jsx",
@@ -29,7 +35,6 @@
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedSideEffectImports": true,
-		"baseUrl": ".",
 		"paths": {
 			"@/*": [
 				"./src/*"

@@ -4,11 +4,7 @@
 
 ## Very important !!!!!!!!!!!!!!!!
 
-- After all changes, before the summery run `bun fix && bun tsc` and fix any errors
-
-## Design
-- When I refer to the design I want to to reference the design in here `./design` Look at the code examples, particularly those in `design/code` and also the screen shots
-- The design server is already running and is available at `http://localhost:3000/sections/dashboard/screen-designs/DashboardView/fullscreen`
+- After all changes, before the summery run `bun fix && bun tsgo` and fix any errors
 
 ## UI
 
@@ -35,22 +31,6 @@
 
 - At the end of each plan, give me a list of unresolved questions to answer, if any. Make the questions extremely concise. Sacrifice grammar for the sake of concision.
 
-## Naming conventions
-
-Use these rules when generating, editing, or suggesting code. Keep them consistent.
-
-### Function prefixes
-
-- `find*`: may return null.  
-- `get*`: guaranteed non null; usually implemented by calling the corresponding `find*` and throwing if null.  
-- `list*`: returns an array; never use `getAll*`.  
-- `is*` / `has*`: return boolean.  
-- `my*`: operates on behalf of the authenticated user.  
-- `create*`: create a new entity.  
-- `update*`: modify an existing entity.  
-- `fetch*`: retrieve data from external services/APIs.  
-- `parse*` (or short `p*`): convert unstructured input into structured values.
-
 ### Naming style
 
 - Prefer clear, descriptive names over abbreviations.  
@@ -67,25 +47,3 @@ Use these rules when generating, editing, or suggesting code. Keep them consiste
 
 - Non component files: short names, one or two words.  
 - React components: one component per file; file name matches component name, use kebab case
-
-### Consistency
-
-- Prefix semantics must remain strict:
-  - `find` = maybe null  
-  - `get` = non null  
-  - `list` = array  
-  - `is`/`has` = boolean  
-  - `my` = user scoped  
-- Prefer renaming to follow rules when safe.  
-- Never mix meanings (e.g., avoid `getAll*`, avoid null returning `get*`).
-
-### Null handling pattern
-
-- Implement `findX` as the core lookup.  
-- Implement `getX` by calling `findX` and applying a shared null check (e.g., `ensure`).
-
-### Route param naming
-
-- Use descriptive param names: `:movieId`, `:downloadId`, not generic `:id`
-- Inline zod schemas in validators: `zValidator('param', z.object({ movieId: z.string() }))`
-- Don't extract param schemas to constants
