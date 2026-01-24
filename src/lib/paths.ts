@@ -11,8 +11,9 @@ export function sanitizePath(input: string): string {
 
 	// Split into segments and filter out dangerous ones
 	const segments = normalized.split(/[\\/]/).filter((seg) => {
+		const trimmed = seg.trim()
 		// Remove empty segments, current dir refs, and parent dir refs
-		if (!seg || seg === '.' || seg === '..') return false
+		if (!trimmed || trimmed === '.' || trimmed === '..') return false
 		return true
 	})
 
