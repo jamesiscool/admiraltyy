@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname } from 'node:path'
 import { env } from '@/env'
 import { type Settings, settingsSchema } from './settings'
 
@@ -81,20 +82,31 @@ const defaultSettings: Settings = {
 // Settings State
 
 let currentSettings: Settings = defaultSettings
+let initialized = false
+
+function ensureInitialized(): void {
+	if (!initialized) {
+		initSettings()
+		initialized = true
+	}
+}
 
 export function getSettings(): Settings {
+	ensureInitialized()
 	return currentSettings
 }
 
 export function updateSettings(updates: Partial<Settings>): Settings {
+	ensureInitialized()
 	currentSettings = { ...currentSettings, ...updates }
 	saveSettings()
 	return currentSettings
 }
 
 export function saveSettings(): void {
-	if (!existsSync(env.SETTINGS_PATH)) {
-		mkdirSync(env.SETTINGS_PATH, { recursive: true })
+	const settingsDir = dirname(env.SETTINGS_PATH)
+	if (!existsSync(settingsDir)) {
+		mkdirSync(settingsDir, { recursive: true })
 	}
 	writeFileSync(env.SETTINGS_PATH, JSON.stringify(currentSettings, null, '\t'))
 }
