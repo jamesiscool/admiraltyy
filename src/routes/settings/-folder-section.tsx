@@ -1,13 +1,14 @@
 import { Film, Plus, Star, Trash2, Tv } from 'lucide-react'
+import { useState } from 'react'
+import { Input } from '@/components/ui/input'
 import type { Folder, Folders } from '@/services/settings'
 
 interface FolderSectionProps {
 	folders: Folders
 	onAdd?: (type: 'movies' | 'tv') => void
-	onEdit?: (id: string) => void
 	onDelete?: (id: string) => void
 	onSetDefault?: (id: string, type: 'movies' | 'tv') => void
-	onSave?: (folder: Folder, type: 'movies' | 'tv') => void
+	onUpdatePath?: (id: string, path: string, type: 'movies' | 'tv') => void
 }
 
 interface FolderListProps {
@@ -19,9 +20,23 @@ interface FolderListProps {
 	onAdd?: () => void
 	onDelete?: (id: string) => void
 	onSetDefault?: (id: string) => void
+	onUpdatePath?: (id: string, path: string) => void
 }
 
-function FolderList({ title, icon: Icon, iconColor, folders, onAdd, onDelete, onSetDefault }: FolderListProps) {
+function FolderList({ title, icon: Icon, iconColor, folders, onAdd, onDelete, onSetDefault, onUpdatePath }: FolderListProps) {
+	const [editingId, setEditingId] = useState<string | null>(null)
+	const [editPath, setEditPath] = useState('')
+
+	const startEditing = (folder: Folder) => {
+		setEditingId(folder.id)
+		setEditPath(folder.path)
+	}
+
+	const saveEdit = (id: string) => {
+		onUpdatePath?.(id, editPath)
+		setEditingId(null)
+	}
+
 	return (
 		<div>
 			<div className="mb-3 flex items-center gap-2">
@@ -40,7 +55,28 @@ function FolderList({ title, icon: Icon, iconColor, folders, onAdd, onDelete, on
 								key={folder.id}
 								className={`flex items-center gap-3 px-4 py-3 ${index !== folders.length - 1 ? 'border-border border-b' : ''}`}
 							>
-								<code className="flex-1 truncate font-mono text-foreground text-sm">{folder.path}</code>
+								{editingId === folder.id ? (
+									<Input
+										type="text"
+										value={editPath}
+										onChange={(e) => setEditPath(e.target.value)}
+										onBlur={() => saveEdit(folder.id)}
+										onKeyDown={(e) => {
+											if (e.key === 'Enter') saveEdit(folder.id)
+											if (e.key === 'Escape') setEditingId(null)
+										}}
+										autoFocus
+										className="flex-1 font-mono"
+									/>
+								) : (
+									<button
+										type="button"
+										onClick={() => startEditing(folder)}
+										className="flex-1 truncate text-left font-mono text-foreground text-sm hover:text-primary"
+									>
+										{folder.path || '/path/to/folder'}
+									</button>
+								)}
 
 								{folder.isDefault ? (
 									<span className="flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 font-medium text-xs text-yellow-700">
@@ -83,7 +119,7 @@ function FolderList({ title, icon: Icon, iconColor, folders, onAdd, onDelete, on
 	)
 }
 
-export function FolderSection({ folders, onAdd, onDelete, onSetDefault }: FolderSectionProps) {
+export function FolderSection({ folders, onAdd, onDelete, onSetDefault, onUpdatePath }: FolderSectionProps) {
 	return (
 		<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 			<FolderList
@@ -95,6 +131,7 @@ export function FolderSection({ folders, onAdd, onDelete, onSetDefault }: Folder
 				onAdd={() => onAdd?.('movies')}
 				onDelete={onDelete}
 				onSetDefault={(id) => onSetDefault?.(id, 'movies')}
+				onUpdatePath={(id, path) => onUpdatePath?.(id, path, 'movies')}
 			/>
 			<FolderList
 				title="TV Shows"
@@ -105,6 +142,7 @@ export function FolderSection({ folders, onAdd, onDelete, onSetDefault }: Folder
 				onAdd={() => onAdd?.('tv')}
 				onDelete={onDelete}
 				onSetDefault={(id) => onSetDefault?.(id, 'tv')}
+				onUpdatePath={(id, path) => onUpdatePath?.(id, path, 'tv')}
 			/>
 		</div>
 	)

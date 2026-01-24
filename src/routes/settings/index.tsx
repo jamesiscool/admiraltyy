@@ -1,5 +1,5 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
 import { Download, FileVideo, FolderOpen, Gauge, Languages, Plus, Radar, Server } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
@@ -38,9 +38,10 @@ const SECTIONS = [
 ] as const
 
 function SettingsPage() {
-	const router = useRouter()
+	const queryClient = useQueryClient()
 	const { data: settings } = useSuspenseQuery(getSettingsOptions())
 	const [activeSection, setActiveSection] = useState<string>('indexers')
+	const [downloadFolderValue, setDownloadFolderValue] = useState(settings.downloadFolder)
 
 	const sectionRefs = useRef<Record<string, HTMLElement | null>>({})
 
@@ -74,7 +75,7 @@ function SettingsPage() {
 
 	const updateSettings = async (updates: Partial<Settings>) => {
 		await updateSettingsServerFn({ data: updates })
-		router.invalidate()
+		await queryClient.invalidateQueries({ queryKey: ['settings'] })
 	}
 
 	const testUsenetServer = async (params: { host: string; port: number; username: string; password: string; ssl: boolean }) => {
@@ -160,7 +161,17 @@ function SettingsPage() {
 
 								<button
 									type="button"
-									onClick={() => console.log('Add indexer')}
+									onClick={() => {
+										const newIndexer = {
+											id: `idx-${crypto.randomUUID().slice(0, 8)}`,
+											name: 'New Indexer',
+											url: 'https://',
+											apiKey: '',
+											enabled: true,
+											priority: settings.indexers.length,
+										}
+										updateSettings({ indexers: [...settings.indexers, newIndexer] })
+									}}
 									className="flex w-full items-center justify-center gap-1.5 border-border border-t px-3 py-3 text-muted-foreground text-sm transition-colors hover:bg-primary/5 hover:text-primary"
 								>
 									<Plus className="h-4 w-4" />
@@ -234,7 +245,21 @@ function SettingsPage() {
 
 								<button
 									type="button"
-									onClick={() => console.log('Add server')}
+									onClick={() => {
+										const newServer = {
+											id: `srv-${crypto.randomUUID().slice(0, 8)}`,
+											name: 'New Server',
+											host: '',
+											port: 563,
+											username: '',
+											password: '',
+											ssl: true,
+											priority: settings.usenetServers.length,
+											connections: 10,
+											enabled: true,
+										}
+										updateSettings({ usenetServers: [...settings.usenetServers, newServer] })
+									}}
 									className="flex w-full items-center justify-center gap-1.5 border-border border-t px-3 py-3 text-muted-foreground text-sm transition-colors hover:bg-primary/5 hover:text-primary"
 								>
 									<Plus className="h-4 w-4" />
@@ -271,8 +296,18 @@ function SettingsPage() {
 								<Input
 									id="download-folder"
 									type="text"
-									value={settings.downloadFolder}
-									onChange={(e) => updateSettings({ downloadFolder: e.target.value })}
+									value={downloadFolderValue}
+									onChange={(e) => setDownloadFolderValue(e.target.value)}
+									onBlur={() => {
+										if (downloadFolderValue !== settings.downloadFolder) {
+											updateSettings({ downloadFolder: downloadFolderValue })
+										}
+									}}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') {
+											e.currentTarget.blur()
+										}
+									}}
 									placeholder="/path/to/downloads"
 									className="font-mono"
 								/>
@@ -300,7 +335,18 @@ function SettingsPage() {
 
 							<FolderSection
 								folders={settings.folders}
-								onAdd={(type) => console.log('Add folder:', type)}
+								onAdd={(type) => {
+									const newFolder = {
+										id: `folder-${crypto.randomUUID().slice(0, 8)}`,
+										path: '',
+										isDefault: settings.folders[type].length === 0,
+									}
+									const newFolders = {
+										...settings.folders,
+										[type]: [...settings.folders[type], newFolder],
+									}
+									updateSettings({ folders: newFolders })
+								}}
 								onDelete={(id) => {
 									const newFolders = {
 										movies: settings.folders.movies.filter((f: Folder) => f.id !== id),
@@ -312,6 +358,13 @@ function SettingsPage() {
 									const newFolders = {
 										...settings.folders,
 										[type]: settings.folders[type].map((f: Folder) => ({ ...f, isDefault: f.id === id })),
+									}
+									updateSettings({ folders: newFolders })
+								}}
+								onUpdatePath={(id, path, type) => {
+									const newFolders = {
+										...settings.folders,
+										[type]: settings.folders[type].map((f: Folder) => (f.id === id ? { ...f, path } : f)),
 									}
 									updateSettings({ folders: newFolders })
 								}}
