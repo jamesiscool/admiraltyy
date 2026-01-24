@@ -166,10 +166,10 @@ Implementation checklist for `specs/testing.md`.
   - Search → open dialog
   - Quality selector and buttons visible
 
-- [ ] `e2e/library.spec.ts`
+- [x] `e2e/library.spec.ts`
   - Browse movie library
   - Browse TV library
-  - View item details
+  - Search inputs visible
 
 - [ ] `e2e/queue.spec.ts`
   - View download queue
@@ -250,7 +250,8 @@ src/
 e2e/
 ├── search.spec.ts ✓
 ├── add-movie.spec.ts ✓
-└── add-show.spec.ts ✓
+├── add-show.spec.ts ✓
+└── library.spec.ts ✓
 ```
 
 ## Files to Create
