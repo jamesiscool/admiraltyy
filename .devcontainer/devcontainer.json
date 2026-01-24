@@ -22,7 +22,7 @@
 	"mounts": [
 		"source=${localEnv:HOME}/.config/zsh/aliases.zsh,target=/home/node/.config/zsh/aliases.zsh,type=bind,readonly"
 	],
-	"postCreateCommand": "bun add -g @antfu/ni && echo 'source ~/.config/zsh/aliases.zsh' >> ~/.zshrc",
+	"postCreateCommand": "bun add -g @antfu/ni && echo 'export PATH=\"/home/node/.bun/bin:$PATH\"' >> ~/.zshrc && echo 'source ~/.config/zsh/aliases.zsh' >> ~/.zshrc",
 	"customizations": {
 		"vscode": {
 			"settings": {},

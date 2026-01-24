@@ -14,6 +14,9 @@
 - 
 - After every UI change test that it works in the browser
 
+## Testing
+- always call `bun run test` insted of just `bun test` this will call the vitest task instead of firing off the Bunn test runner. 
+
 ### Playwright MCP Usage
 - Use `browser_navigate` to open pages (e.g. `http://localhost:2828/tv`)
 - Don't use `browser_wait_for` - the page renders during your thinking time
