@@ -112,7 +112,7 @@ Implementation checklist for `specs/testing.md`.
 - [x] FileScan property tests
   - `src/services/fileScan.test.ts` — simplifyTitle, parseEpisode, parseQuality
 
-- [ ] API response parsing
+- [x] API response parsing
   - `src/services/tmdb.test.ts` — arbitrary response parsing
 
 - [ ] State machines (if applicable)
@@ -244,6 +244,7 @@ test/
 src/
 ├── lib/utils.test.ts ✓
 ├── services/fileScan.test.ts ✓
+├── services/tmdb.test.ts ✓
 e2e/
 └── search.spec.ts ✓
 ```

@@ -32,7 +32,8 @@ const tmdbClient =
 // biome-ignore lint/suspicious/noExplicitAny: passthrough wrapper
 const tmdbFetch = <T>(url: string, opts?: any): Promise<T> => tmdbClient.fetch<T>(url, opts)
 
-function mapMovieResult(movie: TmdbMovieResult): SearchResult {
+// Exported for testing
+export function mapMovieResult(movie: TmdbMovieResult): SearchResult {
 	return {
 		tmdbId: movie.id,
 		title: movie.title,
@@ -47,7 +48,8 @@ function mapMovieResult(movie: TmdbMovieResult): SearchResult {
 	}
 }
 
-function mapTvResult(tv: TmdbTvResult): SearchResult {
+// Exported for testing
+export function mapTvResult(tv: TmdbTvResult): SearchResult {
 	return {
 		tmdbId: tv.id,
 		title: tv.name,
