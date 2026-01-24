@@ -118,8 +118,9 @@ Implementation checklist for `specs/testing.md`.
 - [ ] State machines (if applicable)
   - Download queue state transitions
 
-- [ ] Path sanitization
-  - `src/lib/paths.test.ts` — no traversal escapes
+- [x] Path sanitization
+  - `src/lib/paths.ts` — sanitizePath, isPathWithinRoot, resolveWithinSandbox
+  - `src/lib/paths.test.ts` — property tests ensuring no traversal escapes
 
 ---
 
@@ -259,6 +260,8 @@ test/helpers/nzbget-stub.ts     # Phase 9 - stub server
 
 ```
 .github/workflows/test.yml      # Phase 10 - CI ✓
+src/lib/paths.ts                # Phase 6 - path sanitization ✓
+src/lib/paths.test.ts           # Phase 6 - path sanitization tests ✓
 ```
 
 ---
