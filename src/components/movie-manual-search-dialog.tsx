@@ -32,7 +32,7 @@ export function MovieManualSearchDialog({ movieId, movieTitle, movieYear, open, 
 	const [results, setResults] = useState<IndexerRelease[] | null>(null)
 	const [filter, setFilter] = useState('')
 	const [isSearching, setIsSearching] = useState(false)
-	const [isGrabbing, setIsGrabbing] = useState(false)
+	const [grabbingGuid, setGrabbingGuid] = useState<string | null>(null)
 
 	// Trigger search when dialog opens
 	useEffect(() => {
@@ -61,7 +61,7 @@ export function MovieManualSearchDialog({ movieId, movieTitle, movieYear, open, 
 	}, [results, filter])
 
 	const handleGrab = async (release: Release) => {
-		setIsGrabbing(true)
+		setGrabbingGuid(release.guid)
 		try {
 			await grabMovieRelease({
 				data: {
@@ -81,7 +81,7 @@ export function MovieManualSearchDialog({ movieId, movieTitle, movieYear, open, 
 		} catch (err) {
 			console.error('Grab failed:', err)
 		} finally {
-			setIsGrabbing(false)
+			setGrabbingGuid(null)
 		}
 	}
 
@@ -90,7 +90,7 @@ export function MovieManualSearchDialog({ movieId, movieTitle, movieYear, open, 
 			open={open}
 			onOpenChange={onOpenChange}
 		>
-			<DialogContent className="flex max-h-[85vh] w-[calc(100vw-40px)] max-w-[calc(100vw-40px)] flex-col overflow-hidden p-0 sm:max-w-[calc(100vw-40px)]">
+			<DialogContent className="flex max-h-[85vh] w-full max-w-[min(calc(100vw-40px),1200px)]! flex-col overflow-hidden p-0">
 				<DialogHeader className="shrink-0 px-6 pt-6">
 					<DialogTitle className="flex items-center gap-2">
 						<Search className="size-5" />
@@ -151,10 +151,10 @@ export function MovieManualSearchDialog({ movieId, movieTitle, movieYear, open, 
 														size="sm"
 														className="h-7 px-2"
 														title="Grab release"
-														disabled={isGrabbing}
+														disabled={grabbingGuid !== null}
 														onClick={() => handleGrab(release)}
 													>
-														{isGrabbing ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+														{grabbingGuid === release.guid ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
 													</Button>
 												</TableCell>
 											</TableRow>
