@@ -1,57 +1,57 @@
 {
-  "key": "fetch:[\"/collection/1024107\",null]",
-  "value": {
-    "__ff_promise_result": true,
-    "value": {
-      "id": 1024107,
-      "name": "The Office: A XXX Parody Collection",
-      "original_language": "en",
-      "original_name": "The Office: A XXX Parody Collection",
-      "overview": "When the cameras enter the offices of Dinder Muffin, it's up to \"World's Bust Boss\", Michelle (Ashlynn Brooke), to make sure that the hard drives are hard and the water cooler is wet.",
-      "poster_path": null,
-      "backdrop_path": null,
-      "parts": [
-        {
-          "adult": true,
-          "backdrop_path": "/xx6ZNTdSrfSZaJ8GG1YFz56yxBI.jpg",
-          "id": 365016,
-          "title": "The Office: A XXX Parody",
-          "original_title": "The Office: A XXX Parody",
-          "overview": "Mockumentary of Dunder Muffin, where everybody seems to have relationships with everybody",
-          "poster_path": "/sdzw0g8IHio7vQkZgBBadwhJ9bo.jpg",
-          "media_type": "movie",
-          "original_language": "en",
-          "genre_ids": [
-            35
-          ],
-          "popularity": 0,
-          "release_date": "2009-03-09",
-          "video": false,
-          "vote_average": 4.8,
-          "vote_count": 4
-        },
-        {
-          "adult": true,
-          "backdrop_path": "/7Hxc7kU7N4NApPIrgSPuKRqMcnJ.jpg",
-          "id": 365020,
-          "title": "The Office: A XXX Parody, Episode 2: The Best Week Ever",
-          "original_title": "The Office: A XXX Parody, Episode 2: The Best Week Ever",
-          "overview": "Mockumentary of Dunder Muffin, where everybody seems to have relationships with everybody",
-          "poster_path": "/6xiJ9LWbZJQ8pTnKNEEmxIYKzzP.jpg",
-          "media_type": "movie",
-          "original_language": "en",
-          "genre_ids": [
-            99,
-            35
-          ],
-          "popularity": 0,
-          "release_date": "2010-01-11",
-          "video": false,
-          "vote_average": 6,
-          "vote_count": 3
-        }
-      ]
-    }
-  },
-  "timestamp": 1769251617202
+	"key": "fetch:[\"/collection/1024107\",null]",
+	"value": {
+		"__ff_promise_result": true,
+		"value": {
+			"id": 1024107,
+			"name": "The Office: A XXX Parody Collection",
+			"original_language": "en",
+			"original_name": "The Office: A XXX Parody Collection",
+			"overview": "When the cameras enter the offices of Dinder Muffin, it's up to \"World's Bust Boss\", Michelle (Ashlynn Brooke), to make sure that the hard drives are hard and the water cooler is wet.",
+			"poster_path": null,
+			"backdrop_path": null,
+			"parts": [
+				{
+					"adult": true,
+					"backdrop_path": "/xx6ZNTdSrfSZaJ8GG1YFz56yxBI.jpg",
+					"id": 365016,
+					"title": "The Office: A XXX Parody",
+					"original_title": "The Office: A XXX Parody",
+					"overview": "Mockumentary of Dunder Muffin, where everybody seems to have relationships with everybody",
+					"poster_path": "/sdzw0g8IHio7vQkZgBBadwhJ9bo.jpg",
+					"media_type": "movie",
+					"original_language": "en",
+					"genre_ids": [
+						35
+					],
+					"popularity": 0,
+					"release_date": "2009-03-09",
+					"video": false,
+					"vote_average": 4.8,
+					"vote_count": 4
+				},
+				{
+					"adult": true,
+					"backdrop_path": "/7Hxc7kU7N4NApPIrgSPuKRqMcnJ.jpg",
+					"id": 365020,
+					"title": "The Office: A XXX Parody, Episode 2: The Best Week Ever",
+					"original_title": "The Office: A XXX Parody, Episode 2: The Best Week Ever",
+					"overview": "Mockumentary of Dunder Muffin, where everybody seems to have relationships with everybody",
+					"poster_path": "/6xiJ9LWbZJQ8pTnKNEEmxIYKzzP.jpg",
+					"media_type": "movie",
+					"original_language": "en",
+					"genre_ids": [
+						99,
+						35
+					],
+					"popularity": 0,
+					"release_date": "2010-01-11",
+					"video": false,
+					"vote_average": 6,
+					"vote_count": 3
+				}
+			]
+		}
+	},
+	"timestamp": 1769251617202
 }
