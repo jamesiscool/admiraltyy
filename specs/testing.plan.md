@@ -123,30 +123,26 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 7: Playwright Setup
+## Phase 7: Playwright Setup ✅ Complete
 
 **Goal:** E2E testing infrastructure.
 
-- [ ] Install Playwright
-  ```bash
-  bun add -d playwright @playwright/test
-  bunx playwright install chromium
-  ```
+- [x] Install Playwright
+  - Already in devDependencies: `@playwright/test`, `playwright`
+  - Chromium installed via `bunx playwright install`
 
-- [ ] Create `playwright.config.ts`
+- [x] Create `playwright.config.ts`
   - testDir: `./e2e`
   - webServer: `bun run dev` on port 2828
   - reuseExistingServer: true
 
-- [ ] Create `e2e/` directory structure
+- [x] Create `e2e/` directory structure
   ```
   e2e/
-  ├── search.spec.ts
-  ├── add-movie.spec.ts
-  └── fixtures/
+  └── search.spec.ts
   ```
 
-- [ ] Add scripts to `package.json`
+- [x] Add scripts to `package.json`
   - `"test:e2e": "playwright test"`
   - `"test:e2e:real": "NZBGET_MODE=real playwright test"`
 
@@ -233,6 +229,7 @@ Implementation checklist for `specs/testing.md`.
 
 ```
 vitest.config.ts ✓
+playwright.config.ts ✓
 test/
 ├── fixtures/
 │   ├── http/                 # fast-forward cache ✓
@@ -247,16 +244,16 @@ test/
 src/
 ├── lib/utils.test.ts ✓
 ├── services/fileScan.test.ts ✓
+e2e/
+└── search.spec.ts ✓
 ```
 
 ## Files to Create
 
 ```
-playwright.config.ts
 test/fixtures/seed.sql
 test/helpers/nzbget-stub.ts
 e2e/
-├── search.spec.ts
 ├── add-movie.spec.ts
 ├── add-show.spec.ts
 ├── library.spec.ts
@@ -273,7 +270,7 @@ e2e/
 After implementation:
 
 - [x] `bun test` runs and finds colocated tests
-- [ ] `bun test:e2e` runs Playwright tests
+- [x] `bun test:e2e` runs Playwright tests
 - [x] fast-forward cache works (TMDB uses READ_ONLY in test mode)
 - [x] In-memory DB tests are isolated
 - [x] memfs tests don't touch real filesystem

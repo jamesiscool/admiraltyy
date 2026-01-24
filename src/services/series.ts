@@ -421,7 +421,7 @@ export const deleteSeries = createServerFn({ method: 'POST' })
 				await db.delete(schema.files).where(inArray(schema.files.episodeId, episodeIds))
 
 				// Get releases for these episodes to delete their downloads
-				const episodeReleases = await db.select({ id: schema.releases.id }).from(schema.releases).where(inArray(schema.releases.episodeId, episodeIds))
+				const episodeReleases = await db.select().from(schema.releases).where(inArray(schema.releases.episodeId, episodeIds))
 				for (const release of episodeReleases) {
 					await db.delete(schema.downloads).where(eq(schema.downloads.releaseId, release.id))
 				}

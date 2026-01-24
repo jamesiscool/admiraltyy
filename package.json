@@ -12,6 +12,8 @@
 		"preview": "vite preview",
 		"test": "bunx vitest run",
 		"test:watch": "vitest",
+		"test:e2e": "playwright test",
+		"test:e2e:real": "NZBGET_MODE=real playwright test",
 		"test:all": "vitest run && playwright test",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",

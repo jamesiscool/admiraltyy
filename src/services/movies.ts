@@ -307,7 +307,7 @@ export const deleteMovie = createServerFn({ method: 'POST' })
 		await db.delete(schema.files).where(eq(schema.files.movieId, numId))
 
 		// Get releases for this movie to delete their downloads
-		const movieReleases = await db.select({ id: schema.releases.id }).from(schema.releases).where(eq(schema.releases.movieId, numId))
+		const movieReleases = await db.select().from(schema.releases).where(eq(schema.releases.movieId, numId))
 		for (const release of movieReleases) {
 			await db.delete(schema.downloads).where(eq(schema.downloads.releaseId, release.id))
 		}
