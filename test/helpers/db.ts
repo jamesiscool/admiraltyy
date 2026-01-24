@@ -1,36 +1,14 @@
+import { Database } from 'bun:sqlite'
 import { sql } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/bun-sqlite'
 import * as schema from '@/db/schema'
 
-// Detect runtime: Bun vs Node (vitest)
-const isBunRuntime = typeof globalThis.Bun !== 'undefined'
-
-// Dynamic import types
-type BunSqliteDb = ReturnType<typeof import('drizzle-orm/bun-sqlite').drizzle<typeof schema>>
-type BetterSqliteDb = ReturnType<typeof import('drizzle-orm/better-sqlite3').drizzle<typeof schema>>
-export type TestDb = BunSqliteDb | BetterSqliteDb
+export type TestDb = ReturnType<typeof drizzle<typeof schema>>
 
 // Create in-memory SQLite database with schema tables
 export function setupTestDb(): TestDb {
-	let db: TestDb
-
-	if (isBunRuntime) {
-		// bun:sqlite for Bun runtime
-		// biome-ignore lint/suspicious/noExplicitAny: dynamic import
-		const Database = require('bun:sqlite').Database as any
-		// biome-ignore lint/suspicious/noExplicitAny: dynamic import
-		const drizzle = require('drizzle-orm/bun-sqlite').drizzle as any
-		const sqlite = new Database(':memory:')
-		db = drizzle(sqlite, { schema })
-	} else {
-		// better-sqlite3 for Node/vitest
-		// biome-ignore lint/suspicious/noExplicitAny: dynamic import
-		const BetterSqlite3Module = require('better-sqlite3') as any
-		const BetterSqlite3 = BetterSqlite3Module.default ?? BetterSqlite3Module
-		// biome-ignore lint/suspicious/noExplicitAny: dynamic import
-		const drizzle = require('drizzle-orm/better-sqlite3').drizzle as any
-		const sqlite = new BetterSqlite3(':memory:')
-		db = drizzle(sqlite, { schema })
-	}
+	const sqlite = new Database(':memory:')
+	const db = drizzle(sqlite, { schema })
 
 	// Create tables directly (no migrations, just DDL)
 	db.run(sql`
