@@ -1,37 +1,31 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-TMPFILE=$(mktemp)
-cleanup() { rm -f "$TMPFILE"; }
-trap 'cleanup; echo " Cancelled"; exit 130' INT
-trap cleanup EXIT
+# Usage: ./ralph.sh [max_iterations]
+MAX_ITERATIONS=${1:-10}
+COMPLETE_FLAG="ralph_complete"
 
-MAX=${1:-10}
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+for i in $(seq 1 "$MAX_ITERATIONS"); do
+  # Exit if we've created the completion flag
+  if [[ -f "$COMPLETE_FLAG" ]]; then
+    echo "All tasks are now complete (found $COMPLETE_FLAG). Exiting."
+    exit 0
+  fi
 
-for ((i=1; i<=MAX; i++)); do
-  echo "═══ Iteration $i/$MAX ═══"
-  > "$TMPFILE"  # Clear temp file
-  script -q -c "cat '$DIR/prompt.md' | claude --dangerously-skip-permissions" "$TMPFILE" &
-  SCRIPT_PID=$!
-  
-  sleep 5  # Wait for claude to initialize before monitoring
-  
-  # Monitor for completion marker, kill when found
-  while kill -0 $SCRIPT_PID 2>/dev/null; do
-    if [[ $(grep -c '<promise>COMPLETE</promise>' "$TMPFILE" 2>/dev/null) -ge 2 ]]; then
-      kill $SCRIPT_PID 2>/dev/null
-      wait $SCRIPT_PID 2>/dev/null
-      echo "✅ Done!"
-      exit 0
-    fi
-    sleep 1
-  done
-  wait $SCRIPT_PID 2>/dev/null
+  cat prompt.md | claude --dangerously-skip-permissions
+
+  # If the agent made changes, commit them (agent may already commit; this is a safety step)
+  if [[ -n "$(git status --porcelain)" ]]; then
+    git add -A
+    git commit -m "Ralph: automated changes (iteration $i)"
+  fi
+
+  # Print progress
+  echo "Completed iteration $i"
 done
 
-echo "⚠️ Max iterations"
-exit 1
+echo "Reached maximum iterations ($MAX_ITERATIONS). Exiting."
+exit 0
 
 
  #trap 'exit 0' INT; for i in {1..10}; do cat prompt.md | claude --dangerously-skip-permissions; done

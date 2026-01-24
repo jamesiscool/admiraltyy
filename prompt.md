@@ -1,6 +1,6 @@
 study `specs/SPECS.md`
 study `specs/testing.md`
-study `specs/testing.plan.md` and pick the most important thing to do - your task is implement then to validate that this functionaltiy works. If all task's are implemented return: <promise>COMPLETE</promise>
+study `specs/testing.plan.md` and pick the most important thing to do - your task is implement then to validate that this functionaltiy works. If there are no remaining tasks, create a file named `ralph_complete`.
 
 IMPORTANT:
 - always call `bun run test` this will call the vitest task instead of firing off the Bunn test runner. 
