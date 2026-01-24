@@ -10,5 +10,8 @@
 		"titleBar.activeForeground": "#f3f3f3",
 		"titleBar.inactiveBackground": "#333F6A",
 		"titleBar.inactiveForeground": "#f3f3f3"
-	}
+	},
+	"cSpell.words": [
+		"schlich"
+	]
 }

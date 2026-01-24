@@ -5,7 +5,7 @@ const FAST_INTERVAL_MS = 2_000 // 2s when active
 const COOLDOWN_MS = 60_000 // stay fast for 60s after last activity
 
 let lastActivityAt = 0
-let currentTimer: Timer | null = null
+let currentTimer: ReturnType<typeof setTimeout> | null = null
 let isPolling: boolean = false
 let isStarted: boolean = false
 

@@ -15,13 +15,15 @@
 		},
 		"ghcr.io/devcontainers/features/sshd:1": {},
 		"ghcr.io/shyim/devcontainers-features/bun:0": {},
-		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {}
+		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
+		"ghcr.io/schlich/devcontainer-features/playwright:0": {}
 	},
 	"workspaceMount": "source=/Users/jlles/Projects/admiraltyy,target=/workspace,type=bind",
 	"workspaceFolder": "/workspace",
 	"mounts": [
 		"source=${localEnv:HOME}/.config/zsh/aliases.zsh,target=/home/node/.config/zsh/aliases.zsh,type=bind,readonly",
-		"source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume"
+		"source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume",
+		"source=${localEnv:HOME}/.bun,target=/home/node/.bun,type=bind"
 	],
 	"postCreateCommand": "bash .devcontainer/post-create.sh",
 	"customizations": {
