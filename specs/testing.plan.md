@@ -200,30 +200,22 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 10: CI Integration
+## Phase 10: CI Integration ✅ Complete
 
 **Goal:** GitHub Actions workflow.
 
-- [ ] Create `.github/workflows/test.yml`
-  ```yaml
-  name: Tests
-  on: [push, pull_request]
-  jobs:
-    test:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - uses: oven-sh/setup-bun@v2
-        - run: bun install
-        - run: bun test
-          continue-on-error: true
-        - run: bun test:e2e
-          continue-on-error: true
-  ```
+- [x] Create `.github/workflows/test.yml`
+  - Triggers on push/PR to main
+  - Runs `bun run test` and `bun run test:e2e`
+  - continue-on-error: true (non-blocking)
 
-- [ ] Cache Playwright browsers in CI
+- [x] Cache Playwright browsers in CI
+  - Uses actions/cache@v4 with playwright version key
+  - Caches ~/.cache/ms-playwright
 
-- [ ] Upload test artifacts (screenshots on failure)
+- [x] Upload test artifacts (screenshots on failure)
+  - Uploads playwright-report/ and test-results/
+  - 7-day retention
 
 ---
 
@@ -261,7 +253,12 @@ e2e/
 ```
 test/fixtures/seed.sql          # Optional DB seed data
 test/helpers/nzbget-stub.ts     # Phase 9 - stub server
-.github/workflows/test.yml      # Phase 10 - CI
+```
+
+## Files Created (This Session)
+
+```
+.github/workflows/test.yml      # Phase 10 - CI ✓
 ```
 
 ---
@@ -277,7 +274,7 @@ After implementation:
 - [x] memfs tests don't touch real filesystem
 - [x] Property tests generate multiple cases
 - [x] NZBget mock mode works without network
-- [ ] CI workflow runs (non-blocking)
+- [x] CI workflow runs (non-blocking)
 
 ---
 
