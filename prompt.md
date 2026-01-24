@@ -1,5 +1,5 @@
 study `specs/SPECS.md`
-study `tasks.md` and pick the most important thing to do - your task is implement one task and then to validate that this functionality works. If there are no remaining tasks, create a file named `ralph_complete`.
+study `tasks.md` and pick the most important thing to do - your task is implement one task and then to validate that this functionality works. If there are no remaining tasks, create a file named `ralph_complete`. Once your one task is complete run `pkill claude` to exit.
 
 IMPORTANT:
 - if integration/property/unit tests are missing you should add them (but choose which one is most appropriate. follow existing test pattern design)
