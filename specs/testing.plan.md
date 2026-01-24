@@ -4,26 +4,26 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 1: Vitest Configuration
+## Phase 1: Vitest Configuration ✓
 
 **Goal:** Configure Vitest for colocated tests with fast-check integration.
 
-- [ ] Update `package.json` scripts
+- [x] Update `package.json` scripts
   - `"test": "vitest run"`
   - `"test:watch": "vitest"`
   - `"test:all": "vitest run && playwright test"`
 
-- [ ] Create `vitest.config.ts`
+- [x] Create `vitest.config.ts`
   - Configure `include: ['src/**/*.test.ts']`
   - Setup jsdom environment for React components
   - Configure coverage (optional, no thresholds)
 
-- [ ] Install missing dependencies
+- [x] Install missing dependencies
   ```bash
   bun add -d @fast-check/vitest
   ```
 
-- [ ] Create sample unit test to verify setup
+- [x] Create sample unit test to verify setup
   - `src/lib/utils.test.ts` — test `cn()` utility
 
 ---
@@ -99,9 +99,12 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 6: Property-Based Tests
+## Phase 6: Property-Based Tests (started)
 
 **Goal:** Add fast-check property tests to critical areas.
+
+- [x] Utils property tests
+  - `src/lib/utils.test.ts` — cn(), formatSize(), generateSettingId() property tests
 
 - [ ] DB schema invariants
   - `src/db/queries.test.ts` — insert/retrieve roundtrip
@@ -263,12 +266,12 @@ e2e/
 
 After implementation:
 
-- [ ] `bun test` runs and finds colocated tests
+- [x] `bun test` runs and finds colocated tests
 - [ ] `bun test:e2e` runs Playwright tests
 - [ ] fast-forward cache works (READ_ONLY mode fails on cache miss)
 - [ ] In-memory DB tests are isolated
 - [ ] memfs tests don't touch real filesystem
-- [ ] Property tests generate multiple cases
+- [x] Property tests generate multiple cases
 - [ ] NZBget mock mode works without network
 - [ ] CI workflow runs (non-blocking)
 
