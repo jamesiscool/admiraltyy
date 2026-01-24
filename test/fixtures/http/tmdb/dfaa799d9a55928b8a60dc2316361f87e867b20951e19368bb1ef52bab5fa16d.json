@@ -1,317 +1,317 @@
 {
-  "key": "fetch:[\"/movie/770/alternative_titles\",null]",
-  "value": {
-    "__ff_promise_result": true,
-    "value": {
-      "id": 770,
-      "titles": [
-        {
-          "iso_3166_1": "RU",
-          "title": "Унесённые ветром",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "ES",
-          "title": "Lo que el viento se llevó",
-          "type": "Castilian title"
-        },
-        {
-          "iso_3166_1": "BE",
-          "title": "Gejaagd door de wind",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "BG",
-          "title": "Отнесени от вихъра",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "CZ",
-          "title": "Jih proti Severu",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "SK",
-          "title": "Odviate vetrom",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "IR",
-          "title": "بر باد رفته",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "HK",
-          "title": "亂世佳人",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "BR",
-          "title": "E o Vento Levou",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "KR",
-          "title": "바람과 함께 사라지다",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "FR",
-          "title": "Autant en emporte le vent",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "PL",
-          "title": "Przeminęło z Wiatrem",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "SE",
-          "title": "Borta med vinden",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "NO",
-          "title": "Tatt av vinden",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "RU",
-          "title": "Унесенные ветром",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "SA",
-          "title": "ذهب مع الريح",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "PT",
-          "title": "E Tudo o Vento Levou",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "BY",
-          "title": "Знесеныя ветрам",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "MK",
-          "title": "Однесено од виорот",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "RS",
-          "title": "Прохујало са вихором",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "UA",
-          "title": "Віднесені вітром",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "UA",
-          "title": "Звіяні вітром",
-          "type": "alternative title"
-        },
-        {
-          "iso_3166_1": "RU",
-          "title": "Тăвăл тăпăлтарнисем",
-          "type": "Chuvash title"
-        },
-        {
-          "iso_3166_1": "KZ",
-          "title": "Жел өтіндегі тағдырлар",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "GR",
-          "title": "Όσα παίρνει ο άνεμος",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "ES",
-          "title": "Ixo que o viento se levó",
-          "type": "Aragonese title"
-        },
-        {
-          "iso_3166_1": "AZ",
-          "title": "Küləklə sovrulanlar",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "BA",
-          "title": "Prohujalo s vihorom",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "ES",
-          "title": "Allò que el vent s'endugué",
-          "type": "Catalan title"
-        },
-        {
-          "iso_3166_1": "DK",
-          "title": "Borte med blæsten",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "DE",
-          "title": "Vom Winde verweht",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "EE",
-          "title": "Tuulest viidud",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "ES",
-          "title": "Foise co vento",
-          "type": "Galician title"
-        },
-        {
-          "iso_3166_1": "HR",
-          "title": "Zameo ih vjetar",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "IT",
-          "title": "Via col vento",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "LV",
-          "title": "Vējiem līdzi",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "LT",
-          "title": "Vėjo nublokšti",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "HU",
-          "title": "Elfújta a szél",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "RO",
-          "title": "Pe aripile vântului",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "SI",
-          "title": "V vrtincu",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "FI",
-          "title": "Tuulen viemää",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "TR",
-          "title": "Rüzgâr Gibi Geçti",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "AM",
-          "title": "Քամուց քշվածները",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "GE",
-          "title": "ქარწაღებულნი",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "AL",
-          "title": "Iku bashkë me erën",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "IS",
-          "title": "Á hverfanda hveli",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "PK",
-          "title": "گون ود دی ونڈ",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "AZ",
-          "title": "کولک‌له سوورولانلار",
-          "type": "South Azerbaijani title"
-        },
-        {
-          "iso_3166_1": "IL",
-          "title": "חלף עם הרוח",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "IN",
-          "title": "गॉन विथ द विंड",
-          "type": "Marathi title"
-        },
-        {
-          "iso_3166_1": "IN",
-          "title": "ഗോൺ വിത്ത് ദ വിൻഡ്",
-          "type": "Malayalam title"
-        },
-        {
-          "iso_3166_1": "JP",
-          "title": "風と共に去りぬ",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "KG",
-          "title": "Шамал алып кеткендер",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "UZ",
-          "title": "Shamollarda qolgan hislarim",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "VN",
-          "title": "Cuốn theo chiều gió",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "BD",
-          "title": "গন উইথ দ্য উইন্ড",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "IN",
-          "title": "கான் வித் த விண்ட்",
-          "type": "Tamil title"
-        },
-        {
-          "iso_3166_1": "IN",
-          "title": "గాన్ విత్ ది విండ్",
-          "type": "Telugu title"
-        },
-        {
-          "iso_3166_1": "TH",
-          "title": "วิมานลอย",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "CN",
-          "title": "乱世佳人",
-          "type": ""
-        },
-        {
-          "iso_3166_1": "CN",
-          "title": "ئەنسىز يىللاردىكى نازىنىن",
-          "type": "Uyghur title"
-        }
-      ]
-    }
-  },
-  "timestamp": 1769171565486
+	"key": "fetch:[\"/movie/770/alternative_titles\",null]",
+	"value": {
+		"__ff_promise_result": true,
+		"value": {
+			"id": 770,
+			"titles": [
+				{
+					"iso_3166_1": "RU",
+					"title": "Унесённые ветром",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "ES",
+					"title": "Lo que el viento se llevó",
+					"type": "Castilian title"
+				},
+				{
+					"iso_3166_1": "BE",
+					"title": "Gejaagd door de wind",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "BG",
+					"title": "Отнесени от вихъра",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "CZ",
+					"title": "Jih proti Severu",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "SK",
+					"title": "Odviate vetrom",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "IR",
+					"title": "بر باد رفته",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "HK",
+					"title": "亂世佳人",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "BR",
+					"title": "E o Vento Levou",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "KR",
+					"title": "바람과 함께 사라지다",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "FR",
+					"title": "Autant en emporte le vent",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "PL",
+					"title": "Przeminęło z Wiatrem",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "SE",
+					"title": "Borta med vinden",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "NO",
+					"title": "Tatt av vinden",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "RU",
+					"title": "Унесенные ветром",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "SA",
+					"title": "ذهب مع الريح",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "PT",
+					"title": "E Tudo o Vento Levou",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "BY",
+					"title": "Знесеныя ветрам",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "MK",
+					"title": "Однесено од виорот",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "RS",
+					"title": "Прохујало са вихором",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "UA",
+					"title": "Віднесені вітром",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "UA",
+					"title": "Звіяні вітром",
+					"type": "alternative title"
+				},
+				{
+					"iso_3166_1": "RU",
+					"title": "Тăвăл тăпăлтарнисем",
+					"type": "Chuvash title"
+				},
+				{
+					"iso_3166_1": "KZ",
+					"title": "Жел өтіндегі тағдырлар",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "GR",
+					"title": "Όσα παίρνει ο άνεμος",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "ES",
+					"title": "Ixo que o viento se levó",
+					"type": "Aragonese title"
+				},
+				{
+					"iso_3166_1": "AZ",
+					"title": "Küləklə sovrulanlar",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "BA",
+					"title": "Prohujalo s vihorom",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "ES",
+					"title": "Allò que el vent s'endugué",
+					"type": "Catalan title"
+				},
+				{
+					"iso_3166_1": "DK",
+					"title": "Borte med blæsten",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "DE",
+					"title": "Vom Winde verweht",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "EE",
+					"title": "Tuulest viidud",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "ES",
+					"title": "Foise co vento",
+					"type": "Galician title"
+				},
+				{
+					"iso_3166_1": "HR",
+					"title": "Zameo ih vjetar",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "IT",
+					"title": "Via col vento",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "LV",
+					"title": "Vējiem līdzi",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "LT",
+					"title": "Vėjo nublokšti",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "HU",
+					"title": "Elfújta a szél",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "RO",
+					"title": "Pe aripile vântului",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "SI",
+					"title": "V vrtincu",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "FI",
+					"title": "Tuulen viemää",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "TR",
+					"title": "Rüzgâr Gibi Geçti",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "AM",
+					"title": "Քամուց քշվածները",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "GE",
+					"title": "ქარწაღებულნი",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "AL",
+					"title": "Iku bashkë me erën",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "IS",
+					"title": "Á hverfanda hveli",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "PK",
+					"title": "گون ود دی ونڈ",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "AZ",
+					"title": "کولک‌له سوورولانلار",
+					"type": "South Azerbaijani title"
+				},
+				{
+					"iso_3166_1": "IL",
+					"title": "חלף עם הרוח",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "IN",
+					"title": "गॉन विथ द विंड",
+					"type": "Marathi title"
+				},
+				{
+					"iso_3166_1": "IN",
+					"title": "ഗോൺ വിത്ത് ദ വിൻഡ്",
+					"type": "Malayalam title"
+				},
+				{
+					"iso_3166_1": "JP",
+					"title": "風と共に去りぬ",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "KG",
+					"title": "Шамал алып кеткендер",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "UZ",
+					"title": "Shamollarda qolgan hislarim",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "VN",
+					"title": "Cuốn theo chiều gió",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "BD",
+					"title": "গন উইথ দ্য উইন্ড",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "IN",
+					"title": "கான் வித் த விண்ட்",
+					"type": "Tamil title"
+				},
+				{
+					"iso_3166_1": "IN",
+					"title": "గాన్ విత్ ది విండ్",
+					"type": "Telugu title"
+				},
+				{
+					"iso_3166_1": "TH",
+					"title": "วิมานลอย",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "CN",
+					"title": "乱世佳人",
+					"type": ""
+				},
+				{
+					"iso_3166_1": "CN",
+					"title": "ئەنسىز يىللاردىكى نازىنىن",
+					"type": "Uyghur title"
+				}
+			]
+		}
+	},
+	"timestamp": 1769171565486
 }
