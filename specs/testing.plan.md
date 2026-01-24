@@ -256,19 +256,12 @@ e2e/
 └── queue.spec.ts ✓
 ```
 
-## Files to Create
+## Files to Create (Remaining)
 
 ```
-test/fixtures/seed.sql
-test/helpers/nzbget-stub.ts
-e2e/
-├── add-movie.spec.ts
-├── add-show.spec.ts
-├── library.spec.ts
-├── queue.spec.ts
-├── settings.spec.ts
-└── fixtures/
-.github/workflows/test.yml
+test/fixtures/seed.sql          # Optional DB seed data
+test/helpers/nzbget-stub.ts     # Phase 9 - stub server
+.github/workflows/test.yml      # Phase 10 - CI
 ```
 
 ---
