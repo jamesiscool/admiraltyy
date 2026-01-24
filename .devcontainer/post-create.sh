@@ -6,4 +6,5 @@ git config --global --add safe.directory /workspace
 bun install
 bun add -g @antfu/ni
 echo 'export PATH="/home/node/.bun/bin:$PATH"' >> ~/.zshrc
+echo 'alias cc="claude --dangerously-skip-permissions"' >> ~/.zshrc
 echo 'source ~/.config/zsh/aliases.zsh' >> ~/.zshrc

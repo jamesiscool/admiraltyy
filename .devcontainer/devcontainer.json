@@ -16,7 +16,10 @@
 		"ghcr.io/devcontainers/features/sshd:1": {},
 		"ghcr.io/shyim/devcontainers-features/bun:0": {},
 		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
-		"ghcr.io/schlich/devcontainer-features/playwright:0": {}
+		"ghcr.io/schlich/devcontainer-features/playwright:0": {},
+		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+			"packages": "curl,nano,sqlite3"
+		}
 	},
 	"workspaceMount": "source=/Users/jlles/Projects/admiraltyy,target=/workspace,type=bind",
 	"workspaceFolder": "/workspace",
