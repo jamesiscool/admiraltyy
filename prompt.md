@@ -1,7 +1,11 @@
-study specs/readme.md
-study specs/analytics-implementation-plan.md and pick the most important thing to do
+study specs/SPECS.md
+study specs/testing.plan.md and pick the most important thing to do - your task is implement then to validate that this functionaltiy works. If all task's are implemented return: <promise>COMPLETE</promise>
+
 IMPORTANT:
-- use the Loom-web i18n patterns for typescript or the loom-i18n patterns for rust
-- author property based tests or unit tests (which ever is best)
-- after making the changes to the files run the tests
-- when tests pass, commit and push to deploy the changes
+- update the specs/testing.plan.md when the task is done
+- when you need run the dev server start it with `bun run dev`
+- you may implement missing functionaltiy if required (but study the specs/*anal* before doing so)
+- study the 
+- you may add temproary logging as needed
+- make sure the code passes linting and typechecks
+- commit when you are done

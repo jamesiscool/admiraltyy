@@ -11,8 +11,8 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   echo "═══ Iteration $i ═══"
   
   OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
-    | amp --dangerously-allow-all 2>&1 \
-    | tee /dev/stderr) || true
+    | stdbuf -oL claude --dangerously-skip-permissions 2>&1 \
+    | tee /dev/tty) || true
   
   if echo "$OUTPUT" | \
     grep -q "<promise>COMPLETE</promise>"
