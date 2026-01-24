@@ -34,6 +34,7 @@ reference
 
 # Testing
 test/results
+test/fixtures/http
 
 # Ralph
 ralph_complete
