@@ -226,6 +226,9 @@ export class MockNzbgetClient {
 }
 
 // Factory function based on NZBGET_MODE env var
+// Returns MockNzbgetClient for in-memory testing (default)
+// For stub mode, use StubNzbgetServer from nzbget-stub.ts directly
+// For real mode, use the actual nzbgetApi functions from src/services/nzbget/nzbgetApi.ts
 export function createNzbgetClient(): MockNzbgetClient {
 	const mode = process.env.NZBGET_MODE ?? 'mock'
 
@@ -233,7 +236,16 @@ export function createNzbgetClient(): MockNzbgetClient {
 		return new MockNzbgetClient()
 	}
 
-	// stub and real modes - future implementation
-	// For now, return mock for all modes
+	if (mode === 'stub') {
+		// For stub mode, tests should use StubNzbgetServer directly
+		// as it requires async start/stop lifecycle management
+		throw new Error('For stub mode, use StubNzbgetServer from test/helpers/nzbget-stub.ts directly')
+	}
+
+	if (mode === 'real') {
+		// For real mode, tests should use the actual nzbgetApi functions
+		throw new Error('For real mode, use nzbgetApi functions from src/services/nzbget/nzbgetApi.ts directly')
+	}
+
 	return new MockNzbgetClient()
 }

@@ -182,7 +182,7 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 9: NZBget Mock/Stub (partial)
+## Phase 9: NZBget Mock/Stub ✅ Complete
 
 **Goal:** Three-tier NZBget testing support.
 
@@ -191,13 +191,14 @@ Implementation checklist for `specs/testing.md`.
   - Tracks calls, returns canned responses
   - `createNzbgetClient()` factory function
 
-- [ ] Create `test/helpers/nzbget-stub.ts`
-  - `StubNzbgetClient` — fake JSON-RPC server
+- [x] Create `test/helpers/nzbget-stub.ts`
+  - `StubNzbgetServer` — fake JSON-RPC HTTP server
   - Uses actual HTTP but controlled responses
+  - Full test coverage in `nzbget-stub.test.ts`
 
 - [x] Environment variable handling
   - `NZBGET_MODE`: mock (default) | stub | real
-  - Factory function returns appropriate client (mock only for now)
+  - Factory function returns mock client; stub/real require direct usage
 
 ---
 
@@ -235,7 +236,9 @@ test/
 │   ├── db.ts ✓
 │   ├── db.test.ts ✓
 │   ├── mocks.ts ✓
-│   └── mocks.test.ts ✓
+│   ├── mocks.test.ts ✓
+│   ├── nzbget-stub.ts ✓
+│   └── nzbget-stub.test.ts ✓
 src/
 ├── lib/utils.test.ts ✓
 ├── services/fileScan.test.ts ✓
@@ -253,15 +256,13 @@ e2e/
 
 ```
 test/fixtures/seed.sql          # Optional DB seed data
-test/helpers/nzbget-stub.ts     # Phase 9 - stub server
 ```
 
 ## Files Created (This Session)
 
 ```
-.github/workflows/test.yml      # Phase 10 - CI ✓
-src/lib/paths.ts                # Phase 6 - path sanitization ✓
-src/lib/paths.test.ts           # Phase 6 - path sanitization tests ✓
+test/helpers/nzbget-stub.ts     # Phase 9 - stub server ✓
+test/helpers/nzbget-stub.test.ts # Phase 9 - stub server tests ✓
 ```
 
 ---
