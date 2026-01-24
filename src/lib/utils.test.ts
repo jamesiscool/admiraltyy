@@ -1,4 +1,3 @@
-import { test as fcTest } from '@fast-check/vitest'
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 import { cn, formatNextAiring, formatSize, generateSettingId } from './utils'
@@ -69,33 +68,57 @@ describe('generateSettingId', () => {
 
 // Property-based tests with fast-check
 describe('property-based tests', () => {
-	fcTest.prop([fc.array(fc.string())])('cn never throws for any string inputs', (inputs) => {
-		expect(() => cn(...inputs)).not.toThrow()
+	it('cn never throws for any string inputs', () => {
+		fc.assert(
+			fc.property(fc.array(fc.string()), (inputs) => {
+				expect(() => cn(...inputs)).not.toThrow()
+			}),
+		)
 	})
 
-	fcTest.prop([fc.string()])('cn always returns a string', (input) => {
-		const result = cn(input)
-		expect(typeof result).toBe('string')
+	it('cn always returns a string', () => {
+		fc.assert(
+			fc.property(fc.string(), (input) => {
+				const result = cn(input)
+				expect(typeof result).toBe('string')
+			}),
+		)
 	})
 
-	fcTest.prop([fc.double({ min: 0, max: 1e9, noNaN: true })])('formatSize returns valid format for non-negative numbers', (gb) => {
-		const result = formatSize(gb)
-		expect(result).toMatch(/^\d+(\.\d+)?\s(GB|TB)$/)
+	it('formatSize returns valid format for non-negative numbers', () => {
+		fc.assert(
+			fc.property(fc.double({ min: 0, max: 1e9, noNaN: true }), (gb) => {
+				const result = formatSize(gb)
+				expect(result).toMatch(/^\d+(\.\d+)?\s(GB|TB)$/)
+			}),
+		)
 	})
 
-	fcTest.prop([fc.double({ min: 0, max: 999.9, noNaN: true })])('formatSize returns GB for values under 1000', (gb) => {
-		const result = formatSize(gb)
-		expect(result).toContain('GB')
+	it('formatSize returns GB for values under 1000', () => {
+		fc.assert(
+			fc.property(fc.double({ min: 0, max: 999.9, noNaN: true }), (gb) => {
+				const result = formatSize(gb)
+				expect(result).toContain('GB')
+			}),
+		)
 	})
 
-	fcTest.prop([fc.double({ min: 1000, max: 1e9, noNaN: true })])('formatSize returns TB for values 1000+', (gb) => {
-		const result = formatSize(gb)
-		expect(result).toContain('TB')
+	it('formatSize returns TB for values 1000+', () => {
+		fc.assert(
+			fc.property(fc.double({ min: 1000, max: 1e9, noNaN: true }), (gb) => {
+				const result = formatSize(gb)
+				expect(result).toContain('TB')
+			}),
+		)
 	})
 
-	fcTest.prop([fc.nat()])('generateSettingId always returns 5 char string', () => {
-		const id = generateSettingId()
-		expect(id).toHaveLength(5)
-		expect(id).toMatch(/^[0-9A-Za-z]+$/)
+	it('generateSettingId always returns 5 char string', () => {
+		fc.assert(
+			fc.property(fc.nat(), () => {
+				const id = generateSettingId()
+				expect(id).toHaveLength(5)
+				expect(id).toMatch(/^[0-9A-Za-z]+$/)
+			}),
+		)
 	})
 })

@@ -1,28 +1,22 @@
 #!/bin/bash
 set -e
 
-MAX_ITERATIONS=${1:-10}
-SCRIPT_DIR="$(cd "$(dirname \
-  "${BASH_SOURCE[0]}")" && pwd)"
+TMPFILE=$(mktemp)
+cleanup() { rm -f "$TMPFILE"; }
+trap 'cleanup; echo " Cancelled"; exit 130' INT
+trap cleanup EXIT
 
-echo "🚀 Starting Ralph"
+MAX=${1:-10}
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-for i in $(seq 1 $MAX_ITERATIONS); do
-  echo "═══ Iteration $i ═══"
-  
-  OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
-    | stdbuf -oL claude --dangerously-skip-permissions 2>&1 \
-    | tee /dev/tty) || true
-  
-  if echo "$OUTPUT" | \
-    grep -q "<promise>COMPLETE</promise>"
-  then
-    echo "✅ Done!"
-    exit 0
-  fi
-  
-  sleep 2
+for ((i=1; i<=MAX; i++)); do
+  echo "═══ Iteration $i/$MAX ═══"
+  script -q -c "cat '$DIR/prompt.md' | claude --dangerously-skip-permissions" "$TMPFILE"
+  grep -q '<promise>COMPLETE</promise>' "$TMPFILE" && echo "✅ Done!" && exit 0
 done
 
-echo "⚠️ Max iterations reached"
+echo "⚠️ Max iterations"
 exit 1
+
+
+ #trap 'exit 0' INT; while :; do cat prompt.md | claude --dangerously-skip-permissions; done

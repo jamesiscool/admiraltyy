@@ -2,9 +2,8 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
 	test: {
-		include: ['src/**/*.test.ts'],
-		exclude: ['**/node_modules/**', '**/reference/**', 'reference/**', 'reference/**/*'],
-		environment: 'jsdom',
+		include: ['src/**/*.test.ts', 'test/**/*.test.ts'],
+		exclude: ['node_modules/**', 'reference/**'],
 		root: '.',
 	},
 	resolve: {

@@ -1,6 +1,10 @@
 {
 	"name": "base-setup",
 	"image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+	"runArgs": [
+		"--memory=16g",
+		"--memory-swap=16g"
+	],
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {
 			"installOhMyZsh": true,
