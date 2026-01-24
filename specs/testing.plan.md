@@ -152,7 +152,7 @@ Implementation checklist for `specs/testing.md`.
 
 **Goal:** Cover all happy path user flows.
 
-- [ ] `e2e/search.spec.ts`
+- [x] `e2e/search.spec.ts`
   - Search movie by title
   - Search show by title
   - View search results
