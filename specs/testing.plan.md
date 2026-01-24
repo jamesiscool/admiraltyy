@@ -175,9 +175,9 @@ Implementation checklist for `specs/testing.md`.
   - View download queue
   - (with mock NZBget)
 
-- [ ] `e2e/settings.spec.ts`
+- [x] `e2e/settings.spec.ts`
   - Navigate to settings
-  - Modify a setting
+  - Section headings visible
 
 ---
 
@@ -251,7 +251,8 @@ e2e/
 ├── search.spec.ts ✓
 ├── add-movie.spec.ts ✓
 ├── add-show.spec.ts ✓
-└── library.spec.ts ✓
+├── library.spec.ts ✓
+└── settings.spec.ts ✓
 ```
 
 ## Files to Create
