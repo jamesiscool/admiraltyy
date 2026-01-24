@@ -26,6 +26,10 @@ function AddPage() {
 	const debouncedQuery = useDebounce(query, 300)
 	const inputRef = useRef<HTMLInputElement>(null)
 
+	useEffect(() => {
+		inputRef.current?.focus()
+	}, [])
+
 	const {
 		data: results,
 		isLoading,

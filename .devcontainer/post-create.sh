@@ -7,3 +7,4 @@ bun install
 bun add -g @antfu/ni
 echo 'export PATH="/home/node/.bun/bin:$PATH"' >> ~/.zshrc
 echo 'source ~/.config/zsh/aliases.zsh' >> ~/.zshrc
+bunx playwright install
