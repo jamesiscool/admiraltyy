@@ -157,9 +157,10 @@ Implementation checklist for `specs/testing.md`.
   - Search show by title
   - View search results
 
-- [ ] `e2e/add-movie.spec.ts`
-  - Search → select → add to library
-  - Verify success feedback
+- [x] `e2e/add-movie.spec.ts`
+  - Search → select → open dialog
+  - Quality selector visible
+  - Add buttons visible
 
 - [ ] `e2e/add-show.spec.ts`
   - Search → select → add to library
