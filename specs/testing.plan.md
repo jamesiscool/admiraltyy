@@ -162,8 +162,9 @@ Implementation checklist for `specs/testing.md`.
   - Quality selector visible
   - Add buttons visible
 
-- [ ] `e2e/add-show.spec.ts`
-  - Search → select → add to library
+- [x] `e2e/add-show.spec.ts`
+  - Search → open dialog
+  - Quality selector and buttons visible
 
 - [ ] `e2e/library.spec.ts`
   - Browse movie library
@@ -247,7 +248,9 @@ src/
 ├── services/fileScan.test.ts ✓
 ├── services/tmdb.test.ts ✓
 e2e/
-└── search.spec.ts ✓
+├── search.spec.ts ✓
+├── add-movie.spec.ts ✓
+└── add-show.spec.ts ✓
 ```
 
 ## Files to Create
