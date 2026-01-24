@@ -61,7 +61,7 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 4: Database Testing ✓
+## Phase 4: Database Testing ✅ Complete
 
 **Goal:** In-memory SQLite per test.
 
@@ -99,7 +99,7 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 6: Property-Based Tests ✓
+## Phase 6: Property-Based Tests ✅ Complete
 
 **Goal:** Add fast-check property tests to critical areas.
 
