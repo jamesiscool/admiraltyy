@@ -28,86 +28,89 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 2: Test Helpers
+## Phase 2: Test Helpers ✓
 
 **Goal:** Create shared test utilities.
 
-- [ ] Create `test/helpers/db.ts`
+- [x] Create `test/helpers/db.ts`
   - `setupTestDb()` — in-memory SQLite with migrations
   - `seedTestData(db)` — optional seed helper
   - Export typed `TestDb` type
 
-- [ ] Create `test/helpers/mocks.ts`
+- [x] Create `test/helpers/mocks.ts`
   - `createNzbgetClient(mode)` — mock/stub/real based on env
   - `MockNzbgetClient` class with in-memory state
 
-- [ ] Create `test/helpers/index.ts`
+- [x] Create `test/helpers/index.ts`
   - Re-export all helpers
 
 ---
 
-## Phase 3: HTTP Caching (fast-forward)
+## Phase 3: HTTP Caching (fast-forward) ✓
 
 **Goal:** Configure fast-forward for TMDB/indexer API caching.
 
-- [ ] Create `src/lib/fetch-cache.ts`
-  - Wrap `globalThis.fetch` with fast-forward
-  - Mode based on `NODE_ENV`: dev=ON, test=READ_ONLY, prod=OFF
-  - Cache dir: `test/fixtures/http/`
+- [x] TMDB service already uses fast-forward
+  - `src/services/tmdb.ts` wraps fetch with fast-forward
+  - Mode based on `BUN_ENV`: dev=ON, test=READ_ONLY, prod=OFF
+  - Cache dir: `test/fixtures/http/tmdb/`
 
-- [ ] Update existing TMDB service to use wrapped fetch
-  - Modify `src/services/tmdb.ts` imports
-
-- [ ] Populate initial cache
-  - Run in dev mode to cache common TMDB responses
-  - Commit `test/fixtures/http/` to git
+- [x] Initial cache populated
+  - `test/fixtures/http/tmdb/` contains cached TMDB responses
+  - Committed to git
 
 ---
 
-## Phase 4: Database Testing
+## Phase 4: Database Testing ✓
 
 **Goal:** In-memory SQLite per test.
 
-- [ ] Update `test/helpers/db.ts`
-  - Use `better-sqlite3` with `:memory:`
-  - Run Drizzle migrations on setup
-  - Return typed db instance
+- [x] `test/helpers/db.ts` implemented
+  - Uses `better-sqlite3` with `:memory:` (Node/vitest)
+  - Uses `bun:sqlite` with `:memory:` (Bun runtime)
+  - Creates tables via DDL (no migrations needed)
+  - Returns typed db instance
+
+- [x] Create first DB integration test
+  - `test/helpers/db.test.ts` — tests insert/retrieve, isolation, seeding
+  - Property tests for movie/series insert roundtrip
 
 - [ ] Create `test/fixtures/seed.sql` (optional)
   - Sample movies, shows, queue items for tests
 
-- [ ] Create first DB integration test
-  - `src/db/queries.test.ts` — test a query function
-
 ---
 
-## Phase 5: Filesystem Testing (memfs)
+## Phase 5: Filesystem Testing (memfs) ✓
 
 **Goal:** Virtual filesystem for file operations.
 
-- [ ] Install memfs
-  ```bash
-  bun add -d memfs
-  ```
+- [x] Install memfs
+  - Already in devDependencies
 
-- [ ] Create `test/fixtures/filesystem.ts`
+- [x] Create `test/fixtures/filesystem.ts`
   - `createTestFilesystem()` — returns vol with sample structure
-  - Sample media library structure
+  - `createEmptyFilesystem()` — empty vol
+  - `createFilesystemFromJSON()` — custom structure
+  - Sample media library structure (movies, TV, downloads)
 
-- [ ] Update file operations to accept fs interface
-  - Or mock at module level in tests
+- [x] Mock at module level in tests
+  - `src/services/fileScan.test.ts` mocks `node:fs` with memfs
+  - Tests listSubfolders, listVideoFiles, listVideoFilesRecursive
 
 ---
 
-## Phase 6: Property-Based Tests (started)
+## Phase 6: Property-Based Tests ✓
 
 **Goal:** Add fast-check property tests to critical areas.
 
 - [x] Utils property tests
   - `src/lib/utils.test.ts` — cn(), formatSize(), generateSettingId() property tests
 
-- [ ] DB schema invariants
-  - `src/db/queries.test.ts` — insert/retrieve roundtrip
+- [x] DB schema invariants
+  - `test/helpers/db.test.ts` — insert/retrieve roundtrip for movies/series
+
+- [x] FileScan property tests
+  - `src/services/fileScan.test.ts` — simplifyTitle, parseEpisode, parseQuality
 
 - [ ] API response parsing
   - `src/services/tmdb.test.ts` — arbitrary response parsing
@@ -180,21 +183,22 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
-## Phase 9: NZBget Mock/Stub
+## Phase 9: NZBget Mock/Stub (partial)
 
 **Goal:** Three-tier NZBget testing support.
 
-- [ ] Create `test/helpers/nzbget-mock.ts`
+- [x] Create `test/helpers/mocks.ts`
   - `MockNzbgetClient` — in-memory, no network
   - Tracks calls, returns canned responses
+  - `createNzbgetClient()` factory function
 
 - [ ] Create `test/helpers/nzbget-stub.ts`
   - `StubNzbgetClient` — fake JSON-RPC server
   - Uses actual HTTP but controlled responses
 
-- [ ] Environment variable handling
+- [x] Environment variable handling
   - `NZBGET_MODE`: mock (default) | stub | real
-  - Factory function returns appropriate client
+  - Factory function returns appropriate client (mock only for now)
 
 ---
 
@@ -225,23 +229,32 @@ Implementation checklist for `specs/testing.md`.
 
 ---
 
+## Files Created
+
+```
+vitest.config.ts ✓
+test/
+├── fixtures/
+│   ├── http/                 # fast-forward cache ✓
+│   ├── filesystem.ts ✓
+│   └── filesystem.test.ts ✓
+├── helpers/
+│   ├── index.ts ✓
+│   ├── db.ts ✓
+│   ├── db.test.ts ✓
+│   ├── mocks.ts ✓
+│   └── mocks.test.ts ✓
+src/
+├── lib/utils.test.ts ✓
+├── services/fileScan.test.ts ✓
+```
+
 ## Files to Create
 
 ```
-vitest.config.ts
 playwright.config.ts
-src/lib/fetch-cache.ts
-test/
-├── fixtures/
-│   ├── http/                 # fast-forward cache (already exists)
-│   ├── seed.sql
-│   └── filesystem.ts
-├── helpers/
-│   ├── index.ts
-│   ├── db.ts
-│   ├── mocks.ts
-│   ├── nzbget-mock.ts
-│   └── nzbget-stub.ts
+test/fixtures/seed.sql
+test/helpers/nzbget-stub.ts
 e2e/
 ├── search.spec.ts
 ├── add-movie.spec.ts
@@ -253,13 +266,6 @@ e2e/
 .github/workflows/test.yml
 ```
 
-## Files to Modify
-
-| File | Change |
-|------|--------|
-| `package.json` | Add test scripts, devDependencies |
-| `src/services/tmdb.ts` | Use cached fetch |
-
 ---
 
 ## Verification Checklist
@@ -268,26 +274,25 @@ After implementation:
 
 - [x] `bun test` runs and finds colocated tests
 - [ ] `bun test:e2e` runs Playwright tests
-- [ ] fast-forward cache works (READ_ONLY mode fails on cache miss)
-- [ ] In-memory DB tests are isolated
-- [ ] memfs tests don't touch real filesystem
+- [x] fast-forward cache works (TMDB uses READ_ONLY in test mode)
+- [x] In-memory DB tests are isolated
+- [x] memfs tests don't touch real filesystem
 - [x] Property tests generate multiple cases
-- [ ] NZBget mock mode works without network
+- [x] NZBget mock mode works without network
 - [ ] CI workflow runs (non-blocking)
 
 ---
 
-## Dependencies to Add
+## Dependencies
 
 ```bash
-# Property testing
-bun add -d @fast-check/vitest
-
-# Filesystem mocking  
-bun add -d memfs
-
-# E2E
-bun add -d playwright @playwright/test
+# Already installed
+vitest ✓
+@fast-check/vitest ✓
+memfs ✓
+@with-logic/fast-forward ✓
+@testing-library/react ✓
+jsdom ✓
+playwright ✓
+@playwright/test ✓
 ```
-
-Already installed: `vitest`, `@with-logic/fast-forward`, `@testing-library/react`, `jsdom`
