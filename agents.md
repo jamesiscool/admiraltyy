@@ -15,12 +15,41 @@
 - After every UI change test that it works in the browser
 
 ## Testing
-- always call `bun run test` insted of just `bun test` this will call the vitest task instead of firing off the Bunn test runner. 
+
+### Commands
+- Always `bun run test` not `bun test` (vitest, not bun's runner)
+- E2E: `bun run test:e2e`
+
+### When to write tests
+- Almost every change. Exceptions: system/config changes, things not suited to testing
+- Be pragmatic—use discretion on what's testable
+
+### Test type selection
+- **Default to property-based tests** (fast-check) for pure functions, parsers, validators, DB queries
+- Integration tests for API routes with DB
+- Add new E2E flows when adding new features
+
+### Where tests live
+- Colocated: `foo.ts` → `foo.test.ts` in same directory
+- E2E: `e2e/*.spec.ts`
+
+### Property-based patterns
+```typescript
+// Prefer this
+test.prop([fc.string()])('sanitizePath blocks traversal', (input) => {
+  expect(sanitizePath(input)).not.toContain('..');
+});
+
+// Over example-based
+test('sanitizePath blocks ../', () => {
+  expect(sanitizePath('../foo')).not.toContain('..');
+});
+```
 
 ### Playwright MCP Usage
 - Use `browser_navigate` to open pages (e.g. `http://localhost:2828/tv`)
-- Don't use `browser_wait_for` - the page renders during your thinking time
-- Don't close the browser at the end
+- Don't use `browser_wait_for` - page renders during thinking time
+- Don't close browser at end
 
 
 ## Rules (must follow)
