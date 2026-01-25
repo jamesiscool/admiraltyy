@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { MOVIE_GENRES, mapMovieResult, mapTvResult, TV_GENRES } from './tmdb'
+import { MOVIE_GENRES, mapMovieResult, mapTvResult, TV_GENRES } from './tmdb-mappers'
 
 // TMDB paths always start with / followed by alphanumeric + extension
 const arbTmdbPath = fc.stringMatching(/^[a-zA-Z0-9]{5,20}$/).map((s) => `/${s}.jpg`)

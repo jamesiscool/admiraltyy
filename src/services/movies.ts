@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq, sql } from 'drizzle-orm'
+import type { BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite'
 import { z } from 'zod'
 import { db, schema } from '@/db'
 import { type Resolution, resolutions } from '@/db/schema'
@@ -8,7 +9,7 @@ import { downloadNzb, searchMovieReleases } from '@/services/indexers'
 import { logInfo } from '@/services/logs'
 import { appendNzb } from '@/services/nzbget/nzbgetApi'
 import { notifyDownloadActivity } from '@/services/nzbget/nzbgetPoller'
-import { fetchMovieDetails } from '@/services/tmdb'
+import { fetchMovieDetails, type MovieDetails } from '@/services/tmdb'
 
 // Preview type for list/card display (minimal fields)
 export interface MoviePreview {
@@ -108,45 +109,55 @@ export const getMovie = createServerFn({ method: 'GET' })
 		return { ...movie, sizeBytes, files }
 	})
 
+// Pure function for movie insertion - testable with any db
+export async function insertMovieFromTmdb(database: BunSQLiteDatabase<typeof schema>, details: MovieDetails, resolution?: Resolution) {
+	const now = new Date().toISOString()
+
+	const result = await database
+		.insert(schema.movies)
+		.values({
+			tmdbId: details.tmdbId,
+			imdbId: details.imdbId,
+			title: details.title,
+			year: details.year,
+			posterUrl: details.posterUrl,
+			backdropUrl: details.backdropUrl,
+			synopsis: details.synopsis,
+			runtimeMins: details.runtimeMins,
+			genres: JSON.stringify(details.genres),
+			cinemaReleaseDate: details.cinemaReleaseDate,
+			digitalReleaseDate: details.digitalReleaseDate,
+			contentRating: details.contentRating,
+			alternateTitles: JSON.stringify(details.alternateTitles),
+			dateAdded: now,
+			monitored: true,
+			resolution: resolution ?? '1080p',
+			lastInfoSync: now,
+		})
+		.returning()
+
+	return result[0]
+}
+
+// Check if movie exists by TMDB ID
+export async function movieExistsByTmdbId(database: BunSQLiteDatabase<typeof schema>, tmdbId: number): Promise<boolean> {
+	const existing = await database.select().from(schema.movies).where(eq(schema.movies.tmdbId, tmdbId))
+	return existing.length > 0
+}
+
 // Create a new movie
 export const createMovie = createServerFn({ method: 'POST' })
 	.inputValidator(z.object({ tmdbId: z.number(), resolution: z.enum(resolutions).optional() }))
 	.handler(async ({ data }) => {
 		// Check if movie already exists
-		const existing = await db.select().from(schema.movies).where(eq(schema.movies.tmdbId, data.tmdbId))
-		if (existing.length > 0) {
+		if (await movieExistsByTmdbId(db, data.tmdbId)) {
 			throw new Error('Movie already exists')
 		}
 
 		// Fetch movie details from TMDB
 		const details = await fetchMovieDetails(data.tmdbId)
-		const now = new Date().toISOString()
 
-		// Insert movie into database
-		const result = await db
-			.insert(schema.movies)
-			.values({
-				tmdbId: details.tmdbId,
-				imdbId: details.imdbId,
-				title: details.title,
-				year: details.year,
-				posterUrl: details.posterUrl,
-				backdropUrl: details.backdropUrl,
-				synopsis: details.synopsis,
-				runtimeMins: details.runtimeMins,
-				genres: JSON.stringify(details.genres),
-				cinemaReleaseDate: details.cinemaReleaseDate,
-				digitalReleaseDate: details.digitalReleaseDate,
-				contentRating: details.contentRating,
-				alternateTitles: JSON.stringify(details.alternateTitles),
-				dateAdded: now,
-				monitored: true,
-				resolution: data.resolution ?? '1080p',
-				lastInfoSync: now,
-			})
-			.returning()
-
-		return result[0]
+		return insertMovieFromTmdb(db, details, data.resolution)
 	})
 
 // Update a movie
