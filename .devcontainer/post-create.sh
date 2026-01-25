@@ -5,6 +5,7 @@ git config --global --add safe.directory /workspace
 #sudo chown -R node:node /workspace/node_modules
 bun install
 bun add -g @antfu/ni agent-browser
+chmod +x /home/node/.bun/install/global/node_modules/agent-browser/bin/agent-browser-linux-arm64 2>/dev/null || true
 echo 'export PATH="/home/node/.bun/bin:$PATH"' >> ~/.zshrc
 echo 'alias cc="claude --dangerously-skip-permissions"' >> ~/.zshrc
 echo 'source ~/.config/zsh/aliases.zsh' >> ~/.zshrc

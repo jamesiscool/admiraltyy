@@ -22,6 +22,12 @@
 - Always `bun run test` not `bun test` (vitest, not bun's runner)
 - E2E: `bun run test:e2e`
 
+### When to run tests
+- During dev: run relevant Vitest + E2E tests as needed
+- After block of changes: run all Vitest tests (`bun run test`)
+- Wrapping up major work: run Vitest + E2E (`bun run test && bun run test:e2e`)
+- Feature complete: full test suite before returning
+
 ### When to write tests
 - Almost every change. Exceptions: system/config changes, things not suited to testing
 - Be pragmatic—use discretion on what's testable
