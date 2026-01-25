@@ -10,11 +10,11 @@
 - [x] Test cascade delete for movies (movie -> files -> releases -> downloads)
 
 ### Series Add Workflow
-- [ ] Test `createSeries()` with TMDB fetch + seasons/episodes insert
-- [ ] Test monitored seasons selection during series creation
+- [x] Test `createSeries()` with TMDB fetch + seasons/episodes insert
+- [x] Test monitored seasons selection during series creation
 - [ ] Test `grabEpisodeRelease()`: NZB download -> NZBGet queue -> DB record
 - [ ] Test episode file import with season determination
-- [ ] Test cascade delete for series (series -> seasons -> episodes -> files -> releases -> downloads)
+- [x] Test cascade delete for series (series -> seasons -> episodes -> files -> releases -> downloads)
 
 ### File Scanning Workflow
 - [ ] Test `scanMoviesFiles()` end-to-end with DB operations
@@ -77,10 +77,10 @@
 ## Lower Priority - Edge Cases
 
 ### Series/Episodes
-- [ ] Test series with no episodes
+- [x] Test series with no episodes
 - [ ] Test season/episode monitoring state propagation
-- [ ] Test next airing date calculation
-- [ ] Test `useYearInFolder` disambiguation logic
+- [x] Test next airing date calculation
+- [x] Test `useYearInFolder` disambiguation logic
 
 ### Search
 - [ ] Test empty query handling
