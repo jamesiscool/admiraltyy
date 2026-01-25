@@ -6,6 +6,10 @@ import { generateNzbgetPassword, getSettings, saveSettings, updateSettings } fro
 
 let nzbgetProcess: Subprocess | null = null
 
+// Cleanup NZBGet on process exit
+process.on('SIGTERM', () => stopNzbget())
+process.on('SIGINT', () => stopNzbget())
+
 export function isNzbgetRunning(): boolean {
 	return nzbgetProcess !== null && !nzbgetProcess.killed
 }
@@ -24,6 +28,22 @@ export async function isNzbgetPortInUse(port: number) {
 	const text = await new Response(stdout).text()
 	const pids = text.trim().split('\n').filter(Boolean)
 	return pids.length > 0
+}
+
+// Test if we can connect to running NZBGet with current credentials
+async function canConnectToNzbget(): Promise<boolean> {
+	const { username, password, host, port } = getSettings().nzbgetSettings
+	const auth = Buffer.from(`${username}:${password}`).toString('base64')
+	try {
+		const res = await fetch(`http://${host}:${port}/jsonrpc`, {
+			method: 'POST',
+			headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+			body: JSON.stringify({ method: 'version', params: [] }),
+		})
+		return res.ok
+	} catch {
+		return false
+	}
 }
 
 async function killProcessOnPort(port: number): Promise<boolean> {
@@ -94,12 +114,18 @@ async function clearQueueOnStartup(): Promise<void> {
 export async function startNzbget() {
 	const settings = getSettings()
 
-	// Skip if NZBGet is already running (e.g. from previous run or hot reload)
+	// Check if NZBGet is already running (e.g. from previous run or hot reload)
 	if (await isNzbgetPortInUse(settings.nzbgetSettings.port)) {
-		initNzbgetApi()
-		startNzbgetPoller()
-		console.log('✓ NZBGet already running on port, skipping start')
-		return
+		// Verify we can connect with current credentials
+		if (await canConnectToNzbget()) {
+			initNzbgetApi()
+			startNzbgetPoller()
+			console.log('✓ Adopted existing NZBGet on port', settings.nzbgetSettings.port)
+			return
+		}
+		// Can't connect - credentials mismatch, restart NZBGet
+		console.log('⚠ NZBGet on port but auth failed, restarting with current credentials...')
+		await killProcessOnPort(settings.nzbgetSettings.port)
 	}
 
 	// Ensure password is generated if empty
