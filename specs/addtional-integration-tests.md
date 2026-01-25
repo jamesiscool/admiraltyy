@@ -52,12 +52,12 @@
 - [ ] Test `checkNeedsYearDisambiguation()` DB query logic
 - [ ] Test API error handling/retries
 
-### Indexer Service
-- [ ] Test NZB download with error handling
-- [ ] Test Newznab API response parsing
-- [ ] Test search result normalization
-- [ ] Test attribute extraction from Newznab response
-- [ ] Test network error handling
+### Indexer Service ✅ Complete
+- [x] Test NZB download with error handling
+- [x] Test Newznab API response parsing
+- [x] Test search result normalization
+- [x] Test attribute extraction from Newznab response
+- [x] Test network error handling
 
 ### Settings Service
 - [ ] Test settings initialization from file
@@ -103,6 +103,7 @@
 
 - Database helper exists at `test/helpers/db.ts` - use for integration tests
 - NZBGet stub exists at `test/helpers/nzbget-stub.ts` - use for NZBGet integration
+- Indexer stub exists at `test/helpers/indexer-stub.ts` - use for Newznab API integration
 - Mock NZBGet client at `test/helpers/mocks.ts`
 - Filesystem fixtures at `test/fixtures/filesystem.ts`
 - Prefer property-based tests (fast-check) where applicable
