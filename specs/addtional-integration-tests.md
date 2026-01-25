@@ -40,7 +40,7 @@
 
 ### NZBGet Integration
 - [x] Test NZBGet API initialization flow
-- [ ] Test polling logic (`nzbgetPoller.ts`)
+- [x] Test polling logic (`nzbgetPoller.ts`)
 - [ ] Test process management lifecycle (`nzbgetProcess.ts`)
 - [ ] Test orphan cleanup on process exit
 - [ ] Test NZBGet API failure handling
