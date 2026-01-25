@@ -85,10 +85,10 @@
 - [x] Test next airing date calculation
 - [x] Test `useYearInFolder` disambiguation logic
 
-### Search
-- [ ] Test empty query handling
-- [ ] Test pagination
-- [ ] Test movie vs TV result aggregation
+### Search ✅ Complete
+- [x] Test empty query handling
+- [x] Test pagination
+- [x] Test movie vs TV result aggregation
 
 ### Movies
 - [ ] Test alternative title handling
