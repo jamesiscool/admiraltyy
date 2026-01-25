@@ -11,7 +11,9 @@
 - The vite dev server will already be run and the site is at !!!! `http://localhost:2828`
 - Global Tailwind design tokens live at `src/client/index.css`.
 - `--color-*: initial;` resets all default Tailwind colors. Use project tokens (blue-100, navy-500, etc.) not default Tailwind colors (sky, slate, amber etc.)
-- 
+- Prefer the use of Shadcn components.
+- Shadcn reference `reference/shadcn-llms.txt`
+- Add new components with `bunx --bun shadcn@latest add <component-name>` command.
 - After every UI change test that it works in the browser
 
 ## Testing
@@ -25,7 +27,7 @@
 - Be pragmatic—use discretion on what's testable
 
 ### Test type selection
-- **Default to property-based tests** (fast-check) for pure functions, parsers, validators, DB queries
+- Prefer property-based tests (fast-check) for unit tests 
 - Integration tests for API routes with DB
 - Add new E2E flows when adding new features
 
@@ -46,15 +48,6 @@ test('sanitizePath blocks ../', () => {
 });
 ```
 
-### Playwright MCP Usage
-- Use `browser_navigate` to open pages (e.g. `http://localhost:2828/tv`)
-- Don't use `browser_wait_for` - page renders during thinking time
-- Don't close browser at end
-
-
-## Rules (must follow)
-- !!!!! Use the shadcn/ui components. Request to add components that you might need. Use the product plan as a guide but implemented using ShadCN components
-
 ## External APIs
 
 -- The OpenAPI spec for TMDB can be found here `reference/tmdb.openapi.json`. Use it as a reference when developing code to interact with it 
@@ -63,7 +56,17 @@ test('sanitizePath blocks ../', () => {
 
 - At the end of each plan, give me a list of unresolved questions to answer, if any. Make the questions extremely concise. Sacrifice grammar for the sake of concision.
 
-### Naming style
+## Browser Automation
+
+Use `agent-browser` for web automation. Run `agent-browser --help` for all commands.
+
+Core workflow:
+1. `agent-browser open <url>` - Navigate to page
+2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
+3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
+4. Re-snapshot after page changes
+
+## Naming style
 
 - Prefer clear, descriptive names over abbreviations.  
 - Short names only for tiny local scopes (like loop counters).  
