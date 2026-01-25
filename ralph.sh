@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Usage: ./ralph.sh [max_iterations]
-MAX_ITERATIONS=${1:-10}
+MAX_ITERATIONS=${1:-3}
 COMPLETE_FLAG="ralph_complete"
 
 for i in $(seq 1 "$MAX_ITERATIONS"); do
@@ -12,7 +12,7 @@ for i in $(seq 1 "$MAX_ITERATIONS"); do
     exit 0
   fi
 
-  cat prompt.md | claude --dangerously-skip-permissions
+  claude --dangerously-skip-permissions < <(cat prompt.md; echo -e "\n\nWhen task complete: kill \$PPID")
 
   # If the agent made changes, commit them (agent may already commit; this is a safety step)
   if [[ -n "$(git status --porcelain)" ]]; then

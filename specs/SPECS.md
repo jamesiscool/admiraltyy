@@ -23,3 +23,10 @@ Technical documentation for Admiraltyy, a unified Usenet media automation platfo
 | Spec | Code | Purpose |
 |------|------|---------|
 | [tmdb-integration.md](./tmdb-integration.md) | [services/tmdb.ts](../src/services/tmdb.ts) | TMDB/TVDB API usage |
+
+## Testing
+
+| Spec | Code | Purpose |
+|------|------|---------|
+| [testing-strategy.md](./testing-strategy.md) | [test/](../test/) | Test layers, patterns, tooling |
+| [filesystem-size-stub.md](./filesystem-size-stub.md) | [test/fixtures/filesystem.ts](../test/fixtures/filesystem.ts) | Stub file sizes in memfs |
