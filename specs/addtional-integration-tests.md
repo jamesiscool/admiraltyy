@@ -1,5 +1,7 @@
 # Functional Integration Test Gaps
 
+- If, while implementing the tests, it seems too convoluted and you don't think it's worth it for that case, mark it as complete but put a note explaining why. 
+
 ## High Priority - Core Workflows
 
 ### Movie Add Workflow ✅ Complete
@@ -66,7 +68,7 @@
 - [x] Test settings persistence to disk
 - [x] Test corrupted settings file handling
 
-### File Import
+### File Import ✅ Complete
 - [x] Test error handling (missing finalDir, no video files)
 - [x] Test subtitle file handling
 - [x] Test quality parsing during import
