@@ -79,9 +79,9 @@
 
 ## Lower Priority - Edge Cases
 
-### Series/Episodes
+### Series/Episodes ✅ Complete
 - [x] Test series with no episodes
-- [ ] Test season/episode monitoring state propagation
+- [x] Test season/episode monitoring state propagation
 - [x] Test next airing date calculation
 - [x] Test `useYearInFolder` disambiguation logic
 

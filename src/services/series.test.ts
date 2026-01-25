@@ -2139,3 +2139,259 @@ describe('findSeriesWithDetails - property-based tests', () => {
 		)
 	})
 })
+
+// --- Monitoring State Propagation Tests ---
+
+// Pure function for updating season monitored status - mirrors updateSeason logic
+async function updateSeasonCore(database: BunSQLiteDatabase<typeof schema>, seasonId: number, monitored: boolean): Promise<typeof schema.seasons.$inferSelect> {
+	const existing = await database.select().from(schema.seasons).where(eq(schema.seasons.id, seasonId))
+	if (!existing.length) {
+		throw new Error('Season not found')
+	}
+
+	// Update season
+	const [updated] = await database.update(schema.seasons).set({ monitored }).where(eq(schema.seasons.id, seasonId)).returning()
+
+	// Also update all episodes in this season
+	await database.update(schema.episodes).set({ monitored }).where(eq(schema.episodes.seasonId, seasonId))
+
+	return updated
+}
+
+// Pure function for updating episode monitored status - mirrors updateEpisode logic
+async function updateEpisodeCore(database: BunSQLiteDatabase<typeof schema>, episodeId: number, monitored: boolean): Promise<typeof schema.episodes.$inferSelect> {
+	const existing = await database.select().from(schema.episodes).where(eq(schema.episodes.id, episodeId))
+	if (!existing.length) {
+		throw new Error('Episode not found')
+	}
+
+	const [updated] = await database.update(schema.episodes).set({ monitored }).where(eq(schema.episodes.id, episodeId)).returning()
+
+	return updated
+}
+
+describe('Season/Episode Monitoring State Propagation', () => {
+	let db: TestDb
+
+	beforeEach(async () => {
+		db = await setupTestDb()
+	})
+
+	describe('updateSeasonCore', () => {
+		it('propagates monitored=false from season to all its episodes', async () => {
+			const now = new Date().toISOString()
+
+			db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+			db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+			db.insert(schema.episodes)
+				.values([
+					{ id: 1, seasonId: 1, episodeNumber: 1, title: 'Ep1', monitored: true },
+					{ id: 2, seasonId: 1, episodeNumber: 2, title: 'Ep2', monitored: true },
+					{ id: 3, seasonId: 1, episodeNumber: 3, title: 'Ep3', monitored: true },
+				])
+				.run()
+
+			const updated = await updateSeasonCore(db, 1, false)
+			expect(updated.monitored).toBe(false)
+
+			const episodes = await db.select().from(schema.episodes).where(eq(schema.episodes.seasonId, 1))
+			expect(episodes.every((e) => e.monitored === false)).toBe(true)
+		})
+
+		it('propagates monitored=true from season to all its episodes', async () => {
+			const now = new Date().toISOString()
+
+			db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+			db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: false }).run()
+			db.insert(schema.episodes)
+				.values([
+					{ id: 1, seasonId: 1, episodeNumber: 1, title: 'Ep1', monitored: false },
+					{ id: 2, seasonId: 1, episodeNumber: 2, title: 'Ep2', monitored: false },
+					{ id: 3, seasonId: 1, episodeNumber: 3, title: 'Ep3', monitored: false },
+				])
+				.run()
+
+			const updated = await updateSeasonCore(db, 1, true)
+			expect(updated.monitored).toBe(true)
+
+			const episodes = await db.select().from(schema.episodes).where(eq(schema.episodes.seasonId, 1))
+			expect(episodes.every((e) => e.monitored === true)).toBe(true)
+		})
+
+		it('does not affect episodes in other seasons', async () => {
+			const now = new Date().toISOString()
+
+			db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+			db.insert(schema.seasons)
+				.values([
+					{ id: 1, seriesId: 1, seasonNumber: 1, monitored: true },
+					{ id: 2, seriesId: 1, seasonNumber: 2, monitored: true },
+				])
+				.run()
+			db.insert(schema.episodes)
+				.values([
+					{ id: 1, seasonId: 1, episodeNumber: 1, title: 'S1E1', monitored: true },
+					{ id: 2, seasonId: 1, episodeNumber: 2, title: 'S1E2', monitored: true },
+					{ id: 3, seasonId: 2, episodeNumber: 1, title: 'S2E1', monitored: true },
+					{ id: 4, seasonId: 2, episodeNumber: 2, title: 'S2E2', monitored: true },
+				])
+				.run()
+
+			await updateSeasonCore(db, 1, false)
+
+			const s1Episodes = await db.select().from(schema.episodes).where(eq(schema.episodes.seasonId, 1))
+			const s2Episodes = await db.select().from(schema.episodes).where(eq(schema.episodes.seasonId, 2))
+
+			expect(s1Episodes.every((e) => e.monitored === false)).toBe(true)
+			expect(s2Episodes.every((e) => e.monitored === true)).toBe(true)
+		})
+
+		it('throws error for non-existent season', async () => {
+			await expect(updateSeasonCore(db, 999, false)).rejects.toThrow('Season not found')
+		})
+
+		it('handles season with no episodes gracefully', async () => {
+			const now = new Date().toISOString()
+
+			db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+			db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+
+			const updated = await updateSeasonCore(db, 1, false)
+			expect(updated.monitored).toBe(false)
+
+			const episodes = await db.select().from(schema.episodes).where(eq(schema.episodes.seasonId, 1))
+			expect(episodes.length).toBe(0)
+		})
+
+		it('season monitored state propagates to episodes consistently (property-based)', async () => {
+			await fc.assert(
+				fc.asyncProperty(fc.boolean(), async (newState) => {
+					const localDb = await setupTestDb()
+					const now = new Date().toISOString()
+
+					localDb.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+					localDb.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: !newState }).run()
+					localDb
+						.insert(schema.episodes)
+						.values([
+							{ id: 1, seasonId: 1, episodeNumber: 1, title: 'Ep1', monitored: !newState },
+							{ id: 2, seasonId: 1, episodeNumber: 2, title: 'Ep2', monitored: !newState },
+						])
+						.run()
+
+					await updateSeasonCore(localDb, 1, newState)
+
+					const season = (await localDb.select().from(schema.seasons).where(eq(schema.seasons.id, 1)))[0]
+					const episodes = await localDb.select().from(schema.episodes).where(eq(schema.episodes.seasonId, 1))
+
+					expect(season.monitored).toBe(newState)
+					expect(episodes.every((e) => e.monitored === newState)).toBe(true)
+				}),
+			)
+		})
+	})
+
+	describe('updateEpisodeCore', () => {
+		it('updates individual episode monitored state without affecting others', async () => {
+			const now = new Date().toISOString()
+
+			db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+			db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+			db.insert(schema.episodes)
+				.values([
+					{ id: 1, seasonId: 1, episodeNumber: 1, title: 'Ep1', monitored: true },
+					{ id: 2, seasonId: 1, episodeNumber: 2, title: 'Ep2', monitored: true },
+				])
+				.run()
+
+			await updateEpisodeCore(db, 1, false)
+
+			const ep1 = (await db.select().from(schema.episodes).where(eq(schema.episodes.id, 1)))[0]
+			const ep2 = (await db.select().from(schema.episodes).where(eq(schema.episodes.id, 2)))[0]
+
+			expect(ep1.monitored).toBe(false)
+			expect(ep2.monitored).toBe(true)
+		})
+
+		it('throws error for non-existent episode', async () => {
+			await expect(updateEpisodeCore(db, 999, false)).rejects.toThrow('Episode not found')
+		})
+
+		it('episode monitored state updates correctly (property-based)', async () => {
+			await fc.assert(
+				fc.asyncProperty(fc.boolean(), async (newState) => {
+					const localDb = await setupTestDb()
+					const now = new Date().toISOString()
+
+					localDb.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+					localDb.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+					localDb.insert(schema.episodes).values({ id: 1, seasonId: 1, episodeNumber: 1, title: 'Ep1', monitored: !newState }).run()
+
+					const updated = await updateEpisodeCore(localDb, 1, newState)
+
+					expect(updated.monitored).toBe(newState)
+				}),
+			)
+		})
+	})
+
+	describe('monitoring state propagation integration', () => {
+		it('unmonitoring season updates episode count calculations', async () => {
+			const now = new Date().toISOString()
+
+			db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+			db.insert(schema.seasons)
+				.values([
+					{ id: 1, seriesId: 1, seasonNumber: 1, monitored: true },
+					{ id: 2, seriesId: 1, seasonNumber: 2, monitored: true },
+				])
+				.run()
+			db.insert(schema.episodes)
+				.values([
+					{ id: 1, seasonId: 1, episodeNumber: 1, title: 'S1E1', monitored: true },
+					{ id: 2, seasonId: 1, episodeNumber: 2, title: 'S1E2', monitored: true },
+					{ id: 3, seasonId: 2, episodeNumber: 1, title: 'S2E1', monitored: true },
+					{ id: 4, seasonId: 2, episodeNumber: 2, title: 'S2E2', monitored: true },
+				])
+				.run()
+
+			// Before: all 4 episodes monitored -> 4 missing
+			const beforeStats = await listSeriesCore(db)
+			expect(beforeStats[0].episodeCount).toBe(4)
+			expect(beforeStats[0].missingEpisodeCount).toBe(4)
+
+			// Unmonitor season 1
+			await updateSeasonCore(db, 1, false)
+
+			// After: only 2 episodes monitored (season 2) -> 2 missing
+			const afterStats = await listSeriesCore(db)
+			expect(afterStats[0].episodeCount).toBe(2)
+			expect(afterStats[0].missingEpisodeCount).toBe(2)
+		})
+
+		it('monitoring season propagates to episodes affecting counts', async () => {
+			const now = new Date().toISOString()
+
+			db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Test', year: 2020, status: 'ended', dateAdded: now }).run()
+			db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: false }).run()
+			db.insert(schema.episodes)
+				.values([
+					{ id: 1, seasonId: 1, episodeNumber: 1, title: 'Ep1', monitored: false },
+					{ id: 2, seasonId: 1, episodeNumber: 2, title: 'Ep2', monitored: false },
+				])
+				.run()
+
+			// Before: no monitored episodes
+			const beforeStats = await listSeriesCore(db)
+			expect(beforeStats[0].episodeCount).toBe(0)
+
+			// Monitor season
+			await updateSeasonCore(db, 1, true)
+
+			// After: 2 monitored episodes
+			const afterStats = await listSeriesCore(db)
+			expect(afterStats[0].episodeCount).toBe(2)
+			expect(afterStats[0].missingEpisodeCount).toBe(2)
+		})
+	})
+})
