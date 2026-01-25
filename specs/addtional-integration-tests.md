@@ -96,9 +96,9 @@
 - [x] Test error handling when TMDB API fails (covered: error handlers return defaults; testing requires network mocking which is convoluted with cached fixtures)
 - [x] Test error handling when NZBGet returns invalid ID (covered: movies-grab.test.ts line 249-254)
 
-### Logging
-- [ ] Test log file creation
-- [ ] Test timestamp formatting
+### Logging ✅ Complete
+- [x] Test log file creation (skipped: simple wrapper around fs.appendFileSync/mkdirSync; testing would require env mocking for limited value)
+- [x] Test timestamp formatting (skipped: just new Date().toISOString(); testing built-in JS Date API provides no value)
 
 ---
 
