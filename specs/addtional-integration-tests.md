@@ -6,7 +6,7 @@
 - [x] Test TMDB fetch + DB insert for `createMovie()`
 - [x] Test duplicate movie detection
 - [x] Test `grabMovieRelease()`: NZB download -> NZBGet queue -> DB record
-- [ ] Test movie file import: download dir -> destination -> DB record
+- [x] Test movie file import: download dir -> destination -> DB record
 - [ ] Test cascade delete for movies (movie -> files -> releases -> downloads)
 
 ### Series Add Workflow
@@ -66,10 +66,10 @@
 - [ ] Test corrupted settings file handling
 
 ### File Import
-- [ ] Test error handling (missing finalDir, no video files)
-- [ ] Test subtitle file handling
-- [ ] Test quality parsing during import
-- [ ] Test `buildMoviePath()` and `buildTvPath()` logic
+- [x] Test error handling (missing finalDir, no video files)
+- [x] Test subtitle file handling
+- [x] Test quality parsing during import
+- [x] Test `buildMoviePath()` and `buildTvPath()` logic (buildMoviePath only)
 - [ ] Test year disambiguation in folder names
 
 ---
