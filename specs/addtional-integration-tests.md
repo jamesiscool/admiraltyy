@@ -22,10 +22,10 @@
 - [x] Test deleted file detection (`markDeletedMovieFiles`, `markDeletedSeriesFiles`)
 - [x] Test upsert operations with real DB
 
-### Download Completion Workflow
-- [ ] Test `syncNzbgetHistory()` sync logic between NZBGet and DB
-- [ ] Test download status transitions
-- [ ] Test file import triggering on download completion
+### Download Completion Workflow ✅ Complete
+- [x] Test `syncNzbgetHistory()` sync logic between NZBGet and DB
+- [x] Test download status transitions
+- [x] Test file import triggering on download completion
 
 ---
 
