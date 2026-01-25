@@ -38,11 +38,11 @@
 - [x] Test relationship integrity constraints
 - [x] Test bulk operations (e.g., deleting multiple seasons)
 
-### NZBGet Integration
+### NZBGet Integration ✅ Complete
 - [x] Test NZBGet API initialization flow
 - [x] Test polling logic (`nzbgetPoller.ts`)
-- [ ] Test process management lifecycle (`nzbgetProcess.ts`)
-- [ ] Test orphan cleanup on process exit
+- [x] Test process management lifecycle (`nzbgetProcess.ts`)
+- [x] Test orphan cleanup on process exit
 - [x] Test NZBGet API failure handling
 
 ### TMDB Service
