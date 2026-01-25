@@ -46,10 +46,11 @@
 - [x] Test NZBGet API failure handling
 
 ### TMDB Service
-- [ ] Test actual API calls (not just mappers)
-- [ ] Test `searchMulti()` aggregation
-- [ ] Test `fetchMovieDetails()` and `fetchSeriesWithEpisodes()`
-- [ ] Test `checkNeedsYearDisambiguation()` DB query logic
+- [x] Test actual API calls (not just mappers)
+- [x] Test `searchMulti()` aggregation
+- [x] Test `fetchSeriesPreview()` and `fetchSeriesWithEpisodes()`
+- [x] Test `checkNeedsYearDisambiguation()` logic
+- [ ] Test `fetchMovieDetails()` (needs cached fixture)
 - [ ] Test API error handling/retries
 
 ### Indexer Service ✅ Complete
