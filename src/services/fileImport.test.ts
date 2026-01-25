@@ -66,6 +66,14 @@ interface ImportResult {
 interface ImportDeps {
 	database: BunSQLiteDatabase<typeof schema>
 	moviesFolder: string | null
+	tvFolder: string | null
+}
+
+// Build TV destination path with useYearInFolder check
+function buildTvPath(folder: string, seriesTitle: string, seriesYear: number, seasonNumber: number, useYearInFolder: boolean): string {
+	const seriesFolder = useYearInFolder ? sanitizeFilename(`${seriesTitle} (${seriesYear})`) : sanitizeFilename(seriesTitle)
+	const seasonFolder = `Season ${seasonNumber}`
+	return join(folder, seriesFolder, seasonFolder)
 }
 
 // Core import function with dependency injection for testing
@@ -103,6 +111,8 @@ async function fileImportCore(downloadId: number, deps: ImportDeps): Promise<Imp
 
 	let destDir: string | null = null
 	let movieId: number | null = null
+	let seriesId: number | null = null
+	let episodeId: number | null = null
 
 	if (release.movieId) {
 		const movie = await deps.database.query.movies.findFirst({
@@ -116,6 +126,36 @@ async function fileImportCore(downloadId: number, deps: ImportDeps): Promise<Imp
 		}
 		destDir = buildMoviePath(deps.moviesFolder, movie.title, movie.year)
 		movieId = movie.id
+	} else if (release.episodeId) {
+		// Episode import - need to traverse episode -> season -> series
+		const episode = await deps.database.query.episodes.findFirst({
+			where: eq(schema.episodes.id, release.episodeId),
+		})
+		if (!episode?.seasonId) {
+			return { success: false, filesImported: 0, error: 'Episode or season not found' }
+		}
+
+		const season = await deps.database.query.seasons.findFirst({
+			where: eq(schema.seasons.id, episode.seasonId),
+		})
+		if (!season?.seriesId) {
+			return { success: false, filesImported: 0, error: 'Season or series not found' }
+		}
+
+		const seriesRow = await deps.database.query.series.findFirst({
+			where: eq(schema.series.id, season.seriesId),
+		})
+		if (!seriesRow) {
+			return { success: false, filesImported: 0, error: 'Series not found' }
+		}
+
+		if (!deps.tvFolder) {
+			return { success: false, filesImported: 0, error: 'Could not determine destination path' }
+		}
+
+		destDir = buildTvPath(deps.tvFolder, seriesRow.title, seriesRow.year, season.seasonNumber, seriesRow.useYearInFolder ?? false)
+		seriesId = seriesRow.id
+		episodeId = episode.id
 	}
 
 	if (!destDir) {
@@ -132,8 +172,8 @@ async function fileImportCore(downloadId: number, deps: ImportDeps): Promise<Imp
 
 		await deps.database.insert(schema.files).values({
 			movieId,
-			seriesId: null,
-			episodeId: null,
+			seriesId,
+			episodeId,
 			path: newPath,
 			size,
 			quality,
@@ -172,6 +212,7 @@ describe('fileImportCore - movie import', () => {
 		deps = {
 			database: db,
 			moviesFolder: moviesDir,
+			tvFolder: null,
 		}
 	})
 
@@ -468,7 +509,7 @@ describe('fileImportCore - movie import', () => {
 
 		createVideoFile(downloadDir, 'test.mkv')
 
-		const noDeps: ImportDeps = { database: db, moviesFolder: null }
+		const noDeps: ImportDeps = { database: db, moviesFolder: null, tvFolder: null }
 		const result = await fileImportCore(1, noDeps)
 
 		expect(result.success).toBe(false)
@@ -507,7 +548,7 @@ describe('fileImportCore - movie import', () => {
 
 			writeFileSync(join(dlDir, `test${ext}`), Buffer.alloc(1024))
 
-			const result = await fileImportCore(1, { database: testDb, moviesFolder: mvDir })
+			const result = await fileImportCore(1, { database: testDb, moviesFolder: mvDir, tvFolder: null })
 			expect(result.success, `Failed for ${ext}`).toBe(true)
 			expect(result.filesImported).toBe(1)
 
@@ -596,5 +637,482 @@ describe('fileImportCore - movie import', () => {
 
 		const files = db.select().from(schema.files).all()
 		expect(files[0].quality).toBe('Unknown')
+	})
+})
+
+describe('fileImportCore - episode import with season determination', () => {
+	let db: TestDb
+	let tempDir: string
+	let downloadDir: string
+	let tvDir: string
+	let deps: ImportDeps
+
+	beforeEach(async () => {
+		db = await setupTestDb()
+
+		// Create temp directories
+		tempDir = join(tmpdir(), `fileimport-tv-test-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+		downloadDir = join(tempDir, 'downloads', 'completed', 'Breaking.Bad.S01E01.1080p')
+		tvDir = join(tempDir, 'media', 'tv')
+
+		mkdirSync(downloadDir, { recursive: true })
+		mkdirSync(tvDir, { recursive: true })
+
+		deps = {
+			database: db,
+			moviesFolder: null,
+			tvFolder: tvDir,
+		}
+	})
+
+	afterEach(() => {
+		if (tempDir && existsSync(tempDir)) {
+			rmSync(tempDir, { recursive: true, force: true })
+		}
+	})
+
+	function insertSeries(overrides?: Partial<schema.SeriesInsert>) {
+		return db
+			.insert(schema.series)
+			.values({
+				id: 1,
+				tmdbId: 1396,
+				title: 'Breaking Bad',
+				year: 2008,
+				status: 'ended',
+				dateAdded: new Date().toISOString(),
+				monitored: true,
+				resolution: '1080p',
+				useYearInFolder: false,
+				...overrides,
+			})
+			.returning()
+			.get()
+	}
+
+	function insertSeason(seriesId: number, overrides?: Partial<schema.SeasonInsert>) {
+		return db
+			.insert(schema.seasons)
+			.values({
+				id: 1,
+				seriesId,
+				seasonNumber: 1,
+				monitored: true,
+				...overrides,
+			})
+			.returning()
+			.get()
+	}
+
+	function insertEpisode(seasonId: number, overrides?: Partial<schema.EpisodeInsert>) {
+		return db
+			.insert(schema.episodes)
+			.values({
+				id: 1,
+				seasonId,
+				episodeNumber: 1,
+				title: 'Pilot',
+				monitored: true,
+				...overrides,
+			})
+			.returning()
+			.get()
+	}
+
+	function insertEpisodeRelease(episodeId: number, overrides?: Partial<schema.ReleaseInsert>) {
+		return db
+			.insert(schema.releases)
+			.values({
+				id: 1,
+				episodeId,
+				guid: 'test-guid',
+				title: 'Breaking.Bad.S01E01.Pilot.1080p.BluRay.x264',
+				downloadUrl: 'https://indexer.example/nzb/123',
+				size: 1_500_000_000,
+				publishDate: '2023-06-15T12:00:00Z',
+				indexerId: 'indexer-1',
+				indexerName: 'TestIndexer',
+				grabbedAt: new Date().toISOString(),
+				...overrides,
+			})
+			.returning()
+			.get()
+	}
+
+	function insertDownload(releaseId: number, finalDir: string | null, overrides?: Partial<schema.DownloadInsert>) {
+		return db
+			.insert(schema.downloads)
+			.values({
+				id: 1,
+				releaseId,
+				nzbId: 123,
+				title: 'Breaking.Bad.S01E01.Pilot.1080p.BluRay.x264',
+				status: 'completed',
+				size: 1_500_000_000,
+				queuedAt: new Date().toISOString(),
+				finalDir,
+				...overrides,
+			})
+			.returning()
+			.get()
+	}
+
+	function createVideoFile(dir: string, filename: string, sizeMb = 100) {
+		const path = join(dir, filename)
+		writeFileSync(path, Buffer.alloc(sizeMb * 1024))
+		return path
+	}
+
+	function createSubtitleFile(dir: string, filename: string) {
+		const path = join(dir, filename)
+		writeFileSync(path, 'WEBVTT\n\n00:00:00.000 --> 00:00:02.000\nTest subtitle')
+		return path
+	}
+
+	it('imports episode file to correct season folder', async () => {
+		const series = insertSeries()
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id)
+		insertDownload(release.id, downloadDir)
+
+		createVideoFile(downloadDir, 'Breaking.Bad.S01E01.1080p.mkv')
+
+		const result = await fileImportCore(1, deps)
+
+		expect(result.success).toBe(true)
+		expect(result.filesImported).toBe(1)
+
+		// Verify path: {tvDir}/{Series}/Season {N}/{filename}
+		const destDir = join(tvDir, 'Breaking Bad', 'Season 1')
+		expect(existsSync(destDir)).toBe(true)
+		expect(existsSync(join(destDir, 'Breaking.Bad.S01E01.1080p.mkv'))).toBe(true)
+
+		// Source dir should be deleted
+		expect(existsSync(downloadDir)).toBe(false)
+	})
+
+	it('creates file record with correct episodeId and seriesId', async () => {
+		const series = insertSeries()
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id)
+		insertDownload(release.id, downloadDir)
+
+		createVideoFile(downloadDir, 'Breaking.Bad.S01E01.1080p.mkv', 50)
+
+		await fileImportCore(1, deps)
+
+		const files = db.select().from(schema.files).all()
+		expect(files).toHaveLength(1)
+
+		const file = files[0]
+		expect(file.movieId).toBeNull()
+		expect(file.seriesId).toBe(series.id)
+		expect(file.episodeId).toBe(episode.id)
+		expect(file.path).toContain('Breaking Bad')
+		expect(file.path).toContain('Season 1')
+		expect(file.quality).toBe('1080p')
+		expect(file.dateImported).toBeDefined()
+	})
+
+	it('uses year in folder when useYearInFolder is true', async () => {
+		const series = insertSeries({ useYearInFolder: true })
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id)
+		insertDownload(release.id, downloadDir)
+
+		createVideoFile(downloadDir, 'Breaking.Bad.S01E01.1080p.mkv')
+
+		const result = await fileImportCore(1, deps)
+
+		expect(result.success).toBe(true)
+
+		// Verify path includes year: {tvDir}/{Series} ({Year})/Season {N}/{filename}
+		const destDir = join(tvDir, 'Breaking Bad (2008)', 'Season 1')
+		expect(existsSync(destDir)).toBe(true)
+		expect(existsSync(join(destDir, 'Breaking.Bad.S01E01.1080p.mkv'))).toBe(true)
+	})
+
+	it('imports episodes to different season folders', async () => {
+		const series = insertSeries()
+		const season1 = insertSeason(series.id, { id: 1, seasonNumber: 1 })
+		const season2 = insertSeason(series.id, { id: 2, seasonNumber: 2 })
+		const episode1 = insertEpisode(season1.id, { id: 1, episodeNumber: 1 })
+		const episode2 = insertEpisode(season2.id, { id: 2, episodeNumber: 1 })
+
+		// Create first download
+		const release1 = insertEpisodeRelease(episode1.id, { id: 1, guid: 'guid-1', title: 'Breaking.Bad.S01E01.1080p' })
+		const dlDir1 = join(tempDir, 'dl1')
+		mkdirSync(dlDir1, { recursive: true })
+		insertDownload(release1.id, dlDir1, { id: 1 })
+		createVideoFile(dlDir1, 'S01E01.mkv')
+
+		// Create second download
+		const release2 = insertEpisodeRelease(episode2.id, { id: 2, guid: 'guid-2', title: 'Breaking.Bad.S02E01.1080p' })
+		const dlDir2 = join(tempDir, 'dl2')
+		mkdirSync(dlDir2, { recursive: true })
+		insertDownload(release2.id, dlDir2, { id: 2, nzbId: 124 })
+		createVideoFile(dlDir2, 'S02E01.mkv')
+
+		// Import both
+		const result1 = await fileImportCore(1, deps)
+		const result2 = await fileImportCore(2, deps)
+
+		expect(result1.success).toBe(true)
+		expect(result2.success).toBe(true)
+
+		// Verify different season folders
+		expect(existsSync(join(tvDir, 'Breaking Bad', 'Season 1', 'S01E01.mkv'))).toBe(true)
+		expect(existsSync(join(tvDir, 'Breaking Bad', 'Season 2', 'S02E01.mkv'))).toBe(true)
+
+		// Verify file records
+		const files = db.select().from(schema.files).all()
+		expect(files).toHaveLength(2)
+		expect(files.find((f) => f.episodeId === 1)?.path).toContain('Season 1')
+		expect(files.find((f) => f.episodeId === 2)?.path).toContain('Season 2')
+	})
+
+	it('moves subtitle files along with episode video', async () => {
+		const series = insertSeries()
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id)
+		insertDownload(release.id, downloadDir)
+
+		createVideoFile(downloadDir, 'Breaking.Bad.S01E01.1080p.mkv')
+		createSubtitleFile(downloadDir, 'Breaking.Bad.S01E01.1080p.srt')
+
+		const result = await fileImportCore(1, deps)
+
+		expect(result.success).toBe(true)
+		expect(result.filesImported).toBe(1) // Only video counted
+
+		const destDir = join(tvDir, 'Breaking Bad', 'Season 1')
+		expect(existsSync(join(destDir, 'Breaking.Bad.S01E01.1080p.srt'))).toBe(true)
+	})
+
+	it('parses quality from episode release title', async () => {
+		const series = insertSeries()
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id, { title: 'Breaking.Bad.S01E01.2160p.UHD.BluRay' })
+		insertDownload(release.id, downloadDir)
+
+		createVideoFile(downloadDir, 'episode.mkv')
+
+		await fileImportCore(1, deps)
+
+		const files = db.select().from(schema.files).all()
+		expect(files[0].quality).toBe('2160p')
+	})
+
+	it('returns error when episode not found', async () => {
+		db.insert(schema.releases)
+			.values({
+				id: 1,
+				episodeId: 999,
+				guid: 'test-guid',
+				title: 'Test.S01E01.1080p',
+				downloadUrl: 'https://example.com/nzb',
+				size: 1000,
+				publishDate: '2023-01-01',
+				indexerId: 'test',
+				indexerName: 'Test',
+				grabbedAt: new Date().toISOString(),
+			})
+			.run()
+
+		insertDownload(1, downloadDir)
+		createVideoFile(downloadDir, 'test.mkv')
+
+		const result = await fileImportCore(1, deps)
+
+		expect(result.success).toBe(false)
+		expect(result.error).toBe('Episode or season not found')
+	})
+
+	it('returns error when season not found', async () => {
+		// Insert episode with invalid seasonId
+		db.insert(schema.episodes)
+			.values({
+				id: 1,
+				seasonId: 999,
+				episodeNumber: 1,
+				title: 'Test',
+				monitored: true,
+			})
+			.run()
+
+		db.insert(schema.releases)
+			.values({
+				id: 1,
+				episodeId: 1,
+				guid: 'test-guid',
+				title: 'Test.S01E01.1080p',
+				downloadUrl: 'https://example.com/nzb',
+				size: 1000,
+				publishDate: '2023-01-01',
+				indexerId: 'test',
+				indexerName: 'Test',
+				grabbedAt: new Date().toISOString(),
+			})
+			.run()
+
+		insertDownload(1, downloadDir)
+		createVideoFile(downloadDir, 'test.mkv')
+
+		const result = await fileImportCore(1, deps)
+
+		expect(result.success).toBe(false)
+		expect(result.error).toBe('Season or series not found')
+	})
+
+	it('returns error when series not found', async () => {
+		// Insert season with invalid seriesId
+		db.insert(schema.seasons)
+			.values({
+				id: 1,
+				seriesId: 999,
+				seasonNumber: 1,
+				monitored: true,
+			})
+			.run()
+
+		db.insert(schema.episodes)
+			.values({
+				id: 1,
+				seasonId: 1,
+				episodeNumber: 1,
+				title: 'Test',
+				monitored: true,
+			})
+			.run()
+
+		db.insert(schema.releases)
+			.values({
+				id: 1,
+				episodeId: 1,
+				guid: 'test-guid',
+				title: 'Test.S01E01.1080p',
+				downloadUrl: 'https://example.com/nzb',
+				size: 1000,
+				publishDate: '2023-01-01',
+				indexerId: 'test',
+				indexerName: 'Test',
+				grabbedAt: new Date().toISOString(),
+			})
+			.run()
+
+		insertDownload(1, downloadDir)
+		createVideoFile(downloadDir, 'test.mkv')
+
+		const result = await fileImportCore(1, deps)
+
+		expect(result.success).toBe(false)
+		expect(result.error).toBe('Series not found')
+	})
+
+	it('returns error when tv folder not configured', async () => {
+		const series = insertSeries()
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id)
+		insertDownload(release.id, downloadDir)
+
+		createVideoFile(downloadDir, 'test.mkv')
+
+		const noDeps: ImportDeps = { database: db, moviesFolder: null, tvFolder: null }
+		const result = await fileImportCore(1, noDeps)
+
+		expect(result.success).toBe(false)
+		expect(result.error).toBe('Could not determine destination path')
+	})
+
+	it('sanitizes special characters in series folder name', async () => {
+		const series = insertSeries({ title: 'Show: The [Special] Edition?' })
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id)
+		insertDownload(release.id, downloadDir)
+
+		createVideoFile(downloadDir, 'episode.mkv')
+
+		const result = await fileImportCore(1, deps)
+
+		expect(result.success).toBe(true)
+
+		const entries = readdirSync(tvDir)
+		expect(entries).toHaveLength(1)
+		expect(entries[0]).toBe('Show The [Special] Edition')
+	})
+
+	it('handles nested video files in episode download', async () => {
+		const series = insertSeries()
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id)
+		insertDownload(release.id, downloadDir)
+
+		const nestedDir = join(downloadDir, 'VIDEO_TS')
+		mkdirSync(nestedDir, { recursive: true })
+		createVideoFile(nestedDir, 'episode.mkv')
+
+		const result = await fileImportCore(1, deps)
+
+		expect(result.success).toBe(true)
+		expect(result.filesImported).toBe(1)
+	})
+
+	it('imports multiple episodes for same series', async () => {
+		const series = insertSeries()
+		const season = insertSeason(series.id)
+		const ep1 = insertEpisode(season.id, { id: 1, episodeNumber: 1, title: 'Pilot' })
+		const ep2 = insertEpisode(season.id, { id: 2, episodeNumber: 2, title: 'Episode 2' })
+
+		// Download 1
+		const release1 = insertEpisodeRelease(ep1.id, { id: 1, guid: 'g1', title: 'Show.S01E01.1080p' })
+		const dlDir1 = join(tempDir, 'ep1')
+		mkdirSync(dlDir1, { recursive: true })
+		insertDownload(release1.id, dlDir1, { id: 1 })
+		createVideoFile(dlDir1, 'S01E01.mkv')
+
+		// Download 2
+		const release2 = insertEpisodeRelease(ep2.id, { id: 2, guid: 'g2', title: 'Show.S01E02.1080p' })
+		const dlDir2 = join(tempDir, 'ep2')
+		mkdirSync(dlDir2, { recursive: true })
+		insertDownload(release2.id, dlDir2, { id: 2, nzbId: 124 })
+		createVideoFile(dlDir2, 'S01E02.mkv')
+
+		// Import both
+		await fileImportCore(1, deps)
+		await fileImportCore(2, deps)
+
+		// Both should be in same season folder
+		const seasonDir = join(tvDir, 'Breaking Bad', 'Season 1')
+		expect(existsSync(join(seasonDir, 'S01E01.mkv'))).toBe(true)
+		expect(existsSync(join(seasonDir, 'S01E02.mkv'))).toBe(true)
+
+		// Verify file records
+		const files = db.select().from(schema.files).all()
+		expect(files).toHaveLength(2)
+		expect(files.every((f) => f.seriesId === series.id)).toBe(true)
+	})
+
+	it('correctly records file size for episode', async () => {
+		const series = insertSeries()
+		const season = insertSeason(series.id)
+		const episode = insertEpisode(season.id)
+		const release = insertEpisodeRelease(episode.id)
+		insertDownload(release.id, downloadDir)
+
+		const sizeMb = 200
+		createVideoFile(downloadDir, 'episode.mkv', sizeMb)
+
+		await fileImportCore(1, deps)
+
+		const files = db.select().from(schema.files).all()
+		expect(files[0].size).toBe(sizeMb * 1024)
 	})
 })
