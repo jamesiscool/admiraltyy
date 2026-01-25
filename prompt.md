@@ -1,1 +1,2 @@
-Say hello
+- Say hello
+- run `kill $PPID` !! I know this is dangerous, but Claude is running in a loop. 

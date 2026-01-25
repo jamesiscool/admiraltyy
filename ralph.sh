@@ -12,7 +12,7 @@ for i in $(seq 1 "$MAX_ITERATIONS"); do
     exit 0
   fi
 
-  claude --dangerously-skip-permissions < <(cat prompt.md; echo -e "\n\nWhen task complete: kill \$PPID")
+  claude --dangerously-skip-permissions < <(cat prompt.md; echo -e "")
 
   # If the agent made changes, commit them (agent may already commit; this is a safety step)
   if [[ -n "$(git status --porcelain)" ]]; then
