@@ -39,3 +39,4 @@ test/fixtures/http
 # Ralph
 ralph_complete
 tasks.md
+.claude/settings.local.json
