@@ -12,7 +12,7 @@
 ### Series Add Workflow
 - [x] Test `createSeries()` with TMDB fetch + seasons/episodes insert
 - [x] Test monitored seasons selection during series creation
-- [ ] Test `grabEpisodeRelease()`: NZB download -> NZBGet queue -> DB record
+- [x] Test `grabEpisodeRelease()`: NZB download -> NZBGet queue -> DB record
 - [ ] Test episode file import with season determination
 - [x] Test cascade delete for series (series -> seasons -> episodes -> files -> releases -> downloads)
 
