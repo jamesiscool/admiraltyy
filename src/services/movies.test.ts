@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import type { BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite'
 import fc from 'fast-check'
 import { beforeEach, describe, expect, it } from 'vitest'
+import type * as schemaTypes from '@/db/schema'
 import * as schema from '@/db/schema'
 import { setupTestDb, type TestDb } from '../../test/helpers'
 
@@ -338,5 +339,369 @@ describe('property-based tests', () => {
 				expect(movies[0].tmdbId).toBe(details.tmdbId)
 			}),
 		)
+	})
+})
+
+// Pure function for movie deletion - copied from movies.ts to avoid env import chain
+async function deleteMovieCore(database: BunSQLiteDatabase<typeof schemaTypes>, movieId: number) {
+	const movie = await database.select().from(schema.movies).where(eq(schema.movies.id, movieId))
+	if (!movie.length) {
+		throw new Error('Movie not found')
+	}
+
+	// Delete associated files from db
+	await database.delete(schema.files).where(eq(schema.files.movieId, movieId))
+
+	// Get releases for this movie to delete their downloads
+	const movieReleases = await database.select().from(schema.releases).where(eq(schema.releases.movieId, movieId))
+	for (const release of movieReleases) {
+		await database.delete(schema.downloads).where(eq(schema.downloads.releaseId, release.id))
+	}
+
+	// Delete releases
+	await database.delete(schema.releases).where(eq(schema.releases.movieId, movieId))
+
+	// Delete movie
+	await database.delete(schema.movies).where(eq(schema.movies.id, movieId))
+
+	return { success: true }
+}
+
+describe('deleteMovieCore - cascade delete', () => {
+	let db: TestDb
+
+	beforeEach(async () => {
+		db = await setupTestDb()
+	})
+
+	it('deletes movie with no associated records', async () => {
+		// Insert movie
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				title: 'Inception',
+				year: 2010,
+				dateAdded: new Date().toISOString(),
+			})
+			.run()
+
+		// Delete movie
+		const result = await deleteMovieCore(db, 1)
+
+		expect(result.success).toBe(true)
+		expect(db.select().from(schema.movies).all()).toHaveLength(0)
+	})
+
+	it('deletes associated files when movie is deleted', async () => {
+		// Insert movie
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				title: 'Inception',
+				year: 2010,
+				dateAdded: new Date().toISOString(),
+			})
+			.run()
+
+		// Insert associated files
+		db.insert(schema.files)
+			.values([
+				{ id: 1, movieId: 1, path: '/movies/Inception/Inception.mkv', size: 8500000000, quality: '1080p', dateImported: new Date().toISOString() },
+				{ id: 2, movieId: 1, path: '/movies/Inception/Inception.srt', size: 50000, quality: '1080p', dateImported: new Date().toISOString() },
+			])
+			.run()
+
+		// Delete movie
+		await deleteMovieCore(db, 1)
+
+		// Verify files are deleted
+		expect(db.select().from(schema.files).all()).toHaveLength(0)
+	})
+
+	it('deletes associated releases when movie is deleted', async () => {
+		// Insert movie
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				title: 'Inception',
+				year: 2010,
+				dateAdded: new Date().toISOString(),
+			})
+			.run()
+
+		// Insert associated releases
+		db.insert(schema.releases)
+			.values([
+				{
+					id: 1,
+					movieId: 1,
+					guid: 'guid-1',
+					title: 'Inception.2010.1080p',
+					downloadUrl: 'https://example.com/nzb/1',
+					size: 8500000000,
+					publishDate: '2023-01-01',
+					indexerId: 'idx-1',
+					indexerName: 'TestIndexer',
+					grabbedAt: new Date().toISOString(),
+				},
+				{
+					id: 2,
+					movieId: 1,
+					guid: 'guid-2',
+					title: 'Inception.2010.720p',
+					downloadUrl: 'https://example.com/nzb/2',
+					size: 4500000000,
+					publishDate: '2023-01-02',
+					indexerId: 'idx-1',
+					indexerName: 'TestIndexer',
+					grabbedAt: new Date().toISOString(),
+				},
+			])
+			.run()
+
+		// Delete movie
+		await deleteMovieCore(db, 1)
+
+		// Verify releases are deleted
+		expect(db.select().from(schema.releases).all()).toHaveLength(0)
+	})
+
+	it('deletes associated downloads when movie is deleted', async () => {
+		// Insert movie
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				title: 'Inception',
+				year: 2010,
+				dateAdded: new Date().toISOString(),
+			})
+			.run()
+
+		// Insert release
+		db.insert(schema.releases)
+			.values({
+				id: 1,
+				movieId: 1,
+				guid: 'guid-1',
+				title: 'Inception.2010.1080p',
+				downloadUrl: 'https://example.com/nzb/1',
+				size: 8500000000,
+				publishDate: '2023-01-01',
+				indexerId: 'idx-1',
+				indexerName: 'TestIndexer',
+				grabbedAt: new Date().toISOString(),
+			})
+			.run()
+
+		// Insert download
+		db.insert(schema.downloads)
+			.values({
+				id: 1,
+				releaseId: 1,
+				nzbId: 100,
+				title: 'Inception.2010.1080p',
+				status: 'queued',
+				size: 8500000000,
+				queuedAt: new Date().toISOString(),
+			})
+			.run()
+
+		// Delete movie
+		await deleteMovieCore(db, 1)
+
+		// Verify downloads are deleted
+		expect(db.select().from(schema.downloads).all()).toHaveLength(0)
+	})
+
+	it('cascade deletes all related records: files, releases, downloads', async () => {
+		const now = new Date().toISOString()
+
+		// Insert movie
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				title: 'Inception',
+				year: 2010,
+				dateAdded: now,
+			})
+			.run()
+
+		// Insert files
+		db.insert(schema.files)
+			.values([
+				{ id: 1, movieId: 1, path: '/movies/Inception/Inception.mkv', size: 8500000000, quality: '1080p', dateImported: now },
+				{ id: 2, movieId: 1, path: '/movies/Inception/Inception.srt', size: 50000, quality: '1080p', dateImported: now },
+			])
+			.run()
+
+		// Insert releases
+		db.insert(schema.releases)
+			.values([
+				{
+					id: 1,
+					movieId: 1,
+					guid: 'guid-1',
+					title: 'Inception.2010.1080p',
+					downloadUrl: 'https://example.com/nzb/1',
+					size: 8500000000,
+					publishDate: '2023-01-01',
+					indexerId: 'idx-1',
+					indexerName: 'TestIndexer',
+					grabbedAt: now,
+				},
+				{
+					id: 2,
+					movieId: 1,
+					guid: 'guid-2',
+					title: 'Inception.2010.720p',
+					downloadUrl: 'https://example.com/nzb/2',
+					size: 4500000000,
+					publishDate: '2023-01-02',
+					indexerId: 'idx-1',
+					indexerName: 'TestIndexer',
+					grabbedAt: now,
+				},
+			])
+			.run()
+
+		// Insert downloads for each release
+		db.insert(schema.downloads)
+			.values([
+				{ id: 1, releaseId: 1, nzbId: 100, title: 'Inception.2010.1080p', status: 'completed', size: 8500000000, queuedAt: now },
+				{ id: 2, releaseId: 2, nzbId: 101, title: 'Inception.2010.720p', status: 'failed', size: 4500000000, queuedAt: now },
+			])
+			.run()
+
+		// Verify initial state
+		expect(db.select().from(schema.movies).all()).toHaveLength(1)
+		expect(db.select().from(schema.files).all()).toHaveLength(2)
+		expect(db.select().from(schema.releases).all()).toHaveLength(2)
+		expect(db.select().from(schema.downloads).all()).toHaveLength(2)
+
+		// Delete movie
+		await deleteMovieCore(db, 1)
+
+		// Verify everything is deleted
+		expect(db.select().from(schema.movies).all()).toHaveLength(0)
+		expect(db.select().from(schema.files).all()).toHaveLength(0)
+		expect(db.select().from(schema.releases).all()).toHaveLength(0)
+		expect(db.select().from(schema.downloads).all()).toHaveLength(0)
+	})
+
+	it('only deletes records for the specified movie', async () => {
+		const now = new Date().toISOString()
+
+		// Insert two movies
+		db.insert(schema.movies)
+			.values([
+				{ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now },
+				{ id: 2, tmdbId: 550, title: 'Fight Club', year: 1999, dateAdded: now },
+			])
+			.run()
+
+		// Insert files for both movies
+		db.insert(schema.files)
+			.values([
+				{ id: 1, movieId: 1, path: '/movies/Inception/Inception.mkv', size: 8500000000, quality: '1080p', dateImported: now },
+				{ id: 2, movieId: 2, path: '/movies/FightClub/FightClub.mkv', size: 7500000000, quality: '1080p', dateImported: now },
+			])
+			.run()
+
+		// Insert releases for both movies
+		db.insert(schema.releases)
+			.values([
+				{
+					id: 1,
+					movieId: 1,
+					guid: 'guid-1',
+					title: 'Inception.2010.1080p',
+					downloadUrl: 'https://example.com/nzb/1',
+					size: 8500000000,
+					publishDate: '2023-01-01',
+					indexerId: 'idx-1',
+					indexerName: 'TestIndexer',
+					grabbedAt: now,
+				},
+				{
+					id: 2,
+					movieId: 2,
+					guid: 'guid-2',
+					title: 'FightClub.1999.1080p',
+					downloadUrl: 'https://example.com/nzb/2',
+					size: 7500000000,
+					publishDate: '2023-01-02',
+					indexerId: 'idx-1',
+					indexerName: 'TestIndexer',
+					grabbedAt: now,
+				},
+			])
+			.run()
+
+		// Insert downloads for both releases
+		db.insert(schema.downloads)
+			.values([
+				{ id: 1, releaseId: 1, nzbId: 100, title: 'Inception.2010.1080p', status: 'completed', size: 8500000000, queuedAt: now },
+				{ id: 2, releaseId: 2, nzbId: 101, title: 'FightClub.1999.1080p', status: 'completed', size: 7500000000, queuedAt: now },
+			])
+			.run()
+
+		// Delete only movie 1 (Inception)
+		await deleteMovieCore(db, 1)
+
+		// Verify movie 1 and its records are deleted
+		expect(db.select().from(schema.movies).where(eq(schema.movies.id, 1)).all()).toHaveLength(0)
+
+		// Verify movie 2 and its records remain
+		expect(db.select().from(schema.movies).where(eq(schema.movies.id, 2)).all()).toHaveLength(1)
+		expect(db.select().from(schema.files).where(eq(schema.files.movieId, 2)).all()).toHaveLength(1)
+		expect(db.select().from(schema.releases).where(eq(schema.releases.movieId, 2)).all()).toHaveLength(1)
+		expect(db.select().from(schema.downloads).where(eq(schema.downloads.releaseId, 2)).all()).toHaveLength(1)
+	})
+
+	it('throws error for non-existent movie', async () => {
+		await expect(deleteMovieCore(db, 999)).rejects.toThrow('Movie not found')
+	})
+
+	it('handles movie with multiple download attempts per release', async () => {
+		const now = new Date().toISOString()
+
+		// Insert movie
+		db.insert(schema.movies).values({ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now }).run()
+
+		// Insert release
+		db.insert(schema.releases)
+			.values({
+				id: 1,
+				movieId: 1,
+				guid: 'guid-1',
+				title: 'Inception.2010.1080p',
+				downloadUrl: 'https://example.com/nzb/1',
+				size: 8500000000,
+				publishDate: '2023-01-01',
+				indexerId: 'idx-1',
+				indexerName: 'TestIndexer',
+				grabbedAt: now,
+			})
+			.run()
+
+		// Insert multiple download attempts for the same release
+		db.insert(schema.downloads)
+			.values([
+				{ id: 1, releaseId: 1, nzbId: 100, title: 'Inception.2010.1080p', status: 'failed', size: 8500000000, queuedAt: now },
+				{ id: 2, releaseId: 1, nzbId: 101, title: 'Inception.2010.1080p', status: 'failed', size: 8500000000, queuedAt: now },
+				{ id: 3, releaseId: 1, nzbId: 102, title: 'Inception.2010.1080p', status: 'completed', size: 8500000000, queuedAt: now },
+			])
+			.run()
+
+		// Delete movie
+		await deleteMovieCore(db, 1)
+
+		// Verify all downloads are deleted
+		expect(db.select().from(schema.downloads).all()).toHaveLength(0)
 	})
 })

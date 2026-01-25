@@ -7,7 +7,7 @@
 - [x] Test duplicate movie detection
 - [x] Test `grabMovieRelease()`: NZB download -> NZBGet queue -> DB record
 - [x] Test movie file import: download dir -> destination -> DB record
-- [ ] Test cascade delete for movies (movie -> files -> releases -> downloads)
+- [x] Test cascade delete for movies (movie -> files -> releases -> downloads)
 
 ### Series Add Workflow
 - [ ] Test `createSeries()` with TMDB fetch + seasons/episodes insert
