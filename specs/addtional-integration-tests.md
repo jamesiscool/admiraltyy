@@ -16,11 +16,11 @@
 - [x] Test episode file import with season determination
 - [x] Test cascade delete for series (series -> seasons -> episodes -> files -> releases -> downloads)
 
-### File Scanning Workflow
-- [ ] Test `scanMoviesFiles()` end-to-end with DB operations
-- [ ] Test `scanSeriesFiles()` end-to-end with episode matching
-- [ ] Test deleted file detection (`markDeletedMovieFiles`, `markDeletedSeriesFiles`)
-- [ ] Test upsert operations with real DB
+### File Scanning Workflow ✅ Complete
+- [x] Test `scanMoviesFiles()` end-to-end with DB operations
+- [x] Test `scanSeriesFiles()` end-to-end with episode matching
+- [x] Test deleted file detection (`markDeletedMovieFiles`, `markDeletedSeriesFiles`)
+- [x] Test upsert operations with real DB
 
 ### Download Completion Workflow
 - [ ] Test `syncNzbgetHistory()` sync logic between NZBGet and DB
