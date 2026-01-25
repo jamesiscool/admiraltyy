@@ -904,6 +904,298 @@ describe('listMovies - file size aggregation', () => {
 	})
 })
 
+// MovieWithFiles type matching the actual getMovie return type
+interface MovieWithFiles {
+	id: number
+	tmdbId: number
+	imdbId: string | null
+	title: string
+	year: number
+	posterUrl: string | null
+	backdropUrl: string | null
+	synopsis: string | null
+	runtimeMins: number | null
+	genres: string | null
+	cinemaReleaseDate: string | null
+	digitalReleaseDate: string | null
+	contentRating: string | null
+	dateAdded: string
+	monitored: boolean | null
+	resolution: '480p' | '720p' | '1080p' | '2160p' | null
+	lastSearchTime: string | null
+	lastInfoSync: string | null
+	rtId: string | null
+	rtVanity: string | null
+	alternateTitles: string | null
+	sizeBytes: number | undefined
+	files: (typeof schema.files.$inferSelect)[]
+}
+
+// Pure function matching getMovie query - testable with any db
+async function getMovieCore(database: TestDb, movieId: number): Promise<MovieWithFiles> {
+	const movies = await database.select().from(schema.movies).where(eq(schema.movies.id, movieId)).limit(1)
+	if (!movies.length) {
+		throw new Error('Movie not found')
+	}
+	const movie = movies[0]
+	// Get files for this movie (excluding deleted)
+	const files = await database.select().from(schema.files).where(sql`${schema.files.movieId} = ${movieId} AND ${schema.files.isDeleted} = 0`)
+	const sizeBytes = files.reduce((sum, f) => sum + f.size, 0) || undefined
+	return { ...movie, sizeBytes, files }
+}
+
+describe('getMovie - file size calculations', () => {
+	let db: TestDb
+
+	beforeEach(async () => {
+		db = await setupTestDb()
+	})
+
+	it('returns sizeBytes as undefined when no files exist', async () => {
+		const now = new Date().toISOString()
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				title: 'Inception',
+				year: 2010,
+				dateAdded: now,
+				resolution: '1080p',
+			})
+			.run()
+
+		const movie = await getMovieCore(db, 1)
+
+		expect(movie.sizeBytes).toBeUndefined()
+		expect(movie.files).toHaveLength(0)
+	})
+
+	it('calculates sizeBytes from single file', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.movies).values({ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now }).run()
+
+		db.insert(schema.files)
+			.values({
+				id: 1,
+				movieId: 1,
+				path: '/movies/Inception/Inception.mkv',
+				size: 8500000000,
+				quality: '1080p',
+				dateImported: now,
+				isDeleted: false,
+			})
+			.run()
+
+		const movie = await getMovieCore(db, 1)
+
+		expect(movie.sizeBytes).toBe(8500000000)
+		expect(movie.files).toHaveLength(1)
+	})
+
+	it('aggregates multiple file sizes', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.movies).values({ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now }).run()
+
+		db.insert(schema.files)
+			.values([
+				{ id: 1, movieId: 1, path: '/movies/Inception/Inception.mkv', size: 8500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, movieId: 1, path: '/movies/Inception/Inception.eng.srt', size: 52000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 3, movieId: 1, path: '/movies/Inception/Inception.spa.srt', size: 48000, quality: '1080p', dateImported: now, isDeleted: false },
+			])
+			.run()
+
+		const movie = await getMovieCore(db, 1)
+
+		expect(movie.sizeBytes).toBe(8500000000 + 52000 + 48000)
+		expect(movie.files).toHaveLength(3)
+	})
+
+	it('excludes deleted files from size calculation', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.movies).values({ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now }).run()
+
+		db.insert(schema.files)
+			.values([
+				{ id: 1, movieId: 1, path: '/movies/Inception/Inception.mkv', size: 8500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, movieId: 1, path: '/movies/Inception/Inception.old.mkv', size: 4000000000, quality: '720p', dateImported: now, isDeleted: true },
+			])
+			.run()
+
+		const movie = await getMovieCore(db, 1)
+
+		expect(movie.sizeBytes).toBe(8500000000) // Only non-deleted file
+		expect(movie.files).toHaveLength(1) // Only non-deleted file in array
+	})
+
+	it('returns full movie metadata alongside size', async () => {
+		const now = new Date().toISOString()
+		const releaseDate = '2010-07-16'
+
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				imdbId: 'tt1375666',
+				title: 'Inception',
+				year: 2010,
+				posterUrl: 'https://image.tmdb.org/poster.jpg',
+				backdropUrl: 'https://image.tmdb.org/backdrop.jpg',
+				synopsis: 'A mind-bending thriller',
+				runtimeMins: 148,
+				genres: JSON.stringify(['Action', 'Sci-Fi']),
+				cinemaReleaseDate: releaseDate,
+				contentRating: 'PG-13',
+				resolution: '2160p',
+				monitored: true,
+				dateAdded: now,
+				alternateTitles: JSON.stringify(['Origin', 'Eredet']),
+			})
+			.run()
+
+		db.insert(schema.files).values({ id: 1, movieId: 1, path: '/movies/Inception.mkv', size: 15000000000, quality: '2160p', dateImported: now, isDeleted: false }).run()
+
+		const movie = await getMovieCore(db, 1)
+
+		expect(movie.id).toBe(1)
+		expect(movie.tmdbId).toBe(27205)
+		expect(movie.imdbId).toBe('tt1375666')
+		expect(movie.title).toBe('Inception')
+		expect(movie.year).toBe(2010)
+		expect(movie.posterUrl).toBe('https://image.tmdb.org/poster.jpg')
+		expect(movie.backdropUrl).toBe('https://image.tmdb.org/backdrop.jpg')
+		expect(movie.synopsis).toBe('A mind-bending thriller')
+		expect(movie.runtimeMins).toBe(148)
+		expect(movie.genres).toBe(JSON.stringify(['Action', 'Sci-Fi']))
+		expect(movie.cinemaReleaseDate).toBe(releaseDate)
+		expect(movie.contentRating).toBe('PG-13')
+		expect(movie.resolution).toBe('2160p')
+		expect(movie.monitored).toBe(true)
+		expect(movie.alternateTitles).toBe(JSON.stringify(['Origin', 'Eredet']))
+		expect(movie.sizeBytes).toBe(15000000000)
+	})
+
+	it('throws for non-existent movie', async () => {
+		await expect(getMovieCore(db, 999)).rejects.toThrow('Movie not found')
+	})
+
+	it('returns files with all metadata', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.movies).values({ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now }).run()
+
+		db.insert(schema.files)
+			.values({
+				id: 1,
+				movieId: 1,
+				path: '/movies/Inception/Inception.2010.1080p.BluRay.mkv',
+				size: 8500000000,
+				quality: '1080p',
+				source: 'bluray',
+				codec: 'x264',
+				dateImported: now,
+				isDeleted: false,
+			})
+			.run()
+
+		const movie = await getMovieCore(db, 1)
+
+		expect(movie.files).toHaveLength(1)
+		expect(movie.files[0].path).toBe('/movies/Inception/Inception.2010.1080p.BluRay.mkv')
+		expect(movie.files[0].size).toBe(8500000000)
+		expect(movie.files[0].quality).toBe('1080p')
+		expect(movie.files[0].source).toBe('bluray')
+		expect(movie.files[0].codec).toBe('x264')
+	})
+})
+
+describe('getMovie - property-based tests', () => {
+	const arbMovieData = fc.record({
+		tmdbId: fc.integer({ min: 1, max: 999999 }),
+		title: fc.string({ minLength: 1, maxLength: 100 }),
+		year: fc.integer({ min: 1900, max: 2030 }),
+	})
+
+	const arbFileSize = fc.integer({ min: 1, max: 50000000000 }) // 1 byte to 50GB
+
+	it('sizeBytes equals sum of file sizes when files exist', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbMovieData, fc.array(arbFileSize, { minLength: 1, maxLength: 5 }), async (movieData, fileSizes) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.movies)
+					.values({ ...movieData, id: 1, dateAdded: now })
+					.run()
+
+				for (let i = 0; i < fileSizes.length; i++) {
+					db.insert(schema.files)
+						.values({
+							id: i + 1,
+							movieId: 1,
+							path: `/movies/file${i}.mkv`,
+							size: fileSizes[i],
+							quality: '1080p',
+							dateImported: now,
+							isDeleted: false,
+						})
+						.run()
+				}
+
+				const movie = await getMovieCore(db, 1)
+				const expectedSize = fileSizes.reduce((sum, s) => sum + s, 0)
+
+				expect(movie.sizeBytes).toBe(expectedSize)
+				expect(movie.files.length).toBe(fileSizes.length)
+			}),
+		)
+	})
+
+	it('sizeBytes is undefined when no files exist', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbMovieData, async (movieData) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.movies)
+					.values({ ...movieData, id: 1, dateAdded: now })
+					.run()
+
+				const movie = await getMovieCore(db, 1)
+
+				expect(movie.sizeBytes).toBeUndefined()
+			}),
+		)
+	})
+
+	it('deleted files excluded from calculation', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbMovieData, arbFileSize, arbFileSize, async (movieData, activeSize, deletedSize) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.movies)
+					.values({ ...movieData, id: 1, dateAdded: now })
+					.run()
+
+				db.insert(schema.files)
+					.values([
+						{ id: 1, movieId: 1, path: '/movies/active.mkv', size: activeSize, quality: '1080p', dateImported: now, isDeleted: false },
+						{ id: 2, movieId: 1, path: '/movies/deleted.mkv', size: deletedSize, quality: '1080p', dateImported: now, isDeleted: true },
+					])
+					.run()
+
+				const movie = await getMovieCore(db, 1)
+
+				expect(movie.sizeBytes).toBe(activeSize)
+				expect(movie.files.length).toBe(1)
+			}),
+		)
+	})
+})
+
 describe('listMovies - property-based tests', () => {
 	const arbMovieData = fc.record({
 		tmdbId: fc.integer({ min: 1, max: 999999 }),
