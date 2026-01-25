@@ -59,11 +59,11 @@
 - [x] Test attribute extraction from Newznab response
 - [x] Test network error handling
 
-### Settings Service
-- [ ] Test settings initialization from file
-- [ ] Test default settings creation
-- [ ] Test settings persistence to disk
-- [ ] Test corrupted settings file handling
+### Settings Service ✅ Complete
+- [x] Test settings initialization from file
+- [x] Test default settings creation
+- [x] Test settings persistence to disk
+- [x] Test corrupted settings file handling
 
 ### File Import
 - [x] Test error handling (missing finalDir, no video files)
