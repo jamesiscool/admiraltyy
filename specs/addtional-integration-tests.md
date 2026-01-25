@@ -39,7 +39,7 @@
 - [x] Test bulk operations (e.g., deleting multiple seasons)
 
 ### NZBGet Integration
-- [ ] Test NZBGet API initialization flow
+- [x] Test NZBGet API initialization flow
 - [ ] Test polling logic (`nzbgetPoller.ts`)
 - [ ] Test process management lifecycle (`nzbgetProcess.ts`)
 - [ ] Test orphan cleanup on process exit
