@@ -33,7 +33,7 @@ vi.mock('@/services/settings.server', () => ({
 	}),
 }))
 
-import { checkNeedsYearDisambiguation, fetchSeriesPreview, fetchSeriesWithEpisodes, searchMulti } from './tmdb'
+import { checkNeedsYearDisambiguation, fetchMovieDetails, fetchSeriesPreview, fetchSeriesWithEpisodes, searchMulti } from './tmdb'
 
 // These tests use cached HTTP fixtures via fast-forward library (CacheMode.READ_ONLY in test env)
 // Fixtures are stored in test/fixtures/http/tmdb/
@@ -130,6 +130,59 @@ describe('TMDB Service Integration', () => {
 			const bb = results.tv.find((t) => t.tmdbId === 1396)
 			expect(bb).toBeDefined()
 			expect(bb?.title).toBe('Breaking Bad')
+		})
+	})
+
+	describe('fetchMovieDetails', () => {
+		it('fetches movie details with release dates', async () => {
+			const movie = await fetchMovieDetails(27205) // Inception
+
+			expect(movie.tmdbId).toBe(27205)
+			expect(movie.title).toBe('Inception')
+			expect(movie.year).toBe(2010)
+			expect(movie.runtimeMins).toBe(148)
+			expect(movie.genres).toContain('Action')
+			expect(movie.genres).toContain('Science Fiction')
+		})
+
+		it('includes poster and backdrop URLs', async () => {
+			const movie = await fetchMovieDetails(27205)
+
+			expect(movie.posterUrl).toMatch(/^https:\/\/image\.tmdb\.org\/t\/p\/w500\//)
+			expect(movie.backdropUrl).toMatch(/^https:\/\/image\.tmdb\.org\/t\/p\/w780\//)
+		})
+
+		it('includes IMDB ID', async () => {
+			const movie = await fetchMovieDetails(27205)
+
+			expect(movie.imdbId).toBe('tt1375666')
+		})
+
+		it('includes release dates and content rating', async () => {
+			const movie = await fetchMovieDetails(27205)
+
+			// Inception has US theatrical release
+			expect(movie.cinemaReleaseDate).toBeDefined()
+			expect(movie.contentRating).toBeDefined()
+		})
+
+		it('includes alternate titles deduplicated', async () => {
+			const movie = await fetchMovieDetails(27205)
+
+			// alternateTitles should be array with unique titles
+			expect(Array.isArray(movie.alternateTitles)).toBe(true)
+			// No duplicates
+			const uniqueTitles = new Set(movie.alternateTitles.map((t) => t.toLowerCase()))
+			expect(uniqueTitles.size).toBe(movie.alternateTitles.length)
+			// Should not include original title
+			expect(movie.alternateTitles.map((t) => t.toLowerCase())).not.toContain('inception')
+		})
+
+		it('includes synopsis', async () => {
+			const movie = await fetchMovieDetails(27205)
+
+			expect(movie.synopsis).toBeDefined()
+			expect(movie.synopsis).toContain('inception')
 		})
 	})
 

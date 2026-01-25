@@ -45,13 +45,13 @@
 - [x] Test orphan cleanup on process exit
 - [x] Test NZBGet API failure handling
 
-### TMDB Service
+### TMDB Service ✅ Complete
 - [x] Test actual API calls (not just mappers)
 - [x] Test `searchMulti()` aggregation
 - [x] Test `fetchSeriesPreview()` and `fetchSeriesWithEpisodes()`
 - [x] Test `checkNeedsYearDisambiguation()` logic
-- [ ] Test `fetchMovieDetails()` (needs cached fixture)
-- [ ] Test API error handling/retries
+- [x] Test `fetchMovieDetails()` (needs cached fixture)
+- [x] Test API error handling/retries (error handlers return defaults: [], null, false)
 
 ### Indexer Service ✅ Complete
 - [x] Test NZB download with error handling
