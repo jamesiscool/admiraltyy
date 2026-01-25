@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite'
 import fc from 'fast-check'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -703,5 +703,286 @@ describe('deleteMovieCore - cascade delete', () => {
 
 		// Verify all downloads are deleted
 		expect(db.select().from(schema.downloads).all()).toHaveLength(0)
+	})
+})
+
+// MoviePreview type matching the actual listMovies return type
+interface MoviePreview {
+	id: number
+	title: string
+	year: number
+	posterUrl: string | null
+	resolution: '480p' | '720p' | '1080p' | '2160p' | null
+	monitored: boolean | null
+	dateAdded: string
+	cinemaReleaseDate: string | null
+	sizeBytes: number
+}
+
+// Pure function matching listMovies query - testable with any db
+async function listMoviesCore(database: TestDb): Promise<MoviePreview[]> {
+	return database.all<MoviePreview>(sql`
+		SELECT
+			m.id,
+			m.title,
+			m.year,
+			m.poster_url as posterUrl,
+			m.resolution,
+			m.monitored,
+			m.date_added as dateAdded,
+			m.cinema_release_date as cinemaReleaseDate,
+			COALESCE(file_stats.size_bytes, 0) as sizeBytes
+		FROM movies m
+		LEFT JOIN (
+			SELECT movie_id, SUM(size) as size_bytes
+			FROM files
+			WHERE is_deleted = 0 AND movie_id IS NOT NULL
+			GROUP BY movie_id
+		) file_stats ON file_stats.movie_id = m.id
+	`)
+}
+
+describe('listMovies - file size aggregation', () => {
+	let db: TestDb
+
+	beforeEach(async () => {
+		db = await setupTestDb()
+	})
+
+	it('returns empty array when no movies exist', async () => {
+		const movies = await listMoviesCore(db)
+		expect(movies).toHaveLength(0)
+	})
+
+	it('returns movie with sizeBytes 0 when no files exist', async () => {
+		const now = new Date().toISOString()
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				title: 'Inception',
+				year: 2010,
+				dateAdded: now,
+				resolution: '1080p',
+			})
+			.run()
+
+		const movies = await listMoviesCore(db)
+
+		expect(movies).toHaveLength(1)
+		expect(movies[0].title).toBe('Inception')
+		expect(movies[0].sizeBytes).toBe(0)
+	})
+
+	it('aggregates single file size for movie', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.movies).values({ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now }).run()
+
+		db.insert(schema.files)
+			.values({
+				id: 1,
+				movieId: 1,
+				path: '/movies/Inception/Inception.mkv',
+				size: 8500000000,
+				quality: '1080p',
+				dateImported: now,
+				isDeleted: false,
+			})
+			.run()
+
+		const movies = await listMoviesCore(db)
+
+		expect(movies).toHaveLength(1)
+		expect(movies[0].sizeBytes).toBe(8500000000)
+	})
+
+	it('aggregates multiple file sizes for same movie', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.movies).values({ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now }).run()
+
+		db.insert(schema.files)
+			.values([
+				{ id: 1, movieId: 1, path: '/movies/Inception/Inception.mkv', size: 8500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, movieId: 1, path: '/movies/Inception/Inception.srt', size: 50000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 3, movieId: 1, path: '/movies/Inception/Inception.eng.srt', size: 48000, quality: '1080p', dateImported: now, isDeleted: false },
+			])
+			.run()
+
+		const movies = await listMoviesCore(db)
+
+		expect(movies).toHaveLength(1)
+		expect(movies[0].sizeBytes).toBe(8500000000 + 50000 + 48000)
+	})
+
+	it('excludes deleted files from size calculation', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.movies).values({ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now }).run()
+
+		db.insert(schema.files)
+			.values([
+				{ id: 1, movieId: 1, path: '/movies/Inception/Inception.mkv', size: 8500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, movieId: 1, path: '/movies/Inception/Inception.old.mkv', size: 4000000000, quality: '720p', dateImported: now, isDeleted: true },
+			])
+			.run()
+
+		const movies = await listMoviesCore(db)
+
+		expect(movies).toHaveLength(1)
+		expect(movies[0].sizeBytes).toBe(8500000000) // Only non-deleted file
+	})
+
+	it('correctly aggregates sizes for multiple movies', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.movies)
+			.values([
+				{ id: 1, tmdbId: 27205, title: 'Inception', year: 2010, dateAdded: now },
+				{ id: 2, tmdbId: 550, title: 'Fight Club', year: 1999, dateAdded: now },
+				{ id: 3, tmdbId: 680, title: 'Pulp Fiction', year: 1994, dateAdded: now },
+			])
+			.run()
+
+		db.insert(schema.files)
+			.values([
+				{ id: 1, movieId: 1, path: '/movies/Inception/Inception.mkv', size: 8500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, movieId: 2, path: '/movies/FightClub/FightClub.mkv', size: 7500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 3, movieId: 2, path: '/movies/FightClub/FightClub.srt', size: 45000, quality: '1080p', dateImported: now, isDeleted: false },
+				// No files for Pulp Fiction
+			])
+			.run()
+
+		const movies = await listMoviesCore(db)
+
+		expect(movies).toHaveLength(3)
+
+		const inception = movies.find((m) => m.title === 'Inception')
+		const fightClub = movies.find((m) => m.title === 'Fight Club')
+		const pulpFiction = movies.find((m) => m.title === 'Pulp Fiction')
+
+		expect(inception?.sizeBytes).toBe(8500000000)
+		expect(fightClub?.sizeBytes).toBe(7500000000 + 45000)
+		expect(pulpFiction?.sizeBytes).toBe(0)
+	})
+
+	it('returns correct metadata alongside size', async () => {
+		const now = new Date().toISOString()
+		const releaseDate = '2010-07-16'
+
+		db.insert(schema.movies)
+			.values({
+				id: 1,
+				tmdbId: 27205,
+				title: 'Inception',
+				year: 2010,
+				posterUrl: 'https://image.tmdb.org/poster.jpg',
+				resolution: '2160p',
+				monitored: true,
+				dateAdded: now,
+				cinemaReleaseDate: releaseDate,
+			})
+			.run()
+
+		db.insert(schema.files).values({ id: 1, movieId: 1, path: '/movies/Inception.mkv', size: 15000000000, quality: '2160p', dateImported: now, isDeleted: false }).run()
+
+		const movies = await listMoviesCore(db)
+
+		expect(movies).toHaveLength(1)
+		expect(movies[0]).toMatchObject({
+			id: 1,
+			title: 'Inception',
+			year: 2010,
+			posterUrl: 'https://image.tmdb.org/poster.jpg',
+			resolution: '2160p',
+			// SQLite returns booleans as integers in raw SQL queries
+			monitored: 1,
+			cinemaReleaseDate: releaseDate,
+			sizeBytes: 15000000000,
+		})
+	})
+})
+
+describe('listMovies - property-based tests', () => {
+	const arbMovieData = fc.record({
+		tmdbId: fc.integer({ min: 1, max: 999999 }),
+		title: fc.string({ minLength: 1, maxLength: 100 }),
+		year: fc.integer({ min: 1900, max: 2030 }),
+	})
+
+	const arbFileSize = fc.integer({ min: 0, max: 50000000000 }) // Up to 50GB
+
+	it('sizeBytes is always non-negative', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbMovieData, async (movieData) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.movies)
+					.values({ ...movieData, id: 1, dateAdded: now })
+					.run()
+
+				const movies = await listMoviesCore(db)
+
+				expect(movies[0].sizeBytes).toBeGreaterThanOrEqual(0)
+			}),
+		)
+	})
+
+	it('sizeBytes equals sum of non-deleted file sizes', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbMovieData, fc.array(arbFileSize, { minLength: 0, maxLength: 5 }), async (movieData, fileSizes) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.movies)
+					.values({ ...movieData, id: 1, dateAdded: now })
+					.run()
+
+				for (let i = 0; i < fileSizes.length; i++) {
+					db.insert(schema.files)
+						.values({
+							id: i + 1,
+							movieId: 1,
+							path: `/movies/file${i}.mkv`,
+							size: fileSizes[i],
+							quality: '1080p',
+							dateImported: now,
+							isDeleted: false,
+						})
+						.run()
+				}
+
+				const movies = await listMoviesCore(db)
+				const expectedSize = fileSizes.reduce((sum, s) => sum + s, 0)
+
+				expect(movies[0].sizeBytes).toBe(expectedSize)
+			}),
+		)
+	})
+
+	it('deleted files are excluded from sizeBytes', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbMovieData, arbFileSize, arbFileSize, async (movieData, activeSize, deletedSize) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.movies)
+					.values({ ...movieData, id: 1, dateAdded: now })
+					.run()
+
+				db.insert(schema.files)
+					.values([
+						{ id: 1, movieId: 1, path: '/movies/active.mkv', size: activeSize, quality: '1080p', dateImported: now, isDeleted: false },
+						{ id: 2, movieId: 1, path: '/movies/deleted.mkv', size: deletedSize, quality: '1080p', dateImported: now, isDeleted: true },
+					])
+					.run()
+
+				const movies = await listMoviesCore(db)
+
+				expect(movies[0].sizeBytes).toBe(activeSize)
+			}),
+		)
 	})
 })

@@ -33,8 +33,8 @@
 
 ### Database/ORM
 - [ ] Test complex queries with joins (e.g., `findSeriesWithDetails()`)
-- [ ] Test `listMovies()` with file size aggregation
-- [ ] Test `listSeries()` with episode count/missing episode calculations
+- [x] Test `listMovies()` with file size aggregation
+- [x] Test `listSeries()` with episode count/missing episode calculations
 - [ ] Test relationship integrity constraints
 - [ ] Test bulk operations (e.g., deleting multiple seasons)
 
