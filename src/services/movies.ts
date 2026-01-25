@@ -4,6 +4,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import type { BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite'
 import { z } from 'zod'
 import { db, schema } from '@/db'
+import type * as schemaTypes from '@/db/schema'
 import { type Resolution, resolutions } from '@/db/schema'
 import { downloadNzb, searchMovieReleases } from '@/services/indexers'
 import { logInfo } from '@/services/logs'
@@ -212,86 +213,109 @@ export const searchMovieReleasesServerFn = createServerFn({ method: 'POST' })
 		return releases
 	})
 
+// Grab release input schema
+export const grabReleaseInput = z.object({
+	movieId: z.string(),
+	guid: z.string(),
+	title: z.string(),
+	downloadUrl: z.string(),
+	infoUrl: z.string().optional(),
+	size: z.number(),
+	publishDate: z.string(),
+	indexerId: z.string(),
+	indexerName: z.string(),
+})
+
+export type GrabReleaseInput = z.infer<typeof grabReleaseInput>
+
+// Dependencies for grab release operation
+export interface GrabReleaseDeps {
+	database: BunSQLiteDatabase<typeof schemaTypes>
+	downloadNzbFn: (url: string, filename: string) => Promise<string>
+	appendNzbFn: (options: { filename: string; nzbContent: string; category?: string }) => Promise<number>
+	readFileFn: (path: string) => Promise<Buffer>
+	notifyActivityFn?: () => void
+}
+
+// Pure function for grabbing a movie release - testable with injected deps
+export async function grabMovieReleaseCore(data: GrabReleaseInput, deps: GrabReleaseDeps) {
+	const numId = parseInt(data.movieId, 10)
+	if (Number.isNaN(numId)) {
+		throw new Error('Invalid movie ID')
+	}
+
+	const now = new Date().toISOString()
+
+	// Download the NZB file
+	const nzbPath = await deps.downloadNzbFn(data.downloadUrl, data.title)
+
+	// Read NZB content and encode as base64
+	const nzbContent = await deps.readFileFn(nzbPath)
+	const base64Content = nzbContent.toString('base64')
+
+	// Queue to NZBGet
+	const sanitizedFilename = `${data.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.nzb`
+	const nzbId = await deps.appendNzbFn({
+		filename: sanitizedFilename,
+		nzbContent: base64Content,
+		category: 'movies',
+	})
+
+	if (nzbId <= 0) {
+		console.error('[Movies] NZBGet returned invalid ID:', nzbId)
+		throw new Error('NZBGet failed to queue download')
+	}
+
+	// Trigger fast polling for download progress
+	deps.notifyActivityFn?.()
+
+	// Create release record
+	const [release] = await deps.database
+		.insert(schema.releases)
+		.values({
+			movieId: numId,
+			guid: data.guid,
+			title: data.title,
+			downloadUrl: data.downloadUrl,
+			infoUrl: data.infoUrl,
+			size: data.size,
+			publishDate: data.publishDate,
+			indexerId: data.indexerId,
+			indexerName: data.indexerName,
+			nzbPath,
+			grabbedAt: now,
+		})
+		.returning()
+
+	// Create download record
+	const [download] = await deps.database
+		.insert(schema.downloads)
+		.values({
+			releaseId: release.id,
+			nzbId,
+			title: data.title,
+			status: 'queued',
+			size: data.size,
+			queuedAt: now,
+		})
+		.returning()
+
+	console.log(`[Movies] NZB queued: NZBID=${nzbId}, downloadId=${download.id}, title="${data.title}"`)
+	return { release, download }
+}
+
 // Grab a movie release
 export const grabMovieRelease = createServerFn({ method: 'POST' })
-	.inputValidator(
-		z.object({
-			movieId: z.string(),
-			guid: z.string(),
-			title: z.string(),
-			downloadUrl: z.string(),
-			infoUrl: z.string().optional(),
-			size: z.number(),
-			publishDate: z.string(),
-			indexerId: z.string(),
-			indexerName: z.string(),
-		}),
-	)
+	.inputValidator(grabReleaseInput)
 	.handler(async ({ data }) => {
-		const numId = parseInt(data.movieId, 10)
-		if (Number.isNaN(numId)) {
-			throw new Error('Invalid movie ID')
-		}
-
-		const now = new Date().toISOString()
-
-		// Download the NZB file
-		const nzbPath = await downloadNzb(data.downloadUrl, data.title)
-
-		// Read NZB content and encode as base64
 		const { readFile } = await import('node:fs/promises')
-		const nzbContent = await readFile(nzbPath)
-		const base64Content = nzbContent.toString('base64')
-
-		// Queue to NZBGet
-		const sanitizedFilename = `${data.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.nzb`
-		const nzbId = await appendNzb({
-			filename: sanitizedFilename,
-			nzbContent: base64Content,
-			category: 'movies',
+		return grabMovieReleaseCore(data, {
+			database: db,
+			downloadNzbFn: downloadNzb,
+			appendNzbFn: appendNzb,
+			readFileFn: readFile,
+			notifyActivityFn: notifyDownloadActivity,
 		})
-
-		if (nzbId <= 0) {
-			console.error('[Movies] NZBGet returned invalid ID:', nzbId)
-			throw new Error('NZBGet failed to queue download')
-		}
-
-		// Trigger fast polling for download progress
-		notifyDownloadActivity()
-
-		// Create release record
-		const [release] = await db
-			.insert(schema.releases)
-			.values({
-				movieId: numId,
-				guid: data.guid,
-				title: data.title,
-				downloadUrl: data.downloadUrl,
-				infoUrl: data.infoUrl,
-				size: data.size,
-				publishDate: data.publishDate,
-				indexerId: data.indexerId,
-				indexerName: data.indexerName,
-				nzbPath,
-				grabbedAt: now,
-			})
-			.returning()
-
-		// Create download record
-		const [download] = await db
-			.insert(schema.downloads)
-			.values({
-				releaseId: release.id,
-				nzbId,
-				title: data.title,
-				status: 'queued',
-				size: data.size,
-				queuedAt: now,
-			})
-			.returning()
-
-		console.log(`[Movies] NZB queued: NZBID=${nzbId}, downloadId=${download.id}, title="${data.title}"`)
-		return { release, download }
 	})
 
 // Delete a movie

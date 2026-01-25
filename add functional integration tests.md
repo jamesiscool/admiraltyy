@@ -5,7 +5,7 @@
 ### Movie Add Workflow
 - [x] Test TMDB fetch + DB insert for `createMovie()`
 - [x] Test duplicate movie detection
-- [ ] Test `grabMovieRelease()`: NZB download -> NZBGet queue -> DB record
+- [x] Test `grabMovieRelease()`: NZB download -> NZBGet queue -> DB record
 - [ ] Test movie file import: download dir -> destination -> DB record
 - [ ] Test cascade delete for movies (movie -> files -> releases -> downloads)
 
