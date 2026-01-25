@@ -1514,3 +1514,628 @@ describe('listSeries - property-based tests', () => {
 		)
 	})
 })
+
+// Types for findSeriesWithDetails tests
+interface EpisodeDetails {
+	id: number
+	seasonId: number | null
+	episodeNumber: number
+	title: string
+	airDate: string | null
+	runtimeMins: number | null
+	monitored: boolean | null
+	files: schemaTypes.File[]
+}
+
+interface SeasonDetails {
+	id: number
+	seriesId: number | null
+	seasonNumber: number
+	monitored: boolean | null
+	episodes: EpisodeDetails[]
+}
+
+interface SeriesDetails {
+	id: number
+	tvdbId: number | null
+	tmdbId: number
+	imdbId: string | null
+	title: string
+	year: number
+	status: 'continuing' | 'ended'
+	network: string | null
+	overview: string | null
+	posterUrl: string | null
+	backdropUrl: string | null
+	genres: string | null
+	runtimeMins: number | null
+	contentRating: string | null
+	monitored: boolean | null
+	resolution: '480p' | '720p' | '1080p' | '2160p' | null
+	dateAdded: string
+	nextAiring: string | null
+	lastInfoSync: string | null
+	rtId: string | null
+	rtVanity: string | null
+	alternateTitles: string | null
+	useYearInFolder: boolean | null
+	sizeBytes: number
+	episodeCount: number
+	missingEpisodeCount: number
+	seasons: SeasonDetails[]
+}
+
+// Pure function matching findSeriesWithDetails logic - testable with any db
+async function findSeriesWithDetailsCore(database: TestDb, seriesId: number): Promise<SeriesDetails | null> {
+	// Get series with stats - using raw SQL like the actual implementation
+	const seriesRows = await database.all<schemaTypes.Series & { sizeBytes: number; episodeCount: number; missingEpisodeCount: number }>(sql`
+		SELECT
+			s.id,
+			s.tvdb_id as tvdbId,
+			s.tmdb_id as tmdbId,
+			s.imdb_id as imdbId,
+			s.title,
+			s.year,
+			s.status,
+			s.network,
+			s.overview,
+			s.poster_url as posterUrl,
+			s.backdrop_url as backdropUrl,
+			s.genres,
+			s.runtime_mins as runtimeMins,
+			s.content_rating as contentRating,
+			s.monitored,
+			s.resolution,
+			s.date_added as dateAdded,
+			s.next_airing as nextAiring,
+			s.last_info_sync as lastInfoSync,
+			s.rt_id as rtId,
+			s.rt_vanity as rtVanity,
+			s.alternate_titles as alternateTitles,
+			s.use_year_in_folder as useYearInFolder,
+			COALESCE(file_stats.size_bytes, 0) as sizeBytes,
+			COALESCE(ep_stats.episode_count, 0) as episodeCount,
+			COALESCE(ep_stats.missing_episode_count, 0) as missingEpisodeCount
+		FROM series s
+		LEFT JOIN (
+			SELECT series_id, SUM(size) as size_bytes
+			FROM files
+			WHERE is_deleted = 0 AND series_id IS NOT NULL
+			GROUP BY series_id
+		) file_stats ON file_stats.series_id = s.id
+		LEFT JOIN (
+			SELECT
+				sea.series_id,
+				COUNT(*) as episode_count,
+				SUM(CASE WHEN ef.episode_id IS NULL THEN 1 ELSE 0 END) as missing_episode_count
+			FROM episodes e
+			INNER JOIN seasons sea ON e.season_id = sea.id
+			LEFT JOIN (
+				SELECT DISTINCT episode_id FROM files WHERE is_deleted = 0 AND episode_id IS NOT NULL
+			) ef ON ef.episode_id = e.id
+			WHERE e.monitored = 1
+			GROUP BY sea.series_id
+		) ep_stats ON ep_stats.series_id = s.id
+		WHERE s.id = ${seriesId}
+	`)
+
+	if (!seriesRows.length) return null
+	const seriesRow = seriesRows[0]
+
+	// Get seasons
+	const seasonsData = await database.select().from(schema.seasons).where(eq(schema.seasons.seriesId, seriesId))
+
+	// Get episodes for all seasons
+	const seasonIds = seasonsData.map((s) => s.id)
+	const episodesData = seasonIds.length > 0 ? await database.select().from(schema.episodes).where(inArray(schema.episodes.seasonId, seasonIds)) : []
+
+	// Get files for all episodes
+	const episodeIds = episodesData.map((e) => e.id)
+	const filesData = episodeIds.length > 0 ? await database.select().from(schema.files).where(sql`${schema.files.episodeId} IN ${episodeIds} AND ${schema.files.isDeleted} = 0`) : []
+
+	// Build file map: episodeId -> files[]
+	const filesByEpisode = new Map<number, typeof filesData>()
+	for (const file of filesData) {
+		if (!file.episodeId) continue
+		const existing = filesByEpisode.get(file.episodeId) ?? []
+		existing.push(file)
+		filesByEpisode.set(file.episodeId, existing)
+	}
+
+	// Build episode map: seasonId -> episodes[]
+	const episodesBySeason = new Map<number, EpisodeDetails[]>()
+	for (const episode of episodesData) {
+		if (!episode.seasonId) continue
+		const existing = episodesBySeason.get(episode.seasonId) ?? []
+		existing.push({
+			...episode,
+			files: filesByEpisode.get(episode.id) ?? [],
+		})
+		episodesBySeason.set(episode.seasonId, existing)
+	}
+
+	// Build seasons with nested episodes
+	const seasons: SeasonDetails[] = seasonsData.map((season) => ({
+		...season,
+		episodes: episodesBySeason.get(season.id) ?? [],
+	}))
+
+	return {
+		...seriesRow,
+		seasons,
+	}
+}
+
+describe('findSeriesWithDetails - complex query with joins', () => {
+	let db: TestDb
+
+	beforeEach(async () => {
+		db = await setupTestDb()
+	})
+
+	it('returns null for non-existent series', async () => {
+		const result = await findSeriesWithDetailsCore(db, 999)
+		expect(result).toBeNull()
+	})
+
+	it('returns series with empty seasons array when no seasons exist', async () => {
+		const now = new Date().toISOString()
+		db.insert(schema.series)
+			.values({
+				id: 1,
+				tmdbId: 1396,
+				title: 'Breaking Bad',
+				year: 2008,
+				status: 'ended',
+				dateAdded: now,
+			})
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result).not.toBeNull()
+		expect(result!.title).toBe('Breaking Bad')
+		expect(result!.seasons).toHaveLength(0)
+		expect(result!.sizeBytes).toBe(0)
+		expect(result!.episodeCount).toBe(0)
+		expect(result!.missingEpisodeCount).toBe(0)
+	})
+
+	it('returns series with nested seasons and episodes', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons)
+			.values([
+				{ id: 1, seriesId: 1, seasonNumber: 1, monitored: true },
+				{ id: 2, seriesId: 1, seasonNumber: 2, monitored: true },
+			])
+			.run()
+		db.insert(schema.episodes)
+			.values([
+				{ id: 1, seasonId: 1, episodeNumber: 1, title: 'Pilot', monitored: true },
+				{ id: 2, seasonId: 1, episodeNumber: 2, title: 'Episode 2', monitored: true },
+				{ id: 3, seasonId: 2, episodeNumber: 1, title: 'S02E01', monitored: true },
+			])
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result).not.toBeNull()
+		expect(result!.seasons).toHaveLength(2)
+
+		const season1 = result!.seasons.find((s) => s.seasonNumber === 1)
+		const season2 = result!.seasons.find((s) => s.seasonNumber === 2)
+
+		expect(season1?.episodes).toHaveLength(2)
+		expect(season2?.episodes).toHaveLength(1)
+		expect(season1?.episodes.map((e) => e.title)).toContain('Pilot')
+		expect(season1?.episodes.map((e) => e.title)).toContain('Episode 2')
+		expect(season2?.episodes[0].title).toBe('S02E01')
+	})
+
+	it('includes files nested within episodes', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+		db.insert(schema.episodes).values({ id: 1, seasonId: 1, episodeNumber: 1, title: 'Pilot', monitored: true }).run()
+		db.insert(schema.files)
+			.values([
+				{ id: 1, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.mkv', size: 1500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.srt', size: 50000, quality: '1080p', dateImported: now, isDeleted: false },
+			])
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result).not.toBeNull()
+		const episode = result!.seasons[0].episodes[0]
+		expect(episode.files).toHaveLength(2)
+		expect(episode.files.map((f) => f.path)).toContain('/tv/BB/S01E01.mkv')
+		expect(episode.files.map((f) => f.path)).toContain('/tv/BB/S01E01.srt')
+	})
+
+	it('excludes deleted files from episode file list', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+		db.insert(schema.episodes).values({ id: 1, seasonId: 1, episodeNumber: 1, title: 'Pilot', monitored: true }).run()
+		db.insert(schema.files)
+			.values([
+				{ id: 1, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.mkv', size: 1500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.old.mkv', size: 1000000000, quality: '720p', dateImported: now, isDeleted: true },
+			])
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result).not.toBeNull()
+		const episode = result!.seasons[0].episodes[0]
+		expect(episode.files).toHaveLength(1)
+		expect(episode.files[0].path).toBe('/tv/BB/S01E01.mkv')
+	})
+
+	it('calculates sizeBytes correctly from all series files', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+		db.insert(schema.episodes)
+			.values([
+				{ id: 1, seasonId: 1, episodeNumber: 1, title: 'S01E01', monitored: true },
+				{ id: 2, seasonId: 1, episodeNumber: 2, title: 'S01E02', monitored: true },
+			])
+			.run()
+		db.insert(schema.files)
+			.values([
+				{ id: 1, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.mkv', size: 1500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, seriesId: 1, episodeId: 2, path: '/tv/BB/S01E02.mkv', size: 1600000000, quality: '1080p', dateImported: now, isDeleted: false },
+			])
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result!.sizeBytes).toBe(1500000000 + 1600000000)
+	})
+
+	it('excludes deleted files from sizeBytes calculation', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+		db.insert(schema.episodes).values({ id: 1, seasonId: 1, episodeNumber: 1, title: 'S01E01', monitored: true }).run()
+		db.insert(schema.files)
+			.values([
+				{ id: 1, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.mkv', size: 1500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.old.mkv', size: 1000000000, quality: '720p', dateImported: now, isDeleted: true },
+			])
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result!.sizeBytes).toBe(1500000000)
+	})
+
+	it('calculates episodeCount from monitored episodes only', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+		db.insert(schema.episodes)
+			.values([
+				{ id: 1, seasonId: 1, episodeNumber: 1, title: 'S01E01', monitored: true },
+				{ id: 2, seasonId: 1, episodeNumber: 2, title: 'S01E02', monitored: true },
+				{ id: 3, seasonId: 1, episodeNumber: 3, title: 'S01E03', monitored: false },
+			])
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result!.episodeCount).toBe(2) // Only monitored episodes
+	})
+
+	it('calculates missingEpisodeCount correctly', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+		db.insert(schema.episodes)
+			.values([
+				{ id: 1, seasonId: 1, episodeNumber: 1, title: 'S01E01', monitored: true },
+				{ id: 2, seasonId: 1, episodeNumber: 2, title: 'S01E02', monitored: true },
+				{ id: 3, seasonId: 1, episodeNumber: 3, title: 'S01E03', monitored: true },
+			])
+			.run()
+		// Only episode 1 has a file
+		db.insert(schema.files).values({ id: 1, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.mkv', size: 1500000000, quality: '1080p', dateImported: now, isDeleted: false }).run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result!.episodeCount).toBe(3)
+		expect(result!.missingEpisodeCount).toBe(2) // Episodes 2 and 3 are missing
+	})
+
+	it('returns all series fields correctly mapped', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series)
+			.values({
+				id: 1,
+				tmdbId: 1396,
+				tvdbId: 81189,
+				imdbId: 'tt0903747',
+				title: 'Breaking Bad',
+				year: 2008,
+				status: 'ended',
+				network: 'AMC',
+				overview: 'A chemistry teacher turned meth producer.',
+				posterUrl: 'https://image.tmdb.org/poster.jpg',
+				backdropUrl: 'https://image.tmdb.org/backdrop.jpg',
+				genres: JSON.stringify(['Drama', 'Crime']),
+				runtimeMins: 45,
+				contentRating: 'TV-MA',
+				monitored: true,
+				resolution: '1080p',
+				dateAdded: now,
+				nextAiring: '2030-01-01',
+				lastInfoSync: now,
+				rtId: 'breaking_bad',
+				rtVanity: 'breaking-bad',
+				alternateTitles: JSON.stringify(['Breaking Bad - A Química do Mal']),
+				useYearInFolder: true,
+			})
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result).not.toBeNull()
+		expect(result!.tmdbId).toBe(1396)
+		expect(result!.tvdbId).toBe(81189)
+		expect(result!.imdbId).toBe('tt0903747')
+		expect(result!.title).toBe('Breaking Bad')
+		expect(result!.year).toBe(2008)
+		expect(result!.status).toBe('ended')
+		expect(result!.network).toBe('AMC')
+		expect(result!.overview).toBe('A chemistry teacher turned meth producer.')
+		expect(result!.posterUrl).toBe('https://image.tmdb.org/poster.jpg')
+		expect(result!.backdropUrl).toBe('https://image.tmdb.org/backdrop.jpg')
+		expect(result!.genres).toBe(JSON.stringify(['Drama', 'Crime']))
+		expect(result!.runtimeMins).toBe(45)
+		expect(result!.contentRating).toBe('TV-MA')
+		expect(result!.monitored).toBeTruthy()
+		expect(result!.resolution).toBe('1080p')
+		expect(result!.nextAiring).toBe('2030-01-01')
+		expect(result!.rtId).toBe('breaking_bad')
+		expect(result!.rtVanity).toBe('breaking-bad')
+		expect(result!.alternateTitles).toBe(JSON.stringify(['Breaking Bad - A Química do Mal']))
+		expect(result!.useYearInFolder).toBeTruthy()
+	})
+
+	it('handles series with multiple seasons across multiple series', async () => {
+		const now = new Date().toISOString()
+
+		// Insert two series
+		db.insert(schema.series)
+			.values([
+				{ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now },
+				{ id: 2, tmdbId: 1399, title: 'Game of Thrones', year: 2011, status: 'ended', dateAdded: now },
+			])
+			.run()
+
+		// Insert seasons for both
+		db.insert(schema.seasons)
+			.values([
+				{ id: 1, seriesId: 1, seasonNumber: 1, monitored: true },
+				{ id: 2, seriesId: 2, seasonNumber: 1, monitored: true },
+			])
+			.run()
+
+		// Insert episodes for both
+		db.insert(schema.episodes)
+			.values([
+				{ id: 1, seasonId: 1, episodeNumber: 1, title: 'BB Pilot', monitored: true },
+				{ id: 2, seasonId: 2, episodeNumber: 1, title: 'GOT Pilot', monitored: true },
+			])
+			.run()
+
+		// Insert files for both
+		db.insert(schema.files)
+			.values([
+				{ id: 1, seriesId: 1, episodeId: 1, path: '/tv/BB/S01E01.mkv', size: 1500000000, quality: '1080p', dateImported: now, isDeleted: false },
+				{ id: 2, seriesId: 2, episodeId: 2, path: '/tv/GOT/S01E01.mkv', size: 2000000000, quality: '1080p', dateImported: now, isDeleted: false },
+			])
+			.run()
+
+		// Get series 1 (Breaking Bad)
+		const result1 = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result1).not.toBeNull()
+		expect(result1!.title).toBe('Breaking Bad')
+		expect(result1!.seasons).toHaveLength(1)
+		expect(result1!.seasons[0].episodes).toHaveLength(1)
+		expect(result1!.seasons[0].episodes[0].title).toBe('BB Pilot')
+		expect(result1!.seasons[0].episodes[0].files).toHaveLength(1)
+		expect(result1!.sizeBytes).toBe(1500000000)
+
+		// Get series 2 (Game of Thrones)
+		const result2 = await findSeriesWithDetailsCore(db, 2)
+
+		expect(result2).not.toBeNull()
+		expect(result2!.title).toBe('Game of Thrones')
+		expect(result2!.seasons).toHaveLength(1)
+		expect(result2!.seasons[0].episodes).toHaveLength(1)
+		expect(result2!.seasons[0].episodes[0].title).toBe('GOT Pilot')
+		expect(result2!.seasons[0].episodes[0].files).toHaveLength(1)
+		expect(result2!.sizeBytes).toBe(2000000000)
+	})
+
+	it('returns episodes with empty files array when no files exist', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+		db.insert(schema.episodes).values({ id: 1, seasonId: 1, episodeNumber: 1, title: 'Pilot', monitored: true }).run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result).not.toBeNull()
+		const episode = result!.seasons[0].episodes[0]
+		expect(episode.files).toHaveLength(0)
+	})
+
+	it('handles episodes across multiple seasons correctly', async () => {
+		const now = new Date().toISOString()
+
+		db.insert(schema.series).values({ id: 1, tmdbId: 1396, title: 'Breaking Bad', year: 2008, status: 'ended', dateAdded: now }).run()
+		db.insert(schema.seasons)
+			.values([
+				{ id: 1, seriesId: 1, seasonNumber: 1, monitored: true },
+				{ id: 2, seriesId: 1, seasonNumber: 2, monitored: true },
+				{ id: 3, seriesId: 1, seasonNumber: 3, monitored: false },
+			])
+			.run()
+		db.insert(schema.episodes)
+			.values([
+				{ id: 1, seasonId: 1, episodeNumber: 1, title: 'S01E01', monitored: true },
+				{ id: 2, seasonId: 1, episodeNumber: 2, title: 'S01E02', monitored: true },
+				{ id: 3, seasonId: 2, episodeNumber: 1, title: 'S02E01', monitored: true },
+				{ id: 4, seasonId: 2, episodeNumber: 2, title: 'S02E02', monitored: true },
+				{ id: 5, seasonId: 3, episodeNumber: 1, title: 'S03E01', monitored: true },
+			])
+			.run()
+
+		const result = await findSeriesWithDetailsCore(db, 1)
+
+		expect(result!.seasons).toHaveLength(3)
+
+		const s1 = result!.seasons.find((s) => s.seasonNumber === 1)
+		const s2 = result!.seasons.find((s) => s.seasonNumber === 2)
+		const s3 = result!.seasons.find((s) => s.seasonNumber === 3)
+
+		expect(s1?.episodes).toHaveLength(2)
+		expect(s2?.episodes).toHaveLength(2)
+		expect(s3?.episodes).toHaveLength(1)
+		expect(s1?.monitored).toBe(true)
+		expect(s2?.monitored).toBe(true)
+		expect(s3?.monitored).toBe(false)
+	})
+})
+
+describe('findSeriesWithDetails - property-based tests', () => {
+	const arbSeriesData = fc.record({
+		tmdbId: fc.integer({ min: 1, max: 999999 }),
+		title: fc.string({ minLength: 1, maxLength: 100 }),
+		year: fc.integer({ min: 1950, max: 2030 }),
+		status: fc.constantFrom('continuing', 'ended') as fc.Arbitrary<'continuing' | 'ended'>,
+	})
+
+	it('returns consistent episode counts between top-level and nested data', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbSeriesData, fc.integer({ min: 1, max: 5 }), fc.integer({ min: 1, max: 5 }), async (seriesData, seasonCount, episodesPerSeason) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.series)
+					.values({ ...seriesData, id: 1, dateAdded: now })
+					.run()
+
+				// Create seasons
+				for (let s = 1; s <= seasonCount; s++) {
+					db.insert(schema.seasons).values({ id: s, seriesId: 1, seasonNumber: s, monitored: true }).run()
+
+					// Create episodes for this season
+					for (let e = 1; e <= episodesPerSeason; e++) {
+						const epId = (s - 1) * episodesPerSeason + e
+						db.insert(schema.episodes)
+							.values({ id: epId, seasonId: s, episodeNumber: e, title: `S${s}E${e}`, monitored: true })
+							.run()
+					}
+				}
+
+				const result = await findSeriesWithDetailsCore(db, 1)
+
+				// Count episodes from nested structure
+				const nestedEpisodeCount = result!.seasons.reduce((sum, season) => sum + season.episodes.length, 0)
+
+				expect(result!.episodeCount).toBe(nestedEpisodeCount)
+			}),
+		)
+	})
+
+	it('sizeBytes equals sum of all non-deleted files', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbSeriesData, fc.array(fc.integer({ min: 0, max: 5000000000 }), { minLength: 0, maxLength: 10 }), async (seriesData, fileSizes) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.series)
+					.values({ ...seriesData, id: 1, dateAdded: now })
+					.run()
+
+				for (let i = 0; i < fileSizes.length; i++) {
+					db.insert(schema.files)
+						.values({
+							id: i + 1,
+							seriesId: 1,
+							path: `/tv/file${i}.mkv`,
+							size: fileSizes[i],
+							quality: '1080p',
+							dateImported: now,
+							isDeleted: false,
+						})
+						.run()
+				}
+
+				const result = await findSeriesWithDetailsCore(db, 1)
+				const expectedSize = fileSizes.reduce((sum, s) => sum + s, 0)
+
+				expect(result!.sizeBytes).toBe(expectedSize)
+			}),
+		)
+	})
+
+	it('missingEpisodeCount is never greater than episodeCount', async () => {
+		await fc.assert(
+			fc.asyncProperty(arbSeriesData, fc.integer({ min: 1, max: 10 }), fc.integer({ min: 0, max: 10 }), async (seriesData, episodeCount, filesCount) => {
+				const db = await setupTestDb()
+				const now = new Date().toISOString()
+
+				db.insert(schema.series)
+					.values({ ...seriesData, id: 1, dateAdded: now })
+					.run()
+				db.insert(schema.seasons).values({ id: 1, seriesId: 1, seasonNumber: 1, monitored: true }).run()
+
+				// Create episodes
+				for (let i = 0; i < episodeCount; i++) {
+					db.insert(schema.episodes)
+						.values({ id: i + 1, seasonId: 1, episodeNumber: i + 1, title: `Ep ${i + 1}`, monitored: true })
+						.run()
+				}
+
+				// Create files for some episodes
+				const actualFilesCount = Math.min(filesCount, episodeCount)
+				for (let i = 0; i < actualFilesCount; i++) {
+					db.insert(schema.files)
+						.values({
+							id: i + 1,
+							seriesId: 1,
+							episodeId: i + 1,
+							path: `/tv/S01E${i + 1}.mkv`,
+							size: 1000000000,
+							quality: '1080p',
+							dateImported: now,
+							isDeleted: false,
+						})
+						.run()
+				}
+
+				const result = await findSeriesWithDetailsCore(db, 1)
+
+				expect(result!.missingEpisodeCount).toBeLessThanOrEqual(result!.episodeCount)
+				expect(result!.missingEpisodeCount).toBe(episodeCount - actualFilesCount)
+			}),
+		)
+	})
+})

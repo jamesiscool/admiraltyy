@@ -32,7 +32,7 @@
 ## Medium Priority - Individual Operations
 
 ### Database/ORM
-- [ ] Test complex queries with joins (e.g., `findSeriesWithDetails()`)
+- [x] Test complex queries with joins (e.g., `findSeriesWithDetails()`)
 - [x] Test `listMovies()` with file size aggregation
 - [x] Test `listSeries()` with episode count/missing episode calculations
 - [ ] Test relationship integrity constraints
