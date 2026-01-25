@@ -35,7 +35,7 @@
 - [x] Test complex queries with joins (e.g., `findSeriesWithDetails()`)
 - [x] Test `listMovies()` with file size aggregation
 - [x] Test `listSeries()` with episode count/missing episode calculations
-- [ ] Test relationship integrity constraints
+- [x] Test relationship integrity constraints
 - [ ] Test bulk operations (e.g., deleting multiple seasons)
 
 ### NZBGet Integration
