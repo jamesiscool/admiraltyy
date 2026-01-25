@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import { eq } from 'drizzle-orm'
 import { db, schema } from '@/db'
@@ -67,12 +67,12 @@ function parseQuality(title: string): string {
 }
 
 // Move file to destination
-function moveFile(src: string, destDir: string): string {
+async function moveFile(src: string, destDir: string): Promise<string> {
 	if (!existsSync(destDir)) {
 		mkdirSync(destDir, { recursive: true })
 	}
 	const destPath = join(destDir, basename(src))
-	copyFileSync(src, destPath)
+	await Bun.write(destPath, Bun.file(src))
 	rmSync(src)
 	return destPath
 }
@@ -171,7 +171,7 @@ export async function fileImport(downloadId: number): Promise<ImportResult> {
 
 	// Move video files and insert into files table
 	for (const videoPath of videoFiles) {
-		const newPath = moveFile(videoPath, destDir)
+		const newPath = await moveFile(videoPath, destDir)
 		const size = statSync(newPath).size
 
 		await db.insert(schema.files).values({
@@ -188,7 +188,7 @@ export async function fileImport(downloadId: number): Promise<ImportResult> {
 
 	// Move subtitle files (no db entry needed)
 	for (const subPath of subtitleFiles) {
-		moveFile(subPath, destDir)
+		await moveFile(subPath, destDir)
 	}
 
 	// Delete source folder
