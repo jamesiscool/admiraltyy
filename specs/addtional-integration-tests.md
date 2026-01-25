@@ -31,12 +31,12 @@
 
 ## Medium Priority - Individual Operations
 
-### Database/ORM
+### Database/ORM ✅ Complete
 - [x] Test complex queries with joins (e.g., `findSeriesWithDetails()`)
 - [x] Test `listMovies()` with file size aggregation
 - [x] Test `listSeries()` with episode count/missing episode calculations
 - [x] Test relationship integrity constraints
-- [ ] Test bulk operations (e.g., deleting multiple seasons)
+- [x] Test bulk operations (e.g., deleting multiple seasons)
 
 ### NZBGet Integration
 - [ ] Test NZBGet API initialization flow
