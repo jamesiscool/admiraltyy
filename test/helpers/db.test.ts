@@ -6,8 +6,8 @@ import { seedTestData, setupTestDb, type TestDb } from './db'
 describe('setupTestDb', () => {
 	let db: TestDb
 
-	beforeEach(() => {
-		db = setupTestDb()
+	beforeEach(async () => {
+		db = await setupTestDb()
 	})
 
 	it('creates all tables', () => {
@@ -44,7 +44,7 @@ describe('setupTestDb', () => {
 		expect(movies[0].tmdbId).toBe(550)
 	})
 
-	it('each call creates isolated db', () => {
+	it('each call creates isolated db', async () => {
 		db.insert(schema.movies)
 			.values({
 				tmdbId: 1,
@@ -54,14 +54,14 @@ describe('setupTestDb', () => {
 			})
 			.run()
 
-		const db2 = setupTestDb()
+		const db2 = await setupTestDb()
 		expect(db2.select().from(schema.movies).all()).toHaveLength(0)
 	})
 })
 
 describe('seedTestData', () => {
 	it('inserts sample movie and series', async () => {
-		const db = setupTestDb()
+		const db = await setupTestDb()
 		await seedTestData(db)
 
 		const movies = db.select().from(schema.movies).all()
@@ -76,10 +76,10 @@ describe('seedTestData', () => {
 })
 
 describe('property-based db tests', () => {
-	it('movie insert preserves data', () => {
-		fc.assert(
-			fc.property(fc.string({ minLength: 1, maxLength: 100 }), fc.integer({ min: 1900, max: 2030 }), (title, year) => {
-				const db = setupTestDb()
+	it('movie insert preserves data', async () => {
+		await fc.assert(
+			fc.asyncProperty(fc.string({ minLength: 1, maxLength: 100 }), fc.integer({ min: 1900, max: 2030 }), async (title, year) => {
+				const db = await setupTestDb()
 				const result = db
 					.insert(schema.movies)
 					.values({
@@ -98,10 +98,10 @@ describe('property-based db tests', () => {
 		)
 	})
 
-	it('series insert preserves data', () => {
-		fc.assert(
-			fc.property(fc.string({ minLength: 1, maxLength: 100 }), fc.integer({ min: 1900, max: 2030 }), (title, year) => {
-				const db = setupTestDb()
+	it('series insert preserves data', async () => {
+		await fc.assert(
+			fc.asyncProperty(fc.string({ minLength: 1, maxLength: 100 }), fc.integer({ min: 1900, max: 2030 }), async (title, year) => {
+				const db = await setupTestDb()
 				const result = db
 					.insert(schema.series)
 					.values({
