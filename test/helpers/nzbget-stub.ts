@@ -60,6 +60,11 @@ export class StubNzbgetServer {
 
 	// Handle incoming JSON-RPC requests
 	private handleRequest(req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse): void {
+		// Check for simulated failures first
+		if (this.handleFailure(res)) {
+			return
+		}
+
 		// Check basic auth
 		const authHeader = req.headers.authorization
 		const expected = `Basic ${Buffer.from(`${this.username}:${this.password}`).toString('base64')}`
@@ -339,5 +344,55 @@ export class StubNzbgetServer {
 		this.configOptions = []
 		this.nextNzbId = 1
 		this._calls = []
+		this.failureMode = null
+		this.failureCount = 0
+	}
+
+	// Failure simulation
+	private failureMode: 'network' | 'http500' | 'invalidJson' | 'rpcError' | 'timeout' | null = null
+	private failureCount = 0
+	private maxFailures = Infinity
+
+	// Configure the server to simulate failures
+	setFailureMode(mode: 'network' | 'http500' | 'invalidJson' | 'rpcError' | 'timeout' | null, maxFailures = Infinity): void {
+		this.failureMode = mode
+		this.maxFailures = maxFailures
+		this.failureCount = 0
+	}
+
+	// Check if should fail this request
+	private shouldFail(): boolean {
+		if (!this.failureMode) return false
+		if (this.failureCount >= this.maxFailures) return false
+		this.failureCount++
+		return true
+	}
+
+	// Handle failures in request handler
+	private handleFailure(res: import('node:http').ServerResponse): boolean {
+		if (!this.shouldFail()) return false
+
+		switch (this.failureMode) {
+			case 'http500':
+				res.writeHead(500, { 'Content-Type': 'text/plain' })
+				res.end('Internal Server Error')
+				return true
+			case 'invalidJson':
+				res.writeHead(200, { 'Content-Type': 'application/json' })
+				res.end('not valid json {{{')
+				return true
+			case 'rpcError':
+				res.writeHead(200, { 'Content-Type': 'application/json' })
+				res.end(JSON.stringify({ version: '1.1', error: { code: -32600, message: 'Invalid Request' } }))
+				return true
+			case 'timeout':
+				// Don't respond at all - let it timeout
+				return true
+			case 'network':
+				// Close connection abruptly
+				res.socket?.destroy()
+				return true
+		}
+		return false
 	}
 }

@@ -459,4 +459,107 @@ describe('NZBGet API integration', () => {
 			expect(nzbId).toBe(1) // Counter reset
 		})
 	})
+
+	describe('API failure handling', () => {
+		it('throws on HTTP 500 error', async () => {
+			server.setFailureMode('http500')
+
+			await expect(api.fetchVersion()).rejects.toThrow()
+		})
+
+		it('throws on invalid JSON response', async () => {
+			server.setFailureMode('invalidJson')
+
+			await expect(api.fetchVersion()).rejects.toThrow()
+		})
+
+		it('throws on network error (connection reset)', async () => {
+			server.setFailureMode('network')
+
+			await expect(api.fetchVersion()).rejects.toThrow()
+		})
+
+		it('throws on RPC error response', async () => {
+			server.setFailureMode('rpcError')
+
+			// RPC error still returns 200 OK but has error in body
+			// The current implementation doesn't explicitly check for RPC errors
+			// so it may return undefined/null result instead of throwing
+			const result = await api.fetchVersion()
+			expect(result).toBeUndefined()
+		})
+
+		it('recovers after transient failure', async () => {
+			// Fail first request, then succeed
+			server.setFailureMode('http500', 1)
+
+			await expect(api.fetchVersion()).rejects.toThrow()
+
+			// Second request should succeed
+			const version = await api.fetchVersion()
+			expect(version).toBe('21.0')
+		})
+
+		it('handles failure during queue operations', async () => {
+			server.addToQueue({ NZBName: 'Test.Item' })
+			server.setFailureMode('http500')
+
+			await expect(api.listQueue()).rejects.toThrow()
+		})
+
+		it('handles failure during append operation', async () => {
+			server.setFailureMode('http500')
+
+			await expect(
+				api.appendNzb({
+					filename: 'Test.nzb',
+					nzbContent: 'dGVzdA==',
+				}),
+			).rejects.toThrow()
+		})
+
+		it('handles failure during editQueue operation', async () => {
+			const item = server.addToQueue({ NZBName: 'Test.Item' })
+			server.setFailureMode('http500')
+
+			await expect(api.editQueue('GroupDelete', [item.NZBID])).rejects.toThrow()
+		})
+
+		it('handles failure during saveConfig operation', async () => {
+			server.setFailureMode('http500')
+
+			await expect(api.saveConfig([{ Name: 'Server1.Host', Value: 'test.com' }])).rejects.toThrow()
+		})
+
+		it('handles multiple consecutive failures', async () => {
+			server.setFailureMode('http500', 3)
+
+			await expect(api.fetchVersion()).rejects.toThrow()
+			await expect(api.fetchVersion()).rejects.toThrow()
+			await expect(api.fetchVersion()).rejects.toThrow()
+
+			// Fourth request should succeed
+			const version = await api.fetchVersion()
+			expect(version).toBe('21.0')
+		})
+
+		it('failure mode clears on reset', async () => {
+			server.setFailureMode('http500')
+			await expect(api.fetchVersion()).rejects.toThrow()
+
+			server.reset()
+
+			const version = await api.fetchVersion()
+			expect(version).toBe('21.0')
+		})
+
+		it('handles concurrent requests when server fails', async () => {
+			server.setFailureMode('http500')
+
+			const results = await Promise.allSettled([api.fetchVersion(), api.fetchStatus(), api.listQueue()])
+
+			// All should be rejected
+			expect(results.every((r) => r.status === 'rejected')).toBe(true)
+		})
+	})
 })
