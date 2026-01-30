@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { IndexerRelease } from '@/services/indexers'
-import { grabMovieRelease, searchMovieReleasesServerFn } from '@/services/movies'
+import { grabMovieRelease, searchMovieReleasesServerFn } from '@/services/movies.functions'
 
 interface Release {
 	guid: string

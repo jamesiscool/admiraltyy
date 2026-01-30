@@ -7,8 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Resolution } from '@/db/schema'
-import { createMovie } from '@/services/movies'
-import { getSettingsOptions } from '@/services/settings'
+import { createMovie } from '@/services/movies.functions'
+import { getSettingsOptions } from '@/services/settings.queries'
 
 interface MovieResult {
 	tmdbId: number

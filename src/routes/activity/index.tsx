@@ -1,32 +1,18 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { RefreshCw } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-	deleteDownload,
-	getNzbgetHistory,
-	getNzbgetHistoryOptions,
-	getNzbgetQueue,
-	getNzbgetQueueOptions,
-	getNzbgetStatus,
-	getNzbgetStatusOptions,
-	listDownloadsQueryOptions,
-	syncNzbget,
-} from '@/services/activity'
-import type { NzbgetHistoryItem, NzbgetQueueItem } from '@/services/nzbget/nzbgetSchema'
+import { deleteDownloadFn, listDownloadsFn } from '@/services/activity.functions'
+import type { NzbgetHistoryItem, NzbgetQueueItem } from '@/services/nzbget'
+import { getNzbgetHistory, getNzbgetQueue, getNzbgetStatus, syncNzbgetHistory } from '@/services/nzbget.functions'
 import { type ActivityAlert, AlertBanner } from './-alert-banner'
 import { DownloadsTable } from './-downloads-table'
 import { type HistoryItem, type HistoryStatus, HistoryTable } from './-history-table'
 import { type DownloadStatus, type QueueItem, QueueTable } from './-queue-table'
 
 export const Route = createFileRoute('/activity/')({
-	loader: async ({ context }) => {
-		await Promise.all([
-			context.queryClient.ensureQueryData(listDownloadsQueryOptions()),
-			context.queryClient.ensureQueryData(getNzbgetStatusOptions()).catch(() => null),
-			context.queryClient.ensureQueryData(getNzbgetQueueOptions()).catch(() => null),
-			context.queryClient.ensureQueryData(getNzbgetHistoryOptions()).catch(() => null),
-		])
+	loader: async () => {
+		const [downloads, status, queue, history] = await Promise.all([listDownloadsFn(), getNzbgetStatus().catch(() => null), getNzbgetQueue().catch(() => null), getNzbgetHistory().catch(() => null)])
+		return { downloads, status, queue, history }
 	},
 	component: ActivityPage,
 })
@@ -134,28 +120,13 @@ function SpeedHistogram({ samples, maxSpeed }: { samples: SpeedSample[]; maxSpee
 
 function ActivityPage() {
 	const router = useRouter()
-	const { data: downloads } = useSuspenseQuery(listDownloadsQueryOptions())
+	const { downloads, status: initialStatus, queue: initialQueue, history: initialHistory } = Route.useLoaderData()
 
 	// Local state for polling updates
-	const [status, setStatus] = useState<Awaited<ReturnType<typeof getNzbgetStatus>> | null>(null)
-	const [queue, setQueue] = useState<Awaited<ReturnType<typeof getNzbgetQueue>> | null>(null)
-	const [history, setHistory] = useState<Awaited<ReturnType<typeof getNzbgetHistory>> | null>(null)
+	const [status, setStatus] = useState(initialStatus)
+	const [queue, setQueue] = useState(initialQueue)
+	const [history, setHistory] = useState(initialHistory)
 	const [errors, setErrors] = useState({ status: false, queue: false, history: false })
-
-	// Initialize from cache on mount
-	useEffect(() => {
-		const fetchInitial = async () => {
-			try {
-				const [s, q, h] = await Promise.all([getNzbgetStatus().catch(() => null), getNzbgetQueue().catch(() => null), getNzbgetHistory().catch(() => null)])
-				setStatus(s)
-				setQueue(q)
-				setHistory(h)
-			} catch {
-				// Silently handle
-			}
-		}
-		fetchInitial()
-	}, [])
 
 	// Dismissed alerts state
 	const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
@@ -263,7 +234,7 @@ function ActivityPage() {
 	const handleSync = async () => {
 		setIsSyncing(true)
 		try {
-			await syncNzbget()
+			await syncNzbgetHistory()
 			router.invalidate()
 		} finally {
 			setIsSyncing(false)
@@ -271,7 +242,7 @@ function ActivityPage() {
 	}
 
 	const handleDelete = async (id: number) => {
-		await deleteDownload({ data: { downloadId: String(id) } })
+		await deleteDownloadFn({ data: { downloadId: String(id) } })
 		router.invalidate()
 	}
 

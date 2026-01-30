@@ -5,7 +5,7 @@ import { type Settings, settingsSchema } from './settings'
 
 // Helpers
 
-function generateApiKey(): string {
+function generateApiKey() {
 	const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
 	let key = ''
 	for (let i = 0; i < 32; i++) {
@@ -14,7 +14,7 @@ function generateApiKey(): string {
 	return key
 }
 
-export function generateNzbgetPassword(): string {
+export function generateNzbgetPassword() {
 	// Only alphanumeric chars - safe for URLs and terminals without escaping
 	const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 	let password = ''
@@ -84,26 +84,26 @@ const defaultSettings: Settings = {
 let currentSettings: Settings = defaultSettings
 let initialized = false
 
-function ensureInitialized(): void {
+function ensureInitialized() {
 	if (!initialized) {
 		initSettings()
 		initialized = true
 	}
 }
 
-export function getSettings(): Settings {
+export function getSettings() {
 	ensureInitialized()
 	return currentSettings
 }
 
-export function updateSettings(updates: Partial<Settings>): Settings {
+export function updateSettings(updates: Partial<Settings>) {
 	ensureInitialized()
 	currentSettings = { ...currentSettings, ...updates }
 	saveSettings()
 	return currentSettings
 }
 
-export function saveSettings(): void {
+export function saveSettings() {
 	const settingsDir = dirname(env.SETTINGS_PATH)
 	if (!existsSync(settingsDir)) {
 		mkdirSync(settingsDir, { recursive: true })
@@ -113,7 +113,7 @@ export function saveSettings(): void {
 
 // Initialization
 
-export function initSettings(): void {
+export function initSettings() {
 	// Ensure log directory exists
 	if (!existsSync(env.LOG_DIRECTORY)) {
 		mkdirSync(env.LOG_DIRECTORY, { recursive: true })

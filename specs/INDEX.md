@@ -7,6 +7,7 @@ Technical documentation for Admiraltyy, a unified Usenet media automation platfo
 | Spec | Code | Purpose |
 |------|------|---------|
 | [architecture.md](./architecture.md) | [src/](../src/) | Folder structure, TanStack patterns, data flow |
+| [service-file-organization.md](./service-file-organization.md) | [services/](../src/services/) | 4-file pattern for services |
 
 ## Domain Systems
 

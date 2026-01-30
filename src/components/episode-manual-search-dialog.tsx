@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { grabEpisodeRelease, searchEpisodeReleasesServerFn } from '@/services/episodes'
+import { grabEpisodeRelease, searchEpisodeReleasesServerFn } from '@/services/episodes.functions'
 import type { IndexerRelease } from '@/services/indexers'
 
 interface Release {

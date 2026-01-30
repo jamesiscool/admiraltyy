@@ -22,7 +22,8 @@
 		"db:studio": "drizzle-kit studio",
 		"fix": "biome check . --write",
 		"check": "biome check",
-		"tsgo": "tsgo --noEmit"
+		"tsgo": "tsgo --noEmit",
+		"clean": "rm -rf node_modules/* node_modules/.[!.]* 2>/dev/null || true"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.1.0",
@@ -42,7 +43,6 @@
 		"@tanstack/start-plugin-core": "^1.154.12",
 		"@tanstack/store": "^0.8.0",
 		"@typescript/native-preview": "^7.0.0-dev.20260122.4",
-		"shadcn": "^3.7.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"drizzle-kit": "^0.31.8",
@@ -53,6 +53,7 @@
 		"ofetch": "^1.5.1",
 		"react": "^19.2.0",
 		"react-dom": "^19.2.0",
+		"shadcn": "^3.7.0",
 		"tailwind-merge": "^3.0.2",
 		"tailwindcss": "^4.0.6",
 		"tw-animate-css": "^1.3.6",
@@ -61,7 +62,6 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.4",
-		"bun-types": "^1.2.9",
 		"@fast-check/vitest": "^0.2.4",
 		"@playwright/test": "^1.58.0",
 		"@tanstack/devtools-event-client": "^0.4.0",
@@ -74,6 +74,7 @@
 		"@vitejs/plugin-react": "^5.0.4",
 		"@with-logic/fast-forward": "^0.1.13",
 		"babel-plugin-react-compiler": "^1.0.0",
+		"bun-types": "^1.2.9",
 		"dotenv": "^16.0.0",
 		"jsdom": "^27.0.0",
 		"memfs": "^4.56.10",

@@ -1,32 +1,24 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { Bookmark, ChevronDown, Download, Search, Settings2, Timer, Trash2, Tv } from 'lucide-react'
 import { useState } from 'react'
 import { DeleteConfirmationModal, type DeleteTarget } from '@/components/delete-confirmation-modal'
-import { EpisodeManualSearchDialog } from '@/components/episode-manual-search-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Progress } from '@/components/ui/progress'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn, formatNextAiring } from '@/lib/utils'
-import { deleteSeries, type EpisodeWithFiles, getSeriesOptions, type SeasonWithEpisodes, updateEpisode, updateSeason, updateSeries } from '@/services/series'
-
-interface ManualSearchTarget {
-	episodeId: string
-	seasonNumber: number
-	episodeNumber: number
-	episodeTitle: string
-}
+import type { EpisodeWithFiles, SeasonWithEpisodes } from '@/services/series'
+import { deleteSeries, getSeries, updateEpisode, updateSeason, updateSeries } from '@/services/series.functions'
 
 export const Route = createFileRoute('/tv/$seriesId')({
-	loader: ({ params, context }) => context.queryClient.ensureQueryData(getSeriesOptions(params.seriesId)),
+	loader: ({ params }) => getSeries({ data: { seriesId: params.seriesId } }),
 	component: SeriesDetailPage,
 })
 
 function SeriesDetailPage() {
 	const { seriesId } = Route.useParams()
-	const { data: series } = useSuspenseQuery(getSeriesOptions(seriesId))
+	const series = Route.useLoaderData()
 	const router = useRouter()
 	const navigate = useNavigate()
 
@@ -36,9 +28,6 @@ function SeriesDetailPage() {
 	// Delete modal state
 	const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
 	const [isDeleting, setIsDeleting] = useState(false)
-
-	// Manual search state
-	const [manualSearchTarget, setManualSearchTarget] = useState<ManualSearchTarget | null>(null)
 
 	const handleToggleMonitored = async () => {
 		setIsUpdating(true)
@@ -256,7 +245,6 @@ function SeriesDetailPage() {
 							seriesId={String(series.id)}
 							seriesMonitored={series.monitored ?? true}
 							seriesResolution={series.resolution}
-							onManualSearch={setManualSearchTarget}
 						/>
 					))}
 				</div>
@@ -269,21 +257,6 @@ function SeriesDetailPage() {
 				onConfirm={handleDeleteConfirm}
 				isPending={isDeleting}
 			/>
-
-			{/* Episode Manual Search Dialog */}
-			{manualSearchTarget && (
-				<EpisodeManualSearchDialog
-					episodeId={manualSearchTarget.episodeId}
-					seriesTitle={series.title}
-					seasonNumber={manualSearchTarget.seasonNumber}
-					episodeNumber={manualSearchTarget.episodeNumber}
-					episodeTitle={manualSearchTarget.episodeTitle}
-					open={true}
-					onOpenChange={(open) => {
-						if (!open) setManualSearchTarget(null)
-					}}
-				/>
-			)}
 		</div>
 	)
 }
@@ -311,19 +284,7 @@ function sortEpisodes(episodes: EpisodeWithFiles[]): EpisodeWithFiles[] {
 	return [...episodes].sort((a, b) => a.episodeNumber - b.episodeNumber)
 }
 
-function SeasonCard({
-	season,
-	seriesId,
-	seriesMonitored,
-	seriesResolution,
-	onManualSearch,
-}: {
-	season: SeasonWithEpisodes
-	seriesId: string
-	seriesMonitored: boolean
-	seriesResolution: string | null
-	onManualSearch: (target: ManualSearchTarget) => void
-}) {
+function SeasonCard({ season, seriesId, seriesMonitored, seriesResolution }: { season: SeasonWithEpisodes; seriesId: string; seriesMonitored: boolean; seriesResolution: string | null }) {
 	const router = useRouter()
 	const [isOpen, setIsOpen] = useState(true)
 	const [isUpdating, setIsUpdating] = useState(false)
@@ -400,10 +361,8 @@ function SeasonCard({
 								key={episode.id}
 								episode={episode}
 								seriesId={seriesId}
-								seasonNumber={season.seasonNumber}
 								seriesMonitored={seriesMonitored}
 								seriesResolution={seriesResolution}
-								onManualSearch={onManualSearch}
 							/>
 						))}
 					</TableBody>
@@ -413,21 +372,7 @@ function SeasonCard({
 	)
 }
 
-function EpisodeRow({
-	episode,
-	seriesId,
-	seasonNumber,
-	seriesMonitored,
-	seriesResolution,
-	onManualSearch,
-}: {
-	episode: EpisodeWithFiles
-	seriesId: string
-	seasonNumber: number
-	seriesMonitored: boolean
-	seriesResolution: string | null
-	onManualSearch: (target: ManualSearchTarget) => void
-}) {
+function EpisodeRow({ episode, seriesId, seriesMonitored, seriesResolution }: { episode: EpisodeWithFiles; seriesId: string; seriesMonitored: boolean; seriesResolution: string | null }) {
 	const router = useRouter()
 	const [isUpdating, setIsUpdating] = useState(false)
 	const hasFiles = episode.files.length > 0
@@ -510,14 +455,6 @@ function EpisodeRow({
 					variant="ghost"
 					size="sm"
 					className="h-7 gap-1.5 text-muted-foreground hover:text-foreground"
-					onClick={() =>
-						onManualSearch({
-							episodeId: String(episode.id),
-							seasonNumber,
-							episodeNumber: episode.episodeNumber,
-							episodeTitle: episode.title,
-						})
-					}
 				>
 					<Search className="size-3.5" />
 					Search

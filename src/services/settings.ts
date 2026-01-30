@@ -1,7 +1,4 @@
-import { queryOptions } from '@tanstack/react-query'
-import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { testUsenetServer as testUsenetServerNzbget } from '@/services/nzbget/nzbgetApi'
 
 // Zod Schemas
 const folderSchema = z.object({
@@ -111,38 +108,3 @@ export type FormatPreference = z.infer<typeof formatPreferenceSchema>
 export type FormatSettings = z.infer<typeof formatSettingsSchema>
 export type AuthSettings = z.infer<typeof authSettingsSchema>
 export type NzbgetSettings = z.infer<typeof nzbgetSettingsSchema>
-
-// Server functions
-
-export const getSettingsOptions = () =>
-	queryOptions({
-		queryKey: ['settings'],
-		queryFn: () => getSettingsServerFn(),
-	})
-
-export const getSettingsServerFn = createServerFn({ method: 'GET' }).handler(async () => {
-	const { getSettings } = await import('./settings.server')
-	return getSettings()
-})
-
-export const updateSettingsServerFn = createServerFn({ method: 'POST' })
-	.inputValidator(settingsSchema.partial())
-	.handler(async ({ data }) => {
-		const { updateSettings } = await import('./settings.server')
-		return updateSettings(data)
-	})
-
-export const testUsenetServerFn = createServerFn({ method: 'POST' })
-	.inputValidator(
-		z.object({
-			host: z.string(),
-			port: z.number(),
-			username: z.string(),
-			password: z.string(),
-			ssl: z.boolean(),
-		}),
-	)
-	.handler(async ({ data }) => {
-		const result = await testUsenetServerNzbget(data)
-		return { result }
-	})
