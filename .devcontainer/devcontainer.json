@@ -1,38 +1,41 @@
 {
-  "name": "base-setup",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
-  "runArgs": ["--memory=16g", "--memory-swap=16g"],
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installOhMyZsh": true,
-      "configureZshAsDefaultShell": true
-    },
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "moby": false
-    },
-    "ghcr.io/devcontainers/features/sshd:1": {},
-    "ghcr.io/shyim/devcontainers-features/bun:0": {},
-    "ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
-    "ghcr.io/schlich/devcontainer-features/playwright:0": {},
-    "ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
-      "packages": "curl,nano,sqlite3"
-    }
-  },
-  "workspaceMount": "source=/Users/jlles/Projects/admiraltyy,target=/workspace,type=bind",
-  "workspaceFolder": "/workspace",
-  "mounts": [
-    "source=${localEnv:HOME}/.config/zsh/aliases.zsh,target=/home/node/.config/zsh/aliases.zsh,type=bind,readonly",
-    "source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume",
-    "source=${localEnv:HOME}/.bun,target=/home/node/.bun,type=bind",
-    "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,readonly"
-  ],
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "customizations": {
-    "vscode": {
-      "settings": {},
-      "extensions": []
-    }
-  }
+	"name": "admiraltyy",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+	"runArgs": [
+		"--memory=16g",
+		"--memory-swap=16g"
+	],
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installOhMyZsh": true,
+			"configureZshAsDefaultShell": true
+		},
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": false
+		},
+		"ghcr.io/devcontainers/features/sshd:1": {},
+		"ghcr.io/shyim/devcontainers-features/bun:0": {},
+		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
+		"ghcr.io/schlich/devcontainer-features/playwright:0": {},
+		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+			"packages": "curl,nano,sqlite3"
+		}
+	},
+	"workspaceMount": "source=/Users/jlles/Projects/admiraltyy,target=/workspace,type=bind",
+	"workspaceFolder": "/workspace",
+	"mounts": [
+		"source=${localEnv:HOME}/.config/zsh/aliases.zsh,target=/home/node/.config/zsh/aliases.zsh,type=bind,readonly",
+		"source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume",
+		"source=${localEnv:HOME}/.bun,target=/home/node/.bun,type=bind",
+		"source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,readonly"
+	],
+	"postCreateCommand": "bash .devcontainer/post-create.sh",
+	"customizations": {
+		"vscode": {
+			"settings": {},
+			"extensions": []
+		}
+	}
 }
