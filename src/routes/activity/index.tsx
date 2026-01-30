@@ -3,7 +3,7 @@ import { RefreshCw } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { deleteDownloadFn, listDownloadsFn } from '@/services/activity.functions'
 import type { NzbgetHistoryItem, NzbgetQueueItem } from '@/services/nzbget'
-import { getNzbgetHistory, getNzbgetQueue, getNzbgetStatus, syncNzbgetHistory } from '@/services/nzbget.functions'
+import { getNzbgetHistoryFn, getNzbgetQueueFn, getNzbgetStatusFn, syncNzbgetHistoryFn } from '@/services/nzbget.functions'
 import { type ActivityAlert, AlertBanner } from './-alert-banner'
 import { DownloadsTable } from './-downloads-table'
 import { type HistoryItem, type HistoryStatus, HistoryTable } from './-history-table'
@@ -11,7 +11,12 @@ import { type DownloadStatus, type QueueItem, QueueTable } from './-queue-table'
 
 export const Route = createFileRoute('/activity/')({
 	loader: async () => {
-		const [downloads, status, queue, history] = await Promise.all([listDownloadsFn(), getNzbgetStatus().catch(() => null), getNzbgetQueue().catch(() => null), getNzbgetHistory().catch(() => null)])
+		const [downloads, status, queue, history] = await Promise.all([
+			listDownloadsFn(),
+			getNzbgetStatusFn().catch(() => null),
+			getNzbgetQueueFn().catch(() => null),
+			getNzbgetHistoryFn().catch(() => null),
+		])
 		return { downloads, status, queue, history }
 	},
 	component: ActivityPage,
@@ -158,7 +163,7 @@ function ActivityPage() {
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			try {
-				const [newStatus, newQueue, newHistory] = await Promise.all([getNzbgetStatus().catch(() => null), getNzbgetQueue().catch(() => null), getNzbgetHistory().catch(() => null)])
+				const [newStatus, newQueue, newHistory] = await Promise.all([getNzbgetStatusFn().catch(() => null), getNzbgetQueueFn().catch(() => null), getNzbgetHistoryFn().catch(() => null)])
 
 				if (newStatus) setStatus(newStatus)
 				if (newQueue) setQueue(newQueue)
@@ -234,7 +239,7 @@ function ActivityPage() {
 	const handleSync = async () => {
 		setIsSyncing(true)
 		try {
-			await syncNzbgetHistory()
+			await syncNzbgetHistoryFn()
 			router.invalidate()
 		} finally {
 			setIsSyncing(false)

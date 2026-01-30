@@ -167,7 +167,7 @@ export async function getSeriesById(seriesId: string) {
 }
 
 // Get series preview from TMDB
-export async function getSeriesPreviewFromTmdbImpl(tmdbId: string) {
+export async function getSeriesPreviewFromTmdb(tmdbId: string) {
 	const { fetchSeriesPreview } = await import('@/services/tmdb')
 	const numId = parseInt(tmdbId, 10)
 	if (Number.isNaN(numId)) {
@@ -178,7 +178,7 @@ export async function getSeriesPreviewFromTmdbImpl(tmdbId: string) {
 }
 
 // Create a new series
-export async function createSeriesImpl(data: { tmdbId: number; resolution?: '480p' | '720p' | '1080p' | '2160p'; monitoredSeasons: number[] }) {
+export async function createSeries(data: { tmdbId: number; resolution?: '480p' | '720p' | '1080p' | '2160p'; monitoredSeasons: number[] }) {
 	const { eq } = await import('drizzle-orm')
 	const { db, schema } = await import('@/db')
 	const { checkNeedsYearDisambiguation, fetchSeriesWithEpisodes } = await import('@/services/tmdb')
@@ -267,7 +267,7 @@ export async function createSeriesImpl(data: { tmdbId: number; resolution?: '480
 }
 
 // Update a series
-export async function updateSeriesImpl(seriesId: string, monitored: boolean) {
+export async function updateSeries(seriesId: string, monitored: boolean) {
 	const { eq } = await import('drizzle-orm')
 	const { db, schema } = await import('@/db')
 
@@ -287,7 +287,7 @@ export async function updateSeriesImpl(seriesId: string, monitored: boolean) {
 }
 
 // Update a season
-export async function updateSeasonImpl(seasonId: string, monitored: boolean) {
+export async function updateSeason(seasonId: string, monitored: boolean) {
 	const { eq } = await import('drizzle-orm')
 	const { db, schema } = await import('@/db')
 
@@ -311,7 +311,7 @@ export async function updateSeasonImpl(seasonId: string, monitored: boolean) {
 }
 
 // Update an episode
-export async function updateEpisodeImpl(episodeId: string, monitored: boolean) {
+export async function updateEpisode(episodeId: string, monitored: boolean) {
 	const { eq } = await import('drizzle-orm')
 	const { db, schema } = await import('@/db')
 
@@ -331,7 +331,7 @@ export async function updateEpisodeImpl(episodeId: string, monitored: boolean) {
 }
 
 // Delete a series
-export async function deleteSeriesImpl(seriesId: string, deleteFiles?: boolean) {
+export async function deleteSeries(seriesId: string, deleteFiles?: boolean) {
 	const { eq, inArray } = await import('drizzle-orm')
 	const { db, schema } = await import('@/db')
 	const { logInfo } = await import('@/services/logs')

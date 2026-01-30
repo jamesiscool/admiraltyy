@@ -1,19 +1,19 @@
 import { createServerFn } from '@tanstack/react-start'
 import { settingsSchema } from './settings'
 
-export const getSettingsServerFn = createServerFn({ method: 'GET' }).handler(async () => {
+export const getSettingsFn = createServerFn({ method: 'GET' }).handler(async () => {
 	const { getSettings } = await import('./settings.server')
 	return getSettings()
 })
 
-export const updateSettingsServerFn = createServerFn({ method: 'POST' })
+export const updateSettingsFn = createServerFn({ method: 'POST' })
 	.inputValidator(settingsSchema.partial())
 	.handler(async ({ data }) => {
 		const { updateSettings } = await import('./settings.server')
 		return updateSettings(data)
 	})
 
-export const testUsenetServerFn = createServerFn({ method: 'POST' })
+export const testUsenetFn = createServerFn({ method: 'POST' })
 	.inputValidator(
 		settingsSchema.shape.usenetServers.element.pick({
 			host: true,

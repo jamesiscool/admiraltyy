@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Resolution } from '@/db/schema'
-import { createMovie } from '@/services/movies.functions'
+import { createMovieFn } from '@/services/movies.functions'
 import { getSettingsOptions } from '@/services/settings.queries'
 
 interface MovieResult {
@@ -49,7 +49,7 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 		if (!movie) return
 		setIsLoading(true)
 		try {
-			await createMovie({ data: { tmdbId: movie.tmdbId, resolution: quality as Resolution } })
+			await createMovieFn({ data: { tmdbId: movie.tmdbId, resolution: quality as Resolution } })
 			router.invalidate()
 			onOpenChange(false)
 		} catch (error) {
@@ -64,7 +64,7 @@ export function AddMovieDialog({ movie, open, onOpenChange }: AddMovieDialogProp
 		setIsLoading(true)
 		try {
 			// For now, same as add - download trigger can be added later
-			await createMovie({ data: { tmdbId: movie.tmdbId, resolution: quality as Resolution } })
+			await createMovieFn({ data: { tmdbId: movie.tmdbId, resolution: quality as Resolution } })
 			router.invalidate()
 			onOpenChange(false)
 		} catch (error) {

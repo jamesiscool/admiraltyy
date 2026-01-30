@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { Resolution } from '@/db/schema'
 import type { MoviePreview } from '@/services/movies'
-import { deleteMovie, updateMovie } from '@/services/movies.functions'
+import { deleteMovieFn, updateMovieFn } from '@/services/movies.functions'
 import { listMoviesQueryOptions } from '@/services/movies.queries'
 import { MovieCard } from './-movie-card'
 import { type MonitoredFilter, MovieFilters, type SortOption, type StatusFilter } from './-movie-filters'
@@ -120,7 +120,7 @@ function MoviesIndexPage() {
 		if (!deleteTarget) return
 		setIsDeleting(true)
 		try {
-			await deleteMovie({ data: { movieId: String(deleteTarget.id), deleteFiles } })
+			await deleteMovieFn({ data: { movieId: String(deleteTarget.id), deleteFiles } })
 			router.invalidate()
 			setDeleteTarget(null)
 		} finally {
@@ -129,7 +129,7 @@ function MoviesIndexPage() {
 	}
 
 	const handleToggleMonitored = async (movie: MoviePreview, monitored: boolean) => {
-		await updateMovie({ data: { movieId: String(movie.id), monitored } })
+		await updateMovieFn({ data: { movieId: String(movie.id), monitored } })
 		router.invalidate()
 	}
 

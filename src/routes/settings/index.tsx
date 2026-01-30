@@ -3,7 +3,7 @@ import { Download, FileVideo, FolderOpen, Gauge, Languages, Loader2, Plus, Radar
 import { useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import type { Folder, FormatPreference, Indexer, Language, Resolution, Settings, UsenetServer } from '@/services/settings'
-import { getSettingsServerFn, testUsenetServerFn, updateSettingsServerFn } from '@/services/settings.functions'
+import { getSettingsFn, testUsenetFn, updateSettingsFn } from '@/services/settings.functions'
 import { FolderSection } from './-folder-section'
 import { FormatsSection } from './-formats-section'
 import { IndexerCard } from './-indexer-card'
@@ -12,7 +12,7 @@ import { QualitySection } from './-quality-section'
 import { ServerCard } from './-server-card'
 
 export const Route = createFileRoute('/settings/')({
-	loader: () => getSettingsServerFn(),
+	loader: () => getSettingsFn(),
 	component: SettingsPage,
 })
 
@@ -62,12 +62,12 @@ function SettingsPage() {
 	}
 
 	const updateSettings = async (updates: Partial<Settings>) => {
-		await updateSettingsServerFn({ data: updates })
+		await updateSettingsFn({ data: updates })
 		router.invalidate()
 	}
 
 	const testUsenetServer = async (params: { host: string; port: number; username: string; password: string; ssl: boolean }) => {
-		const result = await testUsenetServerFn({ data: params })
+		const result = await testUsenetFn({ data: params })
 		return result.result
 	}
 

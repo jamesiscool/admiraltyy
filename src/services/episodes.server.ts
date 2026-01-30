@@ -5,7 +5,7 @@ import { downloadNzb, searchEpisodeReleases } from '@/services/indexers'
 import { appendNzb, notifyDownloadActivity } from '@/services/nzbget.server'
 import type { GrabEpisodeReleaseInput } from './episodes'
 
-export async function searchEpisodeReleasesImpl(episodeId: string) {
+export async function findEpisodeReleases(episodeId: string) {
 	const numId = parseInt(episodeId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid episode ID')
@@ -55,7 +55,7 @@ export async function searchEpisodeReleasesImpl(episodeId: string) {
 	return releases
 }
 
-export async function grabEpisodeReleaseImpl(data: GrabEpisodeReleaseInput) {
+export async function grabEpisodeRelease(data: GrabEpisodeReleaseInput) {
 	const numId = parseInt(data.episodeId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid episode ID')

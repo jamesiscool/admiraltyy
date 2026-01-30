@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { Resolution } from '@/db/schema'
 import type { SeriesPreview } from '@/services/series'
-import { deleteSeries, updateSeries } from '@/services/series.functions'
+import { deleteSeriesFn, updateSeriesFn } from '@/services/series.functions'
 import { listSeriesQueryOptions } from '@/services/series.queries'
 import { SeriesCard } from './-series-card'
 import { type MonitoredFilter, SeriesFilters, type SeriesStatusFilter, type SortOption } from './-series-filters'
@@ -114,7 +114,7 @@ function TvIndexPage() {
 		if (!deleteTarget) return
 		setIsDeleting(true)
 		try {
-			await deleteSeries({ data: { seriesId: String(deleteTarget.id), deleteFiles } })
+			await deleteSeriesFn({ data: { seriesId: String(deleteTarget.id), deleteFiles } })
 			router.invalidate()
 			setDeleteTarget(null)
 		} finally {
@@ -123,7 +123,7 @@ function TvIndexPage() {
 	}
 
 	const handleToggleMonitored = async (series: SeriesPreview, monitored: boolean) => {
-		await updateSeries({ data: { seriesId: String(series.id), monitored } })
+		await updateSeriesFn({ data: { seriesId: String(series.id), monitored } })
 		router.invalidate()
 	}
 

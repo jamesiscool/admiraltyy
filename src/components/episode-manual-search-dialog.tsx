@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { grabEpisodeRelease, searchEpisodeReleasesServerFn } from '@/services/episodes.functions'
+import { grabEpisodeReleaseFn, searchEpisodeReleasesFn } from '@/services/episodes.functions'
 import type { IndexerRelease } from '@/services/indexers'
 
 interface Release {
@@ -40,7 +40,7 @@ export function EpisodeManualSearchDialog({ episodeId, seriesTitle, seasonNumber
 	useEffect(() => {
 		if (open && results === null && !isSearching) {
 			setIsSearching(true)
-			searchEpisodeReleasesServerFn({ data: { episodeId } })
+			searchEpisodeReleasesFn({ data: { episodeId } })
 				.then((data) => setResults(data))
 				.catch((err) => console.error('Search failed:', err))
 				.finally(() => setIsSearching(false))
@@ -65,7 +65,7 @@ export function EpisodeManualSearchDialog({ episodeId, seriesTitle, seasonNumber
 	const handleGrab = async (release: Release) => {
 		setGrabbingGuid(release.guid)
 		try {
-			await grabEpisodeRelease({
+			await grabEpisodeReleaseFn({
 				data: {
 					episodeId,
 					guid: release.guid,

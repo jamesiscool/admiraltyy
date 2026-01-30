@@ -1,12 +1,15 @@
-import type { BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite'
-import type * as schemaTypes from '@/db/schema'
+import { readFile } from 'node:fs/promises'
+import { and, eq, sql } from 'drizzle-orm'
+import { db, schema } from '@/db'
 import type { resolutions } from '@/db/schema'
+import { downloadNzb, searchMovieReleases } from '@/services/indexers'
+import { logInfo } from '@/services/logs'
+import { appendNzb, notifyDownloadActivity } from '@/services/nzbget.server'
 import type { MovieDetails } from '@/services/tmdb'
+import { fetchMovieDetails } from '@/services/tmdb'
 import type { GrabReleaseInput, MoviePreview, MovieWithFiles } from './movies'
 
 export async function listMoviesFromDb(): Promise<MoviePreview[]> {
-	const { sql } = await import('drizzle-orm')
-	const { db } = await import('@/db')
 	return db.all<MoviePreview>(sql`
 		SELECT
 			m.id,
@@ -29,8 +32,6 @@ export async function listMoviesFromDb(): Promise<MoviePreview[]> {
 }
 
 export async function getMovieById(movieId: string): Promise<MovieWithFiles> {
-	const { and, eq } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
 	const numId = parseInt(movieId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid movie ID')
@@ -48,11 +49,10 @@ export async function getMovieById(movieId: string): Promise<MovieWithFiles> {
 	return { ...movie, sizeBytes, files } as MovieWithFiles
 }
 
-export async function insertMovieFromTmdb(database: BunSQLiteDatabase<typeof schemaTypes>, details: MovieDetails, resolution?: (typeof resolutions)[number]) {
-	const schema = await import('@/db/schema')
+export async function insertMovieFromTmdb(details: MovieDetails, resolution?: (typeof resolutions)[number]) {
 	const now = new Date().toISOString()
 
-	const result = await database
+	const result = await db
 		.insert(schema.movies)
 		.values({
 			tmdbId: details.tmdbId,
@@ -78,26 +78,20 @@ export async function insertMovieFromTmdb(database: BunSQLiteDatabase<typeof sch
 	return result[0]
 }
 
-export async function movieExistsByTmdbId(database: BunSQLiteDatabase<typeof schemaTypes>, tmdbId: number) {
-	const { eq } = await import('drizzle-orm')
-	const schema = await import('@/db/schema')
-	const existing = await database.select().from(schema.movies).where(eq(schema.movies.tmdbId, tmdbId))
+export async function movieExistsByTmdbId(tmdbId: number) {
+	const existing = await db.select().from(schema.movies).where(eq(schema.movies.tmdbId, tmdbId))
 	return existing.length > 0
 }
 
 export async function createMovieFromTmdb(tmdbId: number, resolution?: (typeof resolutions)[number]) {
-	const { db } = await import('@/db')
-	const { fetchMovieDetails } = await import('@/services/tmdb')
-	if (await movieExistsByTmdbId(db, tmdbId)) {
+	if (await movieExistsByTmdbId(tmdbId)) {
 		throw new Error('Movie already exists')
 	}
 	const details = await fetchMovieDetails(tmdbId)
-	return insertMovieFromTmdb(db, details, resolution)
+	return insertMovieFromTmdb(details, resolution)
 }
 
-export async function updateMovieImpl(movieId: string, data: { monitored?: boolean }) {
-	const { eq } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
+export async function updateMovie(movieId: string, data: { monitored?: boolean }) {
 	const numId = parseInt(movieId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid movie ID')
@@ -121,10 +115,7 @@ export async function updateMovieImpl(movieId: string, data: { monitored?: boole
 	return result[0]
 }
 
-export async function searchMovieReleasesImpl(movieId: string) {
-	const { eq } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
-	const { searchMovieReleases } = await import('@/services/indexers')
+export async function findMovieReleases(movieId: string) {
 	const numId = parseInt(movieId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid movie ID')
@@ -144,12 +135,7 @@ export async function searchMovieReleasesImpl(movieId: string) {
 	})
 }
 
-export async function grabMovieReleaseImpl(data: GrabReleaseInput) {
-	const { readFile } = await import('node:fs/promises')
-	const { db, schema } = await import('@/db')
-	const { downloadNzb } = await import('@/services/indexers')
-	const { appendNzb, notifyDownloadActivity } = await import('@/services/nzbget.server')
-
+export async function grabMovieRelease(data: GrabReleaseInput) {
 	const numId = parseInt(data.movieId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid movie ID')
@@ -208,11 +194,7 @@ export async function grabMovieReleaseImpl(data: GrabReleaseInput) {
 	return { release, download }
 }
 
-export async function deleteMovieImpl(movieId: string, deleteFiles?: boolean) {
-	const { eq } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
-	const { logInfo } = await import('@/services/logs')
-
+export async function deleteMovie(movieId: string, deleteFiles?: boolean) {
 	const numId = parseInt(movieId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid movie ID')

@@ -1,14 +1,14 @@
 import { queryOptions } from '@tanstack/react-query'
-import { getMovie, listMovies } from '@/services/movies.functions'
+import { getMovieFn, listMoviesFn } from '@/services/movies.functions'
 
 export const listMoviesQueryOptions = () =>
 	queryOptions({
 		queryKey: ['movies'],
-		queryFn: () => listMovies(),
+		queryFn: () => listMoviesFn(),
 	})
 
 export const getMovieOptions = (movieId: string) =>
 	queryOptions({
 		queryKey: ['movies', movieId],
-		queryFn: () => getMovie({ data: { movieId } }),
+		queryFn: () => getMovieFn({ data: { movieId } }),
 	})

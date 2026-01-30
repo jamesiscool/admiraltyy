@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
-import { scanMoviesFilesImpl, scanSeriesFilesImpl } from './tasks.server'
+import { scanMoviesFiles, scanSeriesFiles } from './tasks.server'
 
-export const scanMoviesFiles = createServerFn({ method: 'POST' }).handler(async () => scanMoviesFilesImpl())
+export const scanMoviesFilesFn = createServerFn({ method: 'POST' }).handler(async () => scanMoviesFiles())
 
-export const scanSeriesFiles = createServerFn({ method: 'POST' }).handler(async () => scanSeriesFilesImpl())
+export const scanSeriesFilesFn = createServerFn({ method: 'POST' }).handler(async () => scanSeriesFiles())

@@ -2,26 +2,26 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { resolutions } from '@/db/schema'
 
-export const listSeries = createServerFn({ method: 'GET' }).handler(async () => {
+export const listSeriesFn = createServerFn({ method: 'GET' }).handler(async () => {
 	const { listSeriesFromDb } = await import('./series.server')
 	return listSeriesFromDb()
 })
 
-export const getSeries = createServerFn({ method: 'GET' })
+export const getSeriesFn = createServerFn({ method: 'GET' })
 	.inputValidator(z.object({ seriesId: z.string() }))
 	.handler(async ({ data }) => {
 		const { getSeriesById } = await import('./series.server')
 		return getSeriesById(data.seriesId)
 	})
 
-export const getSeriesPreviewFromTmdb = createServerFn({ method: 'GET' })
+export const getSeriesPreviewFromTmdbFn = createServerFn({ method: 'GET' })
 	.inputValidator(z.object({ tmdbId: z.string() }))
 	.handler(async ({ data }) => {
-		const { getSeriesPreviewFromTmdbImpl } = await import('./series.server')
-		return getSeriesPreviewFromTmdbImpl(data.tmdbId)
+		const { getSeriesPreviewFromTmdb } = await import('./series.server')
+		return getSeriesPreviewFromTmdb(data.tmdbId)
 	})
 
-export const createSeries = createServerFn({ method: 'POST' })
+export const createSeriesFn = createServerFn({ method: 'POST' })
 	.inputValidator(
 		z.object({
 			tmdbId: z.number(),
@@ -30,34 +30,34 @@ export const createSeries = createServerFn({ method: 'POST' })
 		}),
 	)
 	.handler(async ({ data }) => {
-		const { createSeriesImpl } = await import('./series.server')
-		return createSeriesImpl(data)
+		const { createSeries } = await import('./series.server')
+		return createSeries(data)
 	})
 
-export const updateSeries = createServerFn({ method: 'POST' })
+export const updateSeriesFn = createServerFn({ method: 'POST' })
 	.inputValidator(z.object({ seriesId: z.string(), monitored: z.boolean() }))
 	.handler(async ({ data }) => {
-		const { updateSeriesImpl } = await import('./series.server')
-		return updateSeriesImpl(data.seriesId, data.monitored)
+		const { updateSeries } = await import('./series.server')
+		return updateSeries(data.seriesId, data.monitored)
 	})
 
-export const updateSeason = createServerFn({ method: 'POST' })
+export const updateSeasonFn = createServerFn({ method: 'POST' })
 	.inputValidator(z.object({ seriesId: z.string(), seasonId: z.string(), monitored: z.boolean() }))
 	.handler(async ({ data }) => {
-		const { updateSeasonImpl } = await import('./series.server')
-		return updateSeasonImpl(data.seasonId, data.monitored)
+		const { updateSeason } = await import('./series.server')
+		return updateSeason(data.seasonId, data.monitored)
 	})
 
-export const updateEpisode = createServerFn({ method: 'POST' })
+export const updateEpisodeFn = createServerFn({ method: 'POST' })
 	.inputValidator(z.object({ seriesId: z.string(), episodeId: z.string(), monitored: z.boolean() }))
 	.handler(async ({ data }) => {
-		const { updateEpisodeImpl } = await import('./series.server')
-		return updateEpisodeImpl(data.episodeId, data.monitored)
+		const { updateEpisode } = await import('./series.server')
+		return updateEpisode(data.episodeId, data.monitored)
 	})
 
-export const deleteSeries = createServerFn({ method: 'POST' })
+export const deleteSeriesFn = createServerFn({ method: 'POST' })
 	.inputValidator(z.object({ seriesId: z.string(), deleteFiles: z.boolean().optional() }))
 	.handler(async ({ data }) => {
-		const { deleteSeriesImpl } = await import('./series.server')
-		return deleteSeriesImpl(data.seriesId, data.deleteFiles)
+		const { deleteSeries } = await import('./series.server')
+		return deleteSeries(data.seriesId, data.deleteFiles)
 	})

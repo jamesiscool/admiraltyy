@@ -117,7 +117,7 @@ async function upsertSeriesFile(seriesId: number, episodeId: number | null, file
 }
 
 // Scan movies
-export async function scanMoviesFilesImpl() {
+export async function scanMoviesFiles() {
 	const settings = getSettings()
 	const movieFolders = settings.folders.movies
 
@@ -170,7 +170,7 @@ export async function scanMoviesFilesImpl() {
 }
 
 // Scan series
-export async function scanSeriesFilesImpl() {
+export async function scanSeriesFiles() {
 	const settings = getSettings()
 	const tvFolders = settings.folders.tv
 

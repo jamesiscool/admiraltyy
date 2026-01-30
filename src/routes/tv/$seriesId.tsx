@@ -9,10 +9,10 @@ import { Progress } from '@/components/ui/progress'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { cn, formatNextAiring } from '@/lib/utils'
 import type { EpisodeWithFiles, SeasonWithEpisodes } from '@/services/series'
-import { deleteSeries, getSeries, updateEpisode, updateSeason, updateSeries } from '@/services/series.functions'
+import { deleteSeriesFn, getSeriesFn, updateEpisodeFn, updateSeasonFn, updateSeriesFn } from '@/services/series.functions'
 
 export const Route = createFileRoute('/tv/$seriesId')({
-	loader: ({ params }) => getSeries({ data: { seriesId: params.seriesId } }),
+	loader: ({ params }) => getSeriesFn({ data: { seriesId: params.seriesId } }),
 	component: SeriesDetailPage,
 })
 
@@ -32,7 +32,7 @@ function SeriesDetailPage() {
 	const handleToggleMonitored = async () => {
 		setIsUpdating(true)
 		try {
-			await updateSeries({ data: { seriesId, monitored: !series.monitored } })
+			await updateSeriesFn({ data: { seriesId, monitored: !series.monitored } })
 			router.invalidate()
 		} finally {
 			setIsUpdating(false)
@@ -43,7 +43,7 @@ function SeriesDetailPage() {
 		if (!deleteTarget) return
 		setIsDeleting(true)
 		try {
-			await deleteSeries({ data: { seriesId: String(deleteTarget.id), deleteFiles } })
+			await deleteSeriesFn({ data: { seriesId: String(deleteTarget.id), deleteFiles } })
 			setDeleteTarget(null)
 			navigate({ to: '/tv' })
 		} finally {
@@ -302,7 +302,7 @@ function SeasonCard({ season, seriesId, seriesMonitored, seriesResolution }: { s
 		e.stopPropagation()
 		setIsUpdating(true)
 		try {
-			await updateSeason({ data: { seriesId, seasonId: season.id.toString(), monitored: !isMonitored } })
+			await updateSeasonFn({ data: { seriesId, seasonId: season.id.toString(), monitored: !isMonitored } })
 			router.invalidate()
 		} finally {
 			setIsUpdating(false)
@@ -393,7 +393,7 @@ function EpisodeRow({ episode, seriesId, seriesMonitored, seriesResolution }: { 
 	const handleToggleMonitored = async () => {
 		setIsUpdating(true)
 		try {
-			await updateEpisode({ data: { seriesId, episodeId: episode.id.toString(), monitored: !isMonitored } })
+			await updateEpisodeFn({ data: { seriesId, episodeId: episode.id.toString(), monitored: !isMonitored } })
 			router.invalidate()
 		} finally {
 			setIsUpdating(false)

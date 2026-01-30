@@ -3,7 +3,7 @@ import { Loader2, Play } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import type { ScanResult } from '@/services/tasks'
-import { scanMoviesFiles, scanSeriesFiles } from '@/services/tasks.functions'
+import { scanMoviesFilesFn, scanSeriesFilesFn } from '@/services/tasks.functions'
 
 export const Route = createFileRoute('/tasks')({
 	component: TasksPage,
@@ -51,7 +51,7 @@ function TasksPage() {
 	const handleScanMovies = async () => {
 		setMovieScan({ isLoading: true })
 		try {
-			const result = await scanMoviesFiles()
+			const result = await scanMoviesFilesFn()
 			setMovieScan({ isLoading: false, result })
 			router.invalidate()
 		} catch (err) {
@@ -62,7 +62,7 @@ function TasksPage() {
 	const handleScanSeries = async () => {
 		setSeriesScan({ isLoading: true })
 		try {
-			const result = await scanSeriesFiles()
+			const result = await scanSeriesFilesFn()
 			setSeriesScan({ isLoading: false, result })
 			router.invalidate()
 		} catch (err) {

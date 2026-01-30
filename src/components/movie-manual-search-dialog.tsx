@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { IndexerRelease } from '@/services/indexers'
-import { grabMovieRelease, searchMovieReleasesServerFn } from '@/services/movies.functions'
+import { grabMovieReleaseFn, searchMovieReleasesFn } from '@/services/movies.functions'
 
 interface Release {
 	guid: string
@@ -38,7 +38,7 @@ export function MovieManualSearchDialog({ movieId, movieTitle, movieYear, open, 
 	useEffect(() => {
 		if (open && results === null && !isSearching) {
 			setIsSearching(true)
-			searchMovieReleasesServerFn({ data: { movieId } })
+			searchMovieReleasesFn({ data: { movieId } })
 				.then((data) => setResults(data))
 				.catch((err) => console.error('Search failed:', err))
 				.finally(() => setIsSearching(false))
@@ -63,7 +63,7 @@ export function MovieManualSearchDialog({ movieId, movieTitle, movieYear, open, 
 	const handleGrab = async (release: Release) => {
 		setGrabbingGuid(release.guid)
 		try {
-			await grabMovieRelease({
+			await grabMovieReleaseFn({
 				data: {
 					movieId,
 					guid: release.guid,

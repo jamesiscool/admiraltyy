@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { Resolution } from '@/db/schema'
-import { createSeries } from '@/services/series.functions'
+import { createSeriesFn } from '@/services/series.functions'
 import { getSeriesPreviewFromTmdbOptions } from '@/services/series.queries'
 import { getSettingsOptions } from '@/services/settings.queries'
 
@@ -83,7 +83,7 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 		if (!series) return
 		setIsLoading(true)
 		try {
-			await createSeries({
+			await createSeriesFn({
 				data: {
 					tmdbId: series.tmdbId,
 					resolution: quality as Resolution,
@@ -104,7 +104,7 @@ export function AddSeriesDialog({ series, open, onOpenChange }: AddSeriesDialogP
 		setIsLoading(true)
 		try {
 			// Same as add for now - download trigger can be added later
-			await createSeries({
+			await createSeriesFn({
 				data: {
 					tmdbId: series.tmdbId,
 					resolution: quality as Resolution,

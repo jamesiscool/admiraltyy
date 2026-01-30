@@ -6,7 +6,7 @@ import { DeleteConfirmationModal, type DeleteTarget } from '@/components/delete-
 import { MovieManualSearchDialog } from '@/components/movie-manual-search-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { deleteMovie, updateMovie } from '@/services/movies.functions'
+import { deleteMovieFn, updateMovieFn } from '@/services/movies.functions'
 import { getMovieOptions } from '@/services/movies.queries'
 
 export const Route = createFileRoute('/movies/$movieId')({
@@ -33,7 +33,7 @@ function MovieDetailPage() {
 	const handleToggleMonitored = async () => {
 		setIsUpdating(true)
 		try {
-			await updateMovie({ data: { movieId, monitored: !movie.monitored } })
+			await updateMovieFn({ data: { movieId, monitored: !movie.monitored } })
 			router.invalidate()
 		} finally {
 			setIsUpdating(false)
@@ -44,7 +44,7 @@ function MovieDetailPage() {
 		if (!deleteTarget) return
 		setIsDeleting(true)
 		try {
-			await deleteMovie({ data: { movieId: String(deleteTarget.id), deleteFiles } })
+			await deleteMovieFn({ data: { movieId: String(deleteTarget.id), deleteFiles } })
 			setDeleteTarget(null)
 			navigate({ to: '/movies' })
 		} finally {
