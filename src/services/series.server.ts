@@ -1,11 +1,12 @@
+import { and, eq, inArray, sql } from 'drizzle-orm'
+import { db, schema } from '@/db'
 import type { File, Series } from '@/db/schema'
+import { logInfo } from '@/services/logs'
+import { checkNeedsYearDisambiguation, fetchSeriesPreview, fetchSeriesWithEpisodes } from '@/services/tmdb'
 import type { EpisodeWithFiles, SeasonWithEpisodes, SeriesPreview, SeriesWithDetails } from './series'
 
 // Get single series with full nested details
 async function findSeriesWithDetails(seriesId: number) {
-	const { and, eq, inArray, sql } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
-
 	// Get series with stats - explicitly alias columns to camelCase
 	const seriesRows = await db.all<Series & { sizeBytes: number; episodeCount: number; missingEpisodeCount: number }>(sql`
 		SELECT
@@ -113,8 +114,6 @@ async function findSeriesWithDetails(seriesId: number) {
 
 // List all series with computed stats
 export async function listSeriesFromDb(): Promise<SeriesPreview[]> {
-	const { sql } = await import('drizzle-orm')
-	const { db } = await import('@/db')
 	const results = await db.all<SeriesPreview>(sql`
 		SELECT
 			s.id,
@@ -168,7 +167,6 @@ export async function getSeriesById(seriesId: string) {
 
 // Get series preview from TMDB
 export async function getSeriesPreviewFromTmdb(tmdbId: string) {
-	const { fetchSeriesPreview } = await import('@/services/tmdb')
 	const numId = parseInt(tmdbId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid TMDB ID')
@@ -179,10 +177,6 @@ export async function getSeriesPreviewFromTmdb(tmdbId: string) {
 
 // Create a new series
 export async function createSeries(data: { tmdbId: number; resolution?: '480p' | '720p' | '1080p' | '2160p'; monitoredSeasons: number[] }) {
-	const { eq } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
-	const { checkNeedsYearDisambiguation, fetchSeriesWithEpisodes } = await import('@/services/tmdb')
-
 	// Check if series already exists
 	const existing = await db.select().from(schema.series).where(eq(schema.series.tmdbId, data.tmdbId))
 	if (existing.length > 0) {
@@ -268,9 +262,6 @@ export async function createSeries(data: { tmdbId: number; resolution?: '480p' |
 
 // Update a series
 export async function updateSeries(seriesId: string, monitored: boolean) {
-	const { eq } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
-
 	const numId = parseInt(seriesId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid series ID')
@@ -288,9 +279,6 @@ export async function updateSeries(seriesId: string, monitored: boolean) {
 
 // Update a season
 export async function updateSeason(seasonId: string, monitored: boolean) {
-	const { eq } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
-
 	const numId = parseInt(seasonId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid season ID')
@@ -312,9 +300,6 @@ export async function updateSeason(seasonId: string, monitored: boolean) {
 
 // Update an episode
 export async function updateEpisode(episodeId: string, monitored: boolean) {
-	const { eq } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
-
 	const numId = parseInt(episodeId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid episode ID')
@@ -332,10 +317,6 @@ export async function updateEpisode(episodeId: string, monitored: boolean) {
 
 // Delete a series
 export async function deleteSeries(seriesId: string, deleteFiles?: boolean) {
-	const { eq, inArray } = await import('drizzle-orm')
-	const { db, schema } = await import('@/db')
-	const { logInfo } = await import('@/services/logs')
-
 	const numId = parseInt(seriesId, 10)
 	if (Number.isNaN(numId)) {
 		throw new Error('Invalid series ID')

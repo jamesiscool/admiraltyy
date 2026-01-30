@@ -72,6 +72,10 @@ Core workflow:
 3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
 4. Re-snapshot after page changes
 
+## Imports
+
+- Never use dynamic `await import()`. Always use static imports at top of file.
+
 ## Naming style
 
 - Prefer clear, descriptive names over abbreviations.  

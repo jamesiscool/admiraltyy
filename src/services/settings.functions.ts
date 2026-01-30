@@ -1,15 +1,15 @@
 import { createServerFn } from '@tanstack/react-start'
+import { testUsenetServer } from '@/services/nzbget.server'
 import { settingsSchema } from './settings'
+import { getSettings, updateSettings } from './settings.server'
 
 export const getSettingsFn = createServerFn({ method: 'GET' }).handler(async () => {
-	const { getSettings } = await import('./settings.server')
 	return getSettings()
 })
 
 export const updateSettingsFn = createServerFn({ method: 'POST' })
 	.inputValidator(settingsSchema.partial())
 	.handler(async ({ data }) => {
-		const { updateSettings } = await import('./settings.server')
 		return updateSettings(data)
 	})
 
@@ -24,7 +24,6 @@ export const testUsenetFn = createServerFn({ method: 'POST' })
 		}),
 	)
 	.handler(async ({ data }) => {
-		const { testUsenetServer } = await import('@/services/nzbget.server')
 		const result = await testUsenetServer(data)
 		return { result }
 	})

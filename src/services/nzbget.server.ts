@@ -1,7 +1,7 @@
 import type { Subprocess } from 'bun'
 import { and, eq, notInArray } from 'drizzle-orm'
 import { type $Fetch, ofetch } from 'ofetch'
-import { type DownloadStatus, db, schema } from '@/db'
+import { db, schema } from '@/db'
 import { fileImport } from '@/services/fileImport.server'
 import type { NzbgetConfigOption, NzbgetHistoryItem, NzbgetQueueItem, NzbgetRpcResponse, NzbgetStatus } from '@/services/nzbget'
 import type { UsenetServer } from '@/services/settings'
@@ -54,7 +54,7 @@ export async function updateDownloadFromHistory(
 }
 
 // Update download status
-export async function updateDownloadStatus(downloadId: number, status: DownloadStatus, errorMessage?: string) {
+export async function updateDownloadStatus(downloadId: number, status: schema.DownloadStatus, errorMessage?: string) {
 	await db.update(schema.downloads).set({ status, errorMessage }).where(eq(schema.downloads.id, downloadId))
 }
 
