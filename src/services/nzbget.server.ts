@@ -11,47 +11,6 @@ import { ensureDownloadFolder, ensureNzbgetPassword, getSettings } from '@/servi
 const STARTUP_TIMEOUT_MS = 10_000
 const STARTUP_POLL_INTERVAL_MS = 200
 
-// --- DB Helpers ---
-
-export function mapNzbgetStatus(item: NzbgetHistoryItem) {
-	if (item.Status.startsWith('SUCCESS')) return 'completed'
-	return 'failed'
-}
-
-export async function findActiveDownloadByNzbId(nzbId: number) {
-	return db.query.downloads.findFirst({
-		where: and(eq(schema.downloads.nzbId, nzbId), notInArray(schema.downloads.status, ['completed', 'failed'])),
-	})
-}
-
-export async function updateDownloadFromHistory(
-	downloadId: number,
-	data: {
-		status: 'completed' | 'failed'
-		parStatus: string
-		unpackStatus: string
-		finalDir: string | null
-		downloadedSizeMb: number
-		downloadTimeSec: number
-		completedAt: string
-	},
-) {
-	await db
-		.update(schema.downloads)
-		.set({
-			status: data.status,
-			parStatus: data.parStatus,
-			unpackStatus: data.unpackStatus,
-			finalDir: data.finalDir,
-			downloadedSizeMb: data.downloadedSizeMb,
-			downloadTimeSec: data.downloadTimeSec,
-			completedAt: data.completedAt,
-			progress: 100,
-			nzbId: null,
-		})
-		.where(eq(schema.downloads.id, downloadId))
-}
-
 // --- API Client ---
 
 function initializeNzbgetFetch() {
@@ -95,14 +54,6 @@ export async function appendNzb(options: { filename: string; nzbContent: string;
 	return rpcCall<number>('append', [filename, nzbContent, category, priority, addToTop, addPaused, '', 0, 'SCORE'])
 }
 
-export async function fetchNzbgetConfig() {
-	return rpcCall<NzbgetConfigOption[]>('config')
-}
-
-export async function saveNzbgetConfig(options: NzbgetConfigOption[]) {
-	return rpcCall<boolean>('saveconfig', [options])
-}
-
 function usenetServerToConfigOptions(server: UsenetServer, index: number) {
 	const serverNumber = index + 1
 	return [
@@ -124,7 +75,7 @@ function usenetServerToConfigOptions(server: UsenetServer, index: number) {
 }
 
 export async function pushUsenetServersToNzbget(servers: UsenetServer[]) {
-	const currentConfig = await fetchNzbgetConfig()
+	const currentConfig = await rpcCall<NzbgetConfigOption[]>('config')
 	const existingServerCount = currentConfig.filter((opt) => opt.Name.match(/^Server\d+\.Host$/)).length
 	const configOptions: NzbgetConfigOption[] = []
 
@@ -138,33 +89,21 @@ export async function pushUsenetServersToNzbget(servers: UsenetServer[]) {
 		configOptions.push({ Name: `Server${serverNumber}.Active`, Value: 'no' })
 	}
 
-	return saveNzbgetConfig(configOptions)
+	return rpcCall<boolean>('saveconfig', [configOptions])
 }
 
 export async function reloadNzbgetConfig() {
 	return rpcCall<boolean>('reload')
 }
 
-export async function editNzbgetQueue(command: string, ids: number[]) {
-	return rpcCall<boolean>('editqueue', [command, '', ids])
-}
-
 export async function clearNzbgetQueue() {
 	const queue = await listNzbgetQueue()
 	if (queue.length === 0) return true
-	return editNzbgetQueue(
-		'GroupDelete',
-		queue.map((item) => item.NZBID),
-	)
+	return rpcCall<boolean>('editqueue', ['GroupDelete', '', queue.map((item) => item.NZBID)])
 }
 
 export async function testUsenetServer(server: { host: string; port: number; username: string; password: string; ssl: boolean }) {
 	return rpcCall<string>('testserver', [server.host, server.port, server.username, server.password, server.ssl, '', 30, 2])
-}
-
-export async function clearNzbgetHistory(nzbIds: number[]) {
-	if (nzbIds.length === 0) return true
-	return rpcCall<boolean>('editqueue', ['HistoryFinalDelete', '', nzbIds])
 }
 
 export async function syncNzbgetHistory() {
@@ -179,7 +118,9 @@ export async function syncNzbgetHistory() {
 
 	for (const item of history) {
 		console.log(`[NZBGet Sync] History item NZBID=${item.NZBID}: "${item.Name}" | Status=${item.Status}`)
-		const download = await findActiveDownloadByNzbId(item.NZBID)
+		const download = await db.query.downloads.findFirst({
+			where: and(eq(schema.downloads.nzbId, item.NZBID), notInArray(schema.downloads.status, ['completed', 'failed'])),
+		})
 
 		if (!download) {
 			console.log(`[NZBGet Sync] No DB download found for NZBID=${item.NZBID}`)
@@ -194,21 +135,26 @@ export async function syncNzbgetHistory() {
 			console.warn(`[NZBGet Sync] ⚠️ TITLE MISMATCH! NZBGet="${item.Name}" vs DB="${download.title}"`)
 		}
 
-		const nzbgetStatus = mapNzbgetStatus(item)
+		const nzbgetStatus = item.Status.startsWith('SUCCESS') ? 'completed' : 'failed'
 		const completedAt = new Date(item.HistoryTime * 1000).toISOString()
 
 		// FinalDir only set after unpacking; use DestDir when no unpack needed
 		const downloadDir = item.FinalDir || item.DestDir || null
 
-		await updateDownloadFromHistory(download.id, {
-			status: nzbgetStatus,
-			parStatus: item.ParStatus,
-			unpackStatus: item.UnpackStatus,
-			finalDir: downloadDir,
-			downloadedSizeMb: item.DownloadedSizeMB,
-			downloadTimeSec: item.DownloadTimeSec,
-			completedAt,
-		})
+		await db
+			.update(schema.downloads)
+			.set({
+				status: nzbgetStatus,
+				parStatus: item.ParStatus,
+				unpackStatus: item.UnpackStatus,
+				finalDir: downloadDir,
+				downloadedSizeMb: item.DownloadedSizeMB,
+				downloadTimeSec: item.DownloadTimeSec,
+				completedAt,
+				progress: 100,
+				nzbId: null,
+			})
+			.where(eq(schema.downloads.id, download.id))
 
 		syncedNzbIds.push(item.NZBID)
 		synced++
@@ -221,7 +167,7 @@ export async function syncNzbgetHistory() {
 	}
 
 	if (syncedNzbIds.length > 0) {
-		await clearNzbgetHistory(syncedNzbIds)
+		await rpcCall<boolean>('editqueue', ['HistoryFinalDelete', '', syncedNzbIds])
 		console.log(`[NZBGet Sync] Cleared ${syncedNzbIds.length} history items from NZBGet`)
 	}
 
@@ -239,10 +185,6 @@ async function findPidsOnPort(port: number) {
 	if (!proc.stdout || typeof proc.stdout === 'number') return []
 	const text = await new Response(proc.stdout).text()
 	return text.trim().split('\n').filter(Boolean)
-}
-
-export async function isNzbgetPortInUse(port: number) {
-	return (await findPidsOnPort(port)).length > 0
 }
 
 async function killProcessOnPort(port: number) {
@@ -423,7 +365,7 @@ export async function stopNzbget() {
 		return
 	}
 
-	if (await isNzbgetPortInUse(port)) {
+	if ((await findPidsOnPort(port)).length > 0) {
 		await killProcessOnPort(port)
 		console.log('✓ Killed NZBGet process on port', port)
 		return
