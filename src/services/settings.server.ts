@@ -14,12 +14,29 @@ function generateApiKey() {
 	return key
 }
 
-export function generateNzbgetPassword() {
+function generateNzbgetPassword() {
 	// Only alphanumeric chars - safe for URLs and terminals without escaping
 	const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 	let password = ''
 	for (let i = 0; i < 32; i++) {
 		password += chars[Math.floor(Math.random() * chars.length)]
+	}
+	return password
+}
+
+/** Ensures nzbget password exists, generating and saving one if missing. Returns password. */
+export function ensureNzbgetPassword() {
+	const settings = getSettings()
+	let { password } = settings.nzbgetSettings
+	if (!password) {
+		password = generateNzbgetPassword()
+		updateSettings({
+			nzbgetSettings: {
+				...settings.nzbgetSettings,
+				password,
+			},
+		})
+		console.log('✓ Generated new NZBGet password')
 	}
 	return password
 }

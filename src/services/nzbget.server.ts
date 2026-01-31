@@ -5,7 +5,7 @@ import { db, schema } from '@/db'
 import { fileImport } from '@/services/fileImport.server'
 import type { NzbgetConfigOption, NzbgetHistoryItem, NzbgetQueueItem, NzbgetRpcResponse, NzbgetStatus } from '@/services/nzbget'
 import type { UsenetServer } from '@/services/settings'
-import { generateNzbgetPassword, getSettings, saveSettings, updateSettings } from '@/services/settings.server'
+import { ensureNzbgetPassword, getSettings } from '@/services/settings.server'
 
 // ============================================================================
 // DB Helpers
@@ -521,19 +521,7 @@ export async function startNzbget() {
 		await killProcessOnPort(settings.nzbgetSettings.port)
 	}
 
-	// Ensure password is generated if empty
-	let { password } = settings.nzbgetSettings
-	if (!password) {
-		password = generateNzbgetPassword()
-		updateSettings({
-			nzbgetSettings: {
-				...settings.nzbgetSettings,
-				password,
-			},
-		})
-		saveSettings()
-		console.log('✓ Generated new NZBGet password')
-	}
+	const password = ensureNzbgetPassword()
 
 	const { username, host, port } = settings.nzbgetSettings
 	const downloadFolder = settings.downloadFolder || '/tmp/admiralty-downloads'

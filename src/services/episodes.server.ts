@@ -1,8 +1,7 @@
-import { readFile } from 'node:fs/promises'
 import { eq } from 'drizzle-orm'
 import { db, schema } from '@/db'
-import { downloadNzb, searchEpisodeReleases } from '@/services/indexers'
-import { appendNzb, notifyDownloadActivity } from '@/services/nzbget.server'
+import { grabRelease } from '@/services/downloads.server'
+import { searchEpisodeReleases } from '@/services/indexers.server'
 import type { GrabEpisodeReleaseInput } from './episodes'
 
 export async function findEpisodeReleases(episodeId: string) {
@@ -56,41 +55,13 @@ export async function findEpisodeReleases(episodeId: string) {
 }
 
 export async function grabEpisodeRelease(data: GrabEpisodeReleaseInput) {
-	const numId = parseInt(data.episodeId, 10)
-	if (Number.isNaN(numId)) {
+	const episodeId = parseInt(data.episodeId, 10)
+	if (Number.isNaN(episodeId)) {
 		throw new Error('Invalid episode ID')
 	}
 
-	const now = new Date().toISOString()
-
-	// Download NZB
-	const nzbPath = await downloadNzb(data.downloadUrl, data.title)
-
-	// Read and encode NZB
-	const nzbContent = await readFile(nzbPath)
-	const base64Content = nzbContent.toString('base64')
-
-	// Queue to NZBGet
-	const sanitizedFilename = `${data.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.nzb`
-	const nzbId = await appendNzb({
-		filename: sanitizedFilename,
-		nzbContent: base64Content,
-		category: 'tv',
-	})
-
-	if (nzbId <= 0) {
-		console.error('[Episodes] NZBGet returned invalid ID:', nzbId)
-		throw new Error('NZBGet failed to queue download')
-	}
-
-	// Trigger fast polling
-	notifyDownloadActivity()
-
-	// Create release record
-	const [release] = await db
-		.insert(schema.releases)
-		.values({
-			episodeId: numId,
+	return grabRelease(
+		{
 			guid: data.guid,
 			title: data.title,
 			downloadUrl: data.downloadUrl,
@@ -99,24 +70,7 @@ export async function grabEpisodeRelease(data: GrabEpisodeReleaseInput) {
 			publishDate: data.publishDate,
 			indexerId: data.indexerId,
 			indexerName: data.indexerName,
-			nzbPath,
-			grabbedAt: now,
-		})
-		.returning()
-
-	// Create download record
-	const [download] = await db
-		.insert(schema.downloads)
-		.values({
-			releaseId: release.id,
-			nzbId,
-			title: data.title,
-			status: 'queued',
-			size: data.size,
-			queuedAt: now,
-		})
-		.returning()
-
-	console.log(`[Episodes] NZB queued: NZBID=${nzbId}, downloadId=${download.id}, title="${data.title}"`)
-	return { release, download }
+		},
+		{ episodeId, category: 'tv' },
+	)
 }

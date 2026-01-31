@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import { eq } from 'drizzle-orm'
 import { db, schema } from '@/db'
-import { getSettings } from '@/services/settings.server'
+import { buildMoviePath, buildTvPath } from '@/services/path.server'
 
 const VIDEO_EXTENSIONS = ['.mkv', '.mp4', '.avi', '.m4v', '.mov', '.wmv']
 const SUBTITLE_EXTENSIONS = ['.srt', '.sub', '.ssa', '.ass', '.vtt']
@@ -22,42 +22,6 @@ function findFiles(dir: string, extensions: string[]) {
 		}
 	}
 	return results
-}
-
-// Get default folder path for media type
-function getDefaultFolder(type: 'movies' | 'tv') {
-	const { folders } = getSettings()
-	const folder = folders[type].find((f) => f.isDefault) ?? folders[type][0]
-	return folder?.path ?? null
-}
-
-// Sanitize filename for filesystem
-function sanitizeFilename(name: string) {
-	return name.replace(/[<>:"/\\|?*]/g, '').trim()
-}
-
-// Build movie destination path: {movieFolder}/{Title} ({Year})/
-function buildMoviePath(title: string, year: number) {
-	const folder = getDefaultFolder('movies')
-	if (!folder) return null
-	const safeName = sanitizeFilename(`${title} (${year})`)
-	return join(folder, safeName)
-}
-
-// Build TV destination path, checking useYearInFolder
-async function buildTvPath(seriesId: number, seasonNumber: number) {
-	const folder = getDefaultFolder('tv')
-	if (!folder) return null
-
-	const seriesRow = await db.query.series.findFirst({
-		where: eq(schema.series.id, seriesId),
-	})
-	if (!seriesRow) return null
-
-	const seriesFolder = seriesRow.useYearInFolder ? sanitizeFilename(`${seriesRow.title} (${seriesRow.year})`) : sanitizeFilename(seriesRow.title)
-
-	const seasonFolder = `Season ${seasonNumber}`
-	return join(folder, seriesFolder, seasonFolder)
 }
 
 // Parse quality from release title

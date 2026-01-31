@@ -1,10 +1,8 @@
-import { readFile } from 'node:fs/promises'
 import { and, eq, sql } from 'drizzle-orm'
 import { db, schema } from '@/db'
 import type { resolutions } from '@/db/schema'
-import { downloadNzb, searchMovieReleases } from '@/services/indexers'
-import { logInfo } from '@/services/logs'
-import { appendNzb, notifyDownloadActivity } from '@/services/nzbget.server'
+import { grabRelease } from '@/services/downloads.server'
+import { searchMovieReleases } from '@/services/indexers.server'
 import type { MovieDetails } from '@/services/tmdb'
 import { fetchMovieDetails } from '@/services/tmdb'
 import type { GrabReleaseInput, MoviePreview, MovieWithFiles } from './movies'
@@ -136,35 +134,13 @@ export async function findMovieReleases(movieId: string) {
 }
 
 export async function grabMovieRelease(data: GrabReleaseInput) {
-	const numId = parseInt(data.movieId, 10)
-	if (Number.isNaN(numId)) {
+	const movieId = parseInt(data.movieId, 10)
+	if (Number.isNaN(movieId)) {
 		throw new Error('Invalid movie ID')
 	}
 
-	const now = new Date().toISOString()
-
-	const nzbPath = await downloadNzb(data.downloadUrl, data.title)
-	const nzbContent = await readFile(nzbPath)
-	const base64Content = nzbContent.toString('base64')
-
-	const sanitizedFilename = `${data.title.replace(/[^a-zA-Z0-9._-]/g, '_')}.nzb`
-	const nzbId = await appendNzb({
-		filename: sanitizedFilename,
-		nzbContent: base64Content,
-		category: 'movies',
-	})
-
-	if (nzbId <= 0) {
-		console.error('[Movies] NZBGet returned invalid ID:', nzbId)
-		throw new Error('NZBGet failed to queue download')
-	}
-
-	notifyDownloadActivity()
-
-	const [release] = await db
-		.insert(schema.releases)
-		.values({
-			movieId: numId,
+	return grabRelease(
+		{
 			guid: data.guid,
 			title: data.title,
 			downloadUrl: data.downloadUrl,
@@ -173,25 +149,9 @@ export async function grabMovieRelease(data: GrabReleaseInput) {
 			publishDate: data.publishDate,
 			indexerId: data.indexerId,
 			indexerName: data.indexerName,
-			nzbPath,
-			grabbedAt: now,
-		})
-		.returning()
-
-	const [download] = await db
-		.insert(schema.downloads)
-		.values({
-			releaseId: release.id,
-			nzbId,
-			title: data.title,
-			status: 'queued',
-			size: data.size,
-			queuedAt: now,
-		})
-		.returning()
-
-	console.log(`[Movies] NZB queued: NZBID=${nzbId}, downloadId=${download.id}, title="${data.title}"`)
-	return { release, download }
+		},
+		{ movieId, category: 'movies' },
+	)
 }
 
 export async function deleteMovie(movieId: string, deleteFiles?: boolean) {
@@ -206,7 +166,7 @@ export async function deleteMovie(movieId: string, deleteFiles?: boolean) {
 	}
 
 	if (deleteFiles) {
-		logInfo(`Would delete movie folder for: ${movie[0].title}`)
+		console.info(`Would delete movie folder for: ${movie[0].title}`)
 	}
 
 	await db.delete(schema.files).where(eq(schema.files.movieId, numId))

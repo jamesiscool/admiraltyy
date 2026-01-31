@@ -1,8 +1,5 @@
-import { TanStackDevtools } from '@tanstack/react-devtools'
 import type { QueryClient } from '@tanstack/react-query'
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import Header from '@/components/header'
 import appCss from '@/styles.css?url'
 
@@ -47,21 +44,6 @@ function RootComponent() {
 					<main className="flex grow flex-col">
 						<Outlet />
 					</main>
-					<TanStackDevtools
-						config={{
-							position: 'bottom-right',
-						}}
-						plugins={[
-							{
-								name: 'TanStack Router',
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-							{
-								name: 'TanStack Query',
-								render: <ReactQueryDevtoolsPanel />,
-							},
-						]}
-					/>
 				</div>
 				<Scripts />
 			</body>

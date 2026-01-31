@@ -1,7 +1,6 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { db, schema } from '@/db'
 import type { File, Series } from '@/db/schema'
-import { logInfo } from '@/services/logs'
 import { checkNeedsYearDisambiguation, fetchSeriesPreview, fetchSeriesWithEpisodes } from '@/services/tmdb'
 import type { EpisodeWithFiles, SeasonWithEpisodes, SeriesPreview, SeriesWithDetails } from './series'
 
@@ -334,7 +333,7 @@ export async function deleteSeries(seriesId: string, deleteFiles?: boolean) {
 	// Delete series folder from disk if requested
 	if (deleteFiles) {
 		// TODO: Implement actual folder deletion
-		logInfo(`Would delete series folder for: ${seriesRecord[0].title}`)
+		console.info(`Would delete series folder for: ${seriesRecord[0].title}`)
 	}
 
 	if (seasonIds.length > 0) {
