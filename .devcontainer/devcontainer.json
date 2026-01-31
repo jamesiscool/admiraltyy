@@ -30,6 +30,9 @@
 	"mounts": [
 		"source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume"
 	],
+	"forwardPorts": [
+		4983
+	],
 	"postCreateCommand": "bash .devcontainer/post-create.sh",
 	"customizations": {
 		"vscode": {

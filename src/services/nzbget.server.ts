@@ -1,21 +1,17 @@
 import { and, eq, notInArray } from 'drizzle-orm'
 import { ofetch } from 'ofetch'
 import { db, schema } from '@/db'
-import { fileImport } from '@/services/fileImport.server'
+import { processDownloadImport } from '@/services/fileImport.server'
 import type { NzbgetConfigOption, NzbgetHistoryItem, NzbgetQueueItem, NzbgetRpcResponse, NzbgetStatus } from '@/services/nzbget'
 import type { UsenetServer } from '@/services/settings'
-import { ensureNzbgetPassword, getSettings } from '@/services/settings.server'
+import { ensureDownloadFolder, ensureNzbgetPassword, getSettings } from '@/services/settings.server'
 
-// ============================================================================
-// Constants
-// ============================================================================
+// --- Constants ---
 
 const STARTUP_TIMEOUT_MS = 10_000
 const STARTUP_POLL_INTERVAL_MS = 200
 
-// ============================================================================
-// DB Helpers
-// ============================================================================
+// --- DB Helpers ---
 
 export function mapNzbgetStatus(item: NzbgetHistoryItem) {
 	if (item.Status.startsWith('SUCCESS')) return 'completed'
@@ -56,13 +52,7 @@ export async function updateDownloadFromHistory(
 		.where(eq(schema.downloads.id, downloadId))
 }
 
-export async function updateDownloadStatus(downloadId: number, status: schema.DownloadStatus, errorMessage?: string) {
-	await db.update(schema.downloads).set({ status, errorMessage }).where(eq(schema.downloads.id, downloadId))
-}
-
-// ============================================================================
-// API Client
-// ============================================================================
+// --- API Client ---
 
 function initializeNzbgetFetch() {
 	const { username, password, host, port } = getSettings().nzbgetSettings
@@ -82,9 +72,7 @@ async function rpcCall<T>(method: string, params: unknown[] = []) {
 	return response.result
 }
 
-// ============================================================================
-// API Functions
-// ============================================================================
+// --- API Functions ---
 
 export async function fetchNzbgetVersion() {
 	return rpcCall<string>('version')
@@ -209,11 +197,14 @@ export async function syncNzbgetHistory() {
 		const nzbgetStatus = mapNzbgetStatus(item)
 		const completedAt = new Date(item.HistoryTime * 1000).toISOString()
 
+		// FinalDir only set after unpacking; use DestDir when no unpack needed
+		const downloadDir = item.FinalDir || item.DestDir || null
+
 		await updateDownloadFromHistory(download.id, {
 			status: nzbgetStatus,
 			parStatus: item.ParStatus,
 			unpackStatus: item.UnpackStatus,
-			finalDir: item.FinalDir || null,
+			finalDir: downloadDir,
 			downloadedSizeMb: item.DownloadedSizeMB,
 			downloadTimeSec: item.DownloadTimeSec,
 			completedAt,
@@ -221,21 +212,11 @@ export async function syncNzbgetHistory() {
 
 		syncedNzbIds.push(item.NZBID)
 		synced++
-		console.log(`[NZBGet Sync] Updated download id=${download.id}: ${nzbgetStatus} (par=${item.ParStatus}, unpack=${item.UnpackStatus})`)
+		console.log(`[NZBGet Sync] Updated download id=${download.id}: ${nzbgetStatus} (par=${item.ParStatus}, unpack=${item.UnpackStatus}, dir=${downloadDir})`)
 
-		const canImport = nzbgetStatus === 'completed' && item.FinalDir && (item.UnpackStatus === 'SUCCESS' || item.UnpackStatus === 'NONE')
+		const canImport = nzbgetStatus === 'completed' && downloadDir && (item.UnpackStatus === 'SUCCESS' || item.UnpackStatus === 'NONE')
 		if (canImport) {
-			console.log(`[NZBGet Sync] Starting import for download id=${download.id}`)
-			await updateDownloadStatus(download.id, 'importing')
-
-			const importResult = await fileImport(download.id)
-			if (importResult.success) {
-				await updateDownloadStatus(download.id, 'imported')
-				console.log(`[NZBGet Sync] Import complete: ${importResult.filesImported} file(s)`)
-			} else {
-				await updateDownloadStatus(download.id, 'failed', importResult.error)
-				console.log(`[NZBGet Sync] Import failed: ${importResult.error}`)
-			}
+			await processDownloadImport(download.id)
 		}
 	}
 
@@ -247,9 +228,7 @@ export async function syncNzbgetHistory() {
 	return { synced, orphans, cleared: syncedNzbIds.length }
 }
 
-// ============================================================================
-// Process Management
-// ============================================================================
+// --- Process Management ---
 
 process.on('SIGTERM', () => stopNzbget())
 process.on('SIGINT', () => stopNzbget())
@@ -313,7 +292,7 @@ async function startNzbget() {
 	}
 
 	const nzbgetPassword = ensureNzbgetPassword()
-	const downloadFolder = settings.downloadFolder || '/tmp/admiralty-downloads'
+	const downloadFolder = ensureDownloadFolder()
 
 	await killProcessOnPort(port)
 

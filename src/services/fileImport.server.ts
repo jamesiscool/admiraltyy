@@ -3,6 +3,7 @@ import { basename, extname, join } from 'node:path'
 import { eq } from 'drizzle-orm'
 import { db, schema } from '@/db'
 import { buildMoviePath, buildTvPath } from '@/services/path.server'
+import type { ImportResult } from './fileImport'
 
 const VIDEO_EXTENSIONS = ['.mkv', '.mp4', '.avi', '.m4v', '.mov', '.wmv']
 const SUBTITLE_EXTENSIONS = ['.srt', '.sub', '.ssa', '.ass', '.vtt']
@@ -48,10 +49,8 @@ function deleteSourceDir(dir: string) {
 	}
 }
 
-import type { ImportResult } from './fileImport'
-
 // Import files for a completed download
-export async function fileImport(downloadId: number): Promise<ImportResult> {
+async function fileImport(downloadId: number): Promise<ImportResult> {
 	const download = await db.query.downloads.findFirst({
 		where: eq(schema.downloads.id, downloadId),
 	})
@@ -156,4 +155,27 @@ export async function fileImport(downloadId: number): Promise<ImportResult> {
 
 	console.log(`[Import] Imported ${filesImported} file(s) to ${destDir}`)
 	return { success: true, filesImported } as ImportResult
+}
+
+// --- Status Updates ---
+
+async function updateDownloadStatus(downloadId: number, status: schema.DownloadStatus, errorMessage?: string) {
+	await db.update(schema.downloads).set({ status, errorMessage }).where(eq(schema.downloads.id, downloadId))
+}
+
+/** Orchestrates import: sets importing status, runs import, updates final status */
+export async function processDownloadImport(downloadId: number): Promise<ImportResult> {
+	console.log(`[Import] Starting import for download id=${downloadId}`)
+	await updateDownloadStatus(downloadId, 'importing')
+
+	const result = await fileImport(downloadId)
+	if (result.success) {
+		await updateDownloadStatus(downloadId, 'imported')
+		console.log(`[Import] Complete: ${result.filesImported} file(s)`)
+	} else {
+		await updateDownloadStatus(downloadId, 'failed', result.error)
+		console.log(`[Import] Failed: ${result.error}`)
+	}
+
+	return result
 }

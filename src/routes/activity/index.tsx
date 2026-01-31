@@ -159,15 +159,29 @@ function ActivityPage() {
 		}
 	}
 
-	// Poll for updates
+	// Poll for updates with backoff on connection failures
+	const consecutiveFailuresRef = useRef(0)
+	const NORMAL_POLL_MS = 2000
+	const BACKOFF_POLL_MS = 60000
+	const MAX_RETRIES_BEFORE_BACKOFF = 3
+
 	useEffect(() => {
-		const interval = setInterval(async () => {
+		let timeoutId: ReturnType<typeof setTimeout>
+
+		const poll = async () => {
 			try {
 				const [newStatus, newQueue, newHistory] = await Promise.all([getNzbgetStatusFn().catch(() => null), getNzbgetQueueFn().catch(() => null), getNzbgetHistoryFn().catch(() => null)])
 
-				if (newStatus) setStatus(newStatus)
-				if (newQueue) setQueue(newQueue)
-				if (newHistory) setHistory(newHistory)
+				const allFailed = !newStatus && !newQueue && !newHistory
+
+				if (allFailed) {
+					consecutiveFailuresRef.current += 1
+				} else {
+					consecutiveFailuresRef.current = 0
+					if (newStatus) setStatus(newStatus)
+					if (newQueue) setQueue(newQueue)
+					if (newHistory) setHistory(newHistory)
+				}
 
 				setErrors({
 					status: !newStatus,
@@ -175,11 +189,17 @@ function ActivityPage() {
 					history: !newHistory,
 				})
 			} catch {
-				// Silently handle polling errors
+				consecutiveFailuresRef.current += 1
 			}
-		}, 2000)
 
-		return () => clearInterval(interval)
+			// Use backoff interval after MAX_RETRIES_BEFORE_BACKOFF consecutive failures
+			const intervalMs = consecutiveFailuresRef.current >= MAX_RETRIES_BEFORE_BACKOFF ? BACKOFF_POLL_MS : NORMAL_POLL_MS
+			timeoutId = setTimeout(poll, intervalMs)
+		}
+
+		timeoutId = setTimeout(poll, NORMAL_POLL_MS)
+
+		return () => clearTimeout(timeoutId)
 	}, [])
 
 	// Build alerts from errors

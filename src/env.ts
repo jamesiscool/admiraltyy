@@ -11,6 +11,7 @@ export const env = createEnv({
 		SETTINGS_PATH: z.string().default(`${dataDirectory}/admiraltyy.settings.json`),
 		DATABASE_PATH: z.string().default(`${dataDirectory}/admiraltyy.db`),
 		LOG_DIRECTORY: z.string().default(`${dataDirectory}/logs`),
+		DOWNLOAD_FOLDER: z.string().optional(),
 		BUN_ENV: z.enum(['development', 'test', 'production']).default('production'),
 	},
 	clientPrefix: 'VITE_',

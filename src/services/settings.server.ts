@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { env } from '@/env'
 import { type Settings, settingsSchema } from './settings'
@@ -39,6 +39,51 @@ export function ensureNzbgetPassword() {
 		console.log('✓ Generated new NZBGet password')
 	}
 	return password
+}
+
+/** Ensures download folder exists and is valid. Checks env, then settings, defaults to {cwd}/downloads. */
+export function ensureDownloadFolder() {
+	// Priority: env var > settings > default
+	const envFolder = env.DOWNLOAD_FOLDER
+	const settings = getSettings()
+	const settingsFolder = settings.downloadFolder
+
+	let folder = envFolder || settingsFolder
+
+	// Validate folder is a non-empty string and directory exists or can be created
+	if (!folder || !isValidDirectory(folder)) {
+		folder = `${process.cwd()}/downloads`
+		console.log(`⚠ Invalid or missing download folder, defaulting to: ${folder}`)
+	}
+
+	// Ensure directory exists
+	if (!existsSync(folder)) {
+		mkdirSync(folder, { recursive: true })
+		console.log(`✓ Created download folder: ${folder}`)
+	}
+
+	// Update settings if needed
+	if (settings.downloadFolder !== folder) {
+		updateSettings({ downloadFolder: folder })
+		console.log(`✓ Updated download folder in settings: ${folder}`)
+	}
+
+	return folder
+}
+
+function isValidDirectory(path: string) {
+	if (!path || path.trim() === '') return false
+	// Check if it exists and is a directory, or if parent exists and we can create it
+	if (existsSync(path)) {
+		try {
+			return statSync(path).isDirectory()
+		} catch {
+			return false
+		}
+	}
+	// Check if parent directory exists
+	const parent = dirname(path)
+	return existsSync(parent)
 }
 
 const defaultSettings: Settings = {

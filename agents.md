@@ -94,5 +94,13 @@ Core workflow:
 
 ### File/component naming
 
-- Non component files: short names, one or two words.  
-- React components: one component per file; file name matches component name, use kebab case
+- Non component files: short names, one or two words. 
+- React components: file name matches component name, use kebab case
+
+## Comments
+
+### Section headers
+
+- Use single-line format: `// --- Section Name ---`
+- No multi-line box-style comments
+
