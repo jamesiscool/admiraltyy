@@ -18,7 +18,9 @@
 		"ghcr.io/devcontainers/features/sshd:1": {},
 		"ghcr.io/shyim/devcontainers-features/bun:0": {},
 		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
-		"ghcr.io/schlich/devcontainer-features/playwright:0": {},
+		"ghcr.io/schlich/devcontainer-features/playwright:0": {
+			"browsers": "chromium"
+		},
 		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
 			"packages": "curl,nano,sqlite3"
 		}
@@ -28,7 +30,6 @@
 	"mounts": [
 		"source=${localEnv:HOME}/.config/zsh/aliases.zsh,target=/home/node/.config/zsh/aliases.zsh,type=bind,readonly",
 		"source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume",
-		"source=${localEnv:HOME}/.bun,target=/home/node/.bun,type=bind",
 		"source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,readonly"
 	],
 	"postCreateCommand": "bash .devcontainer/post-create.sh",
