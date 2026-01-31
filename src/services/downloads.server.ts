@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { db, schema } from '@/db'
 import { downloadNzb } from '@/services/indexers.server'
-import { appendNzb, notifyDownloadActivity } from '@/services/nzbget.server'
+import { appendNzb } from '@/services/nzbget.server'
 
 export interface GrabReleaseData {
 	guid: string
@@ -47,9 +47,6 @@ export async function grabRelease(data: GrabReleaseData, options: GrabReleaseOpt
 		console.error(`${logPrefix} NZBGet returned invalid ID:`, nzbId)
 		throw new Error('NZBGet failed to queue download')
 	}
-
-	// Trigger fast polling for download status
-	notifyDownloadActivity()
 
 	// Create release record
 	const [release] = await db

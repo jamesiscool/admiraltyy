@@ -22,7 +22,7 @@
 			"browsers": "chromium"
 		},
 		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
-			"packages": "curl,nano,sqlite3"
+			"packages": "curl,nano,sqlite3,nzbget"
 		}
 	},
 	"workspaceMount": "source=/Users/jlles/Projects/admiraltyy,target=/workspace,type=bind",
