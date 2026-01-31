@@ -12,11 +12,12 @@
 		},
 		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
-			"moby": false
-		},
+		// "ghcr.io/devcontainers/features/docker-in-docker:2": {
+		// 	"moby": false
+		// },
 		"ghcr.io/devcontainers/features/sshd:1": {},
-		"ghcr.io/shyim/devcontainers-features/bun:0": {},
+		"ghcr.io/shyim/devcontainers-features/bun:0": {
+		},
 		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
 		"ghcr.io/schlich/devcontainer-features/playwright:0": {
 			"browsers": "chromium"
@@ -28,15 +29,13 @@
 	"workspaceMount": "source=/Users/jlles/Projects/admiraltyy,target=/workspace,type=bind",
 	"workspaceFolder": "/workspace",
 	"mounts": [
-		"source=${localEnv:HOME}/.config/zsh/aliases.zsh,target=/home/node/.config/zsh/aliases.zsh,type=bind,readonly",
-		"source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume",
-		"source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,readonly"
+		"source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume"
 	],
 	"postCreateCommand": "bash .devcontainer/post-create.sh",
 	"customizations": {
 		"vscode": {
 			"settings": {},
-			"extensions": []
+			"extensions": ["biomejs.biome","streetsidesoftware.code-spell-checker","mhutchie.git-graph","bradlc.vscode-tailwindcss","typescriptteam.native-preview", "ms-playwright.playwright"]
 		}
 	}
 }
