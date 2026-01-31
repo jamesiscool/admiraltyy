@@ -16,8 +16,7 @@
 		// 	"moby": false
 		// },
 		"ghcr.io/devcontainers/features/sshd:1": {},
-		"ghcr.io/shyim/devcontainers-features/bun:0": {
-		},
+		"ghcr.io/shyim/devcontainers-features/bun:0": {},
 		"ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
 		"ghcr.io/schlich/devcontainer-features/playwright:0": {
 			"browsers": "chromium"
@@ -35,7 +34,14 @@
 	"customizations": {
 		"vscode": {
 			"settings": {},
-			"extensions": ["biomejs.biome","streetsidesoftware.code-spell-checker","mhutchie.git-graph","bradlc.vscode-tailwindcss","typescriptteam.native-preview", "ms-playwright.playwright"]
+			"extensions": [
+				"biomejs.biome",
+				"streetsidesoftware.code-spell-checker",
+				"mhutchie.git-graph",
+				"bradlc.vscode-tailwindcss",
+				"typescriptteam.native-preview",
+				"ms-playwright.playwright"
+			]
 		}
 	}
 }
