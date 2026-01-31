@@ -1,6 +1,5 @@
-import type { Subprocess } from 'bun'
 import { and, eq, notInArray } from 'drizzle-orm'
-import { type $Fetch, ofetch } from 'ofetch'
+import { ofetch } from 'ofetch'
 import { db, schema } from '@/db'
 import { fileImport } from '@/services/fileImport.server'
 import type { NzbgetConfigOption, NzbgetHistoryItem, NzbgetQueueItem, NzbgetRpcResponse, NzbgetStatus } from '@/services/nzbget'
@@ -18,7 +17,7 @@ const STARTUP_POLL_INTERVAL_MS = 200
 // DB Helpers
 // ============================================================================
 
-export function mapNzbgetStatus(item: NzbgetHistoryItem): 'completed' | 'failed' {
+export function mapNzbgetStatus(item: NzbgetHistoryItem) {
 	if (item.Status.startsWith('SUCCESS')) return 'completed'
 	return 'failed'
 }
@@ -65,40 +64,21 @@ export async function updateDownloadStatus(downloadId: number, status: schema.Do
 // API Client
 // ============================================================================
 
-let nzbgetFetch: $Fetch | null = null
-let nzbgetStartPromise: Promise<boolean> | null = null
-
-function ensureNzbgetApiInitialized(): $Fetch {
-	if (!nzbgetFetch) {
-		const { username, password, host, port } = getSettings().nzbgetSettings
-		const baseURL = `http://${host}:${port}/jsonrpc`
-		const auth = Buffer.from(`${username}:${password}`).toString('base64')
-		nzbgetFetch = ofetch.create({
-			baseURL,
-			method: 'POST',
-			headers: { Authorization: `Basic ${auth}` },
-		})
-	}
-	return nzbgetFetch
+function initializeNzbgetFetch() {
+	const { username, password, host, port } = getSettings().nzbgetSettings
+	const baseURL = `http://${host}:${port}/jsonrpc`
+	const auth = Buffer.from(`${username}:${password}`).toString('base64')
+	return ofetch.create({
+		baseURL,
+		method: 'POST',
+		headers: { Authorization: `Basic ${auth}` },
+	})
 }
 
-export function reinitNzbgetApi(): void {
-	nzbgetFetch = null
-}
+const nzbgetFetch = initializeNzbgetFetch()
 
-// Lazy-start NZBGet on first API call
-async function ensureNzbgetRunning(): Promise<void> {
-	if (!nzbgetStartPromise) {
-		// Start NZBGet (this is idempotent - will adopt existing process if running)
-		nzbgetStartPromise = startNzbget()
-	}
-	await nzbgetStartPromise
-}
-
-async function rpcCall<T>(method: string, params: unknown[] = []): Promise<T> {
-	await ensureNzbgetRunning()
-	const client = ensureNzbgetApiInitialized()
-	const response = await client<NzbgetRpcResponse<T>>('', { body: { method, params } })
+async function rpcCall<T>(method: string, params: unknown[] = []) {
+	const response = await nzbgetFetch<NzbgetRpcResponse<T>>('', { body: { method, params } })
 	return response.result
 }
 
@@ -106,36 +86,36 @@ async function rpcCall<T>(method: string, params: unknown[] = []): Promise<T> {
 // API Functions
 // ============================================================================
 
-export async function fetchNzbgetVersion(): Promise<string> {
+export async function fetchNzbgetVersion() {
 	return rpcCall<string>('version')
 }
 
-export async function fetchNzbgetStatus(): Promise<NzbgetStatus> {
+export async function fetchNzbgetStatus() {
 	return rpcCall<NzbgetStatus>('status')
 }
 
-export async function listNzbgetQueue(): Promise<NzbgetQueueItem[]> {
+export async function listNzbgetQueue() {
 	return rpcCall<NzbgetQueueItem[]>('listgroups', [0])
 }
 
-export async function listNzbgetHistory(showHidden = false): Promise<NzbgetHistoryItem[]> {
+export async function listNzbgetHistory(showHidden = false) {
 	return rpcCall<NzbgetHistoryItem[]>('history', [showHidden])
 }
 
-export async function appendNzb(options: { filename: string; nzbContent: string; category?: string; priority?: number; addToTop?: boolean; addPaused?: boolean }): Promise<number> {
+export async function appendNzb(options: { filename: string; nzbContent: string; category?: string; priority?: number; addToTop?: boolean; addPaused?: boolean }) {
 	const { filename, nzbContent, category = '', priority = 0, addToTop = false, addPaused = false } = options
 	return rpcCall<number>('append', [filename, nzbContent, category, priority, addToTop, addPaused, '', 0, 'SCORE'])
 }
 
-export async function fetchNzbgetConfig(): Promise<NzbgetConfigOption[]> {
+export async function fetchNzbgetConfig() {
 	return rpcCall<NzbgetConfigOption[]>('config')
 }
 
-export async function saveNzbgetConfig(options: NzbgetConfigOption[]): Promise<boolean> {
+export async function saveNzbgetConfig(options: NzbgetConfigOption[]) {
 	return rpcCall<boolean>('saveconfig', [options])
 }
 
-function usenetServerToConfigOptions(server: UsenetServer, index: number): NzbgetConfigOption[] {
+function usenetServerToConfigOptions(server: UsenetServer, index: number) {
 	const serverNumber = index + 1
 	return [
 		{ Name: `Server${serverNumber}.Active`, Value: server.enabled ? 'yes' : 'no' },
@@ -155,7 +135,7 @@ function usenetServerToConfigOptions(server: UsenetServer, index: number): Nzbge
 	]
 }
 
-export async function pushUsenetServersToNzbget(servers: UsenetServer[]): Promise<boolean> {
+export async function pushUsenetServersToNzbget(servers: UsenetServer[]) {
 	const currentConfig = await fetchNzbgetConfig()
 	const existingServerCount = currentConfig.filter((opt) => opt.Name.match(/^Server\d+\.Host$/)).length
 	const configOptions: NzbgetConfigOption[] = []
@@ -173,15 +153,15 @@ export async function pushUsenetServersToNzbget(servers: UsenetServer[]): Promis
 	return saveNzbgetConfig(configOptions)
 }
 
-export async function reloadNzbgetConfig(): Promise<boolean> {
+export async function reloadNzbgetConfig() {
 	return rpcCall<boolean>('reload')
 }
 
-export async function editNzbgetQueue(command: string, ids: number[]): Promise<boolean> {
+export async function editNzbgetQueue(command: string, ids: number[]) {
 	return rpcCall<boolean>('editqueue', [command, '', ids])
 }
 
-export async function clearNzbgetQueue(): Promise<boolean> {
+export async function clearNzbgetQueue() {
 	const queue = await listNzbgetQueue()
 	if (queue.length === 0) return true
 	return editNzbgetQueue(
@@ -190,16 +170,16 @@ export async function clearNzbgetQueue(): Promise<boolean> {
 	)
 }
 
-export async function testUsenetServer(server: { host: string; port: number; username: string; password: string; ssl: boolean }): Promise<string> {
+export async function testUsenetServer(server: { host: string; port: number; username: string; password: string; ssl: boolean }) {
 	return rpcCall<string>('testserver', [server.host, server.port, server.username, server.password, server.ssl, '', 30, 2])
 }
 
-export async function clearNzbgetHistory(nzbIds: number[]): Promise<boolean> {
+export async function clearNzbgetHistory(nzbIds: number[]) {
 	if (nzbIds.length === 0) return true
 	return rpcCall<boolean>('editqueue', ['HistoryFinalDelete', '', nzbIds])
 }
 
-export async function syncNzbgetHistory(): Promise<{ synced: number; orphans: number; cleared: number }> {
+export async function syncNzbgetHistory() {
 	const history = await listNzbgetHistory()
 	if (history.length === 0) return { synced: 0, orphans: 0, cleared: 0 }
 
@@ -271,16 +251,10 @@ export async function syncNzbgetHistory(): Promise<{ synced: number; orphans: nu
 // Process Management
 // ============================================================================
 
-let nzbgetProcess: Subprocess | null = null
-
 process.on('SIGTERM', () => stopNzbget())
 process.on('SIGINT', () => stopNzbget())
 
-export function isNzbgetRunning(): boolean {
-	return nzbgetProcess !== null && !nzbgetProcess.killed
-}
-
-async function findPidsOnPort(port: number): Promise<string[]> {
+async function findPidsOnPort(port: number) {
 	const proc = Bun.spawn(['lsof', '-t', `-i:${port}`], { stdout: 'pipe', stderr: 'ignore' })
 	await proc.exited
 	if (!proc.stdout || typeof proc.stdout === 'number') return []
@@ -288,11 +262,11 @@ async function findPidsOnPort(port: number): Promise<string[]> {
 	return text.trim().split('\n').filter(Boolean)
 }
 
-export async function isNzbgetPortInUse(port: number): Promise<boolean> {
+export async function isNzbgetPortInUse(port: number) {
 	return (await findPidsOnPort(port)).length > 0
 }
 
-async function killProcessOnPort(port: number): Promise<boolean> {
+async function killProcessOnPort(port: number) {
 	const pids = await findPidsOnPort(port)
 	if (pids.length === 0) return false
 
@@ -306,88 +280,68 @@ async function killProcessOnPort(port: number): Promise<boolean> {
 	return true
 }
 
-async function canConnectToNzbget(): Promise<boolean> {
-	const { username, password, host, port } = getSettings().nzbgetSettings
-	const auth = Buffer.from(`${username}:${password}`).toString('base64')
-	try {
-		const res = await fetch(`http://${host}:${port}/jsonrpc`, {
-			method: 'POST',
-			headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
-			body: JSON.stringify({ method: 'version', params: [] }),
-		})
-		return res.ok
-	} catch {
-		return false
-	}
-}
-
-async function waitForNzbgetReady(timeoutMs: number): Promise<boolean> {
-	const startedAt = Date.now()
-	while (Date.now() - startedAt < timeoutMs) {
-		if (await canConnectToNzbget()) return true
-		await Bun.sleep(STARTUP_POLL_INTERVAL_MS)
-	}
-	return false
-}
-
-async function checkNzbgetBinary(): Promise<boolean> {
-	const proc = Bun.spawn(['which', 'nzbget'], { stdout: 'pipe', stderr: 'ignore' })
-	const exitCode = await proc.exited
-	return exitCode === 0
-}
-
-function buildServerArgs(servers: UsenetServer[]): string[] {
-	const args: string[] = []
-	for (let i = 0; i < servers.length; i++) {
-		const srv = servers[i]
-		const n = i + 1
-		args.push('-o', `Server${n}.Active=${srv.enabled ? 'yes' : 'no'}`)
-		args.push('-o', `Server${n}.Name=${srv.name}`)
-		args.push('-o', `Server${n}.Level=${srv.priority}`)
-		args.push('-o', `Server${n}.Host=${srv.host}`)
-		args.push('-o', `Server${n}.Port=${srv.port}`)
-		args.push('-o', `Server${n}.Username=${srv.username}`)
-		args.push('-o', `Server${n}.Password=${srv.password}`)
-		args.push('-o', `Server${n}.Encryption=${srv.ssl ? 'yes' : 'no'}`)
-		args.push('-o', `Server${n}.Connections=${srv.connections}`)
-		args.push('-o', `Server${n}.Retention=0`)
-	}
-	return args
-}
-
-export async function startNzbget(): Promise<boolean> {
+async function startNzbget() {
 	const settings = getSettings()
-	const { host, port } = settings.nzbgetSettings
+	const { username, password, host, port } = settings.nzbgetSettings
 
 	// Check if NZBGet already running and usable
-	if (await isNzbgetPortInUse(port)) {
-		if (await canConnectToNzbget()) {
-			console.log('✓ Adopted existing NZBGet on port', port)
-			return true
+	const pidsOnPort = await findPidsOnPort(port)
+	if (pidsOnPort.length > 0) {
+		const auth = Buffer.from(`${username}:${password}`).toString('base64')
+		try {
+			const res = await fetch(`http://${host}:${port}/jsonrpc`, {
+				method: 'POST',
+				headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+				body: JSON.stringify({ method: 'version', params: [] }),
+			})
+			if (res.ok) {
+				console.log('✓ Adopted existing NZBGet on port', port)
+				return null
+			}
+		} catch {
+			// Connection failed, will restart
 		}
 		console.log('⚠ NZBGet on port but auth failed, restarting...')
 		await killProcessOnPort(port)
 	}
 
 	// Verify binary exists
-	if (!(await checkNzbgetBinary())) {
+	const whichProc = Bun.spawn(['which', 'nzbget'], { stdout: 'pipe', stderr: 'ignore' })
+	if ((await whichProc.exited) !== 0) {
 		console.error('✗ nzbget binary not found. Install with: apt install nzbget')
-		return false
+		return null
 	}
 
-	const password = ensureNzbgetPassword()
+	const nzbgetPassword = ensureNzbgetPassword()
 	const downloadFolder = settings.downloadFolder || '/tmp/admiralty-downloads'
 
 	await killProcessOnPort(port)
+
+	// Build server args inline
+	const serverArgs: string[] = []
+	for (let i = 0; i < settings.usenetServers.length; i++) {
+		const srv = settings.usenetServers[i]
+		const n = i + 1
+		serverArgs.push('-o', `Server${n}.Active=${srv.enabled ? 'yes' : 'no'}`)
+		serverArgs.push('-o', `Server${n}.Name=${srv.name}`)
+		serverArgs.push('-o', `Server${n}.Level=${srv.priority}`)
+		serverArgs.push('-o', `Server${n}.Host=${srv.host}`)
+		serverArgs.push('-o', `Server${n}.Port=${srv.port}`)
+		serverArgs.push('-o', `Server${n}.Username=${srv.username}`)
+		serverArgs.push('-o', `Server${n}.Password=${srv.password}`)
+		serverArgs.push('-o', `Server${n}.Encryption=${srv.ssl ? 'yes' : 'no'}`)
+		serverArgs.push('-o', `Server${n}.Connections=${srv.connections}`)
+		serverArgs.push('-o', `Server${n}.Retention=0`)
+	}
 
 	const args = [
 		'nzbget',
 		'-n',
 		'-s',
 		'-o',
-		`ControlUsername=${settings.nzbgetSettings.username}`,
+		`ControlUsername=${username}`,
 		'-o',
-		`ControlPassword=${password}`,
+		`ControlPassword=${nzbgetPassword}`,
 		'-o',
 		`ControlIP=${host}`,
 		'-o',
@@ -398,41 +352,56 @@ export async function startNzbget(): Promise<boolean> {
 		`DestDir=${downloadFolder}`,
 		'-o',
 		`InterDir=${downloadFolder}/.incomplete`,
-		...buildServerArgs(settings.usenetServers),
+		...serverArgs,
 	]
 
 	console.log(`🚀 Starting NZBGet on ${host}:${port} (dest: ${downloadFolder}, ${settings.usenetServers.length} server(s))...`)
 
 	try {
-		nzbgetProcess = Bun.spawn(args, {
+		const proc = Bun.spawn(args, {
 			stdout: 'pipe',
 			stderr: 'pipe',
 			onExit(_proc, exitCode, signalCode) {
 				console.log(`⏹ NZBGet exited (code: ${exitCode}, signal: ${signalCode})`)
-				nzbgetProcess = null
 			},
 		})
 
 		// Stream output
-		if (nzbgetProcess.stdout && typeof nzbgetProcess.stdout !== 'number') {
-			streamOutput(nzbgetProcess.stdout, 'nzbget')
+		if (proc.stdout && typeof proc.stdout !== 'number') {
+			streamOutput(proc.stdout, 'nzbget')
 		}
-		if (nzbgetProcess.stderr && typeof nzbgetProcess.stderr !== 'number') {
-			streamOutput(nzbgetProcess.stderr, 'nzbget:err')
+		if (proc.stderr && typeof proc.stderr !== 'number') {
+			streamOutput(proc.stderr, 'nzbget:err')
 		}
 
 		// Wait for NZBGet to be ready
-		const ready = await waitForNzbgetReady(STARTUP_TIMEOUT_MS)
-		if (!ready) {
-			console.error('✗ NZBGet failed to start (timeout waiting for port)')
-			if (nzbgetProcess && !nzbgetProcess.killed) {
-				nzbgetProcess.kill()
+		const startedAt = Date.now()
+		let ready = false
+		const auth = Buffer.from(`${username}:${password}`).toString('base64')
+		while (Date.now() - startedAt < STARTUP_TIMEOUT_MS) {
+			try {
+				const res = await fetch(`http://${host}:${port}/jsonrpc`, {
+					method: 'POST',
+					headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
+					body: JSON.stringify({ method: 'version', params: [] }),
+				})
+				if (res.ok) {
+					ready = true
+					break
+				}
+			} catch {
+				// Not ready yet
 			}
-			nzbgetProcess = null
-			return false
+			await Bun.sleep(STARTUP_POLL_INTERVAL_MS)
 		}
 
-		console.log(`✓ NZBGet started (pid: ${nzbgetProcess.pid})`)
+		if (!ready) {
+			console.error('✗ NZBGet failed to start (timeout waiting for port)')
+			if (!proc.killed) proc.kill()
+			return null
+		}
+
+		console.log(`✓ NZBGet started (pid: ${proc.pid})`)
 
 		// Clear queue on startup (non-blocking)
 		clearNzbgetQueue()
@@ -443,34 +412,34 @@ export async function startNzbget(): Promise<boolean> {
 				console.error('✗ Failed to clear NZBGet queue:', err)
 			})
 
-		return true
+		return proc
 	} catch (err) {
 		console.error('✗ Failed to start NZBGet:', err)
-		nzbgetProcess = null
-		return false
+		return null
 	}
 }
 
-export async function stopNzbget(): Promise<void> {
-	const port = getSettings().nzbgetSettings.port
+const nzbgetSubprocess = startNzbget()
 
-	if (nzbgetProcess && !nzbgetProcess.killed) {
+export async function stopNzbget() {
+	const port = getSettings().nzbgetSettings.port
+	const proc = await nzbgetSubprocess
+
+	if (proc && !proc.killed) {
 		console.log('⏹ Stopping NZBGet...')
 		try {
-			nzbgetProcess.kill('SIGTERM')
+			proc.kill('SIGTERM')
 			const timeout = setTimeout(() => {
-				if (nzbgetProcess && !nzbgetProcess.killed) {
+				if (!proc.killed) {
 					console.log('⚠ NZBGet did not exit gracefully, forcing kill...')
-					nzbgetProcess.kill('SIGKILL')
+					proc.kill('SIGKILL')
 				}
 			}, 5000)
-			await nzbgetProcess.exited
+			await proc.exited
 			clearTimeout(timeout)
 			console.log('✓ NZBGet stopped')
 		} catch (err) {
 			console.error('✗ Error stopping NZBGet:', err)
-		} finally {
-			nzbgetProcess = null
 		}
 		return
 	}
@@ -484,7 +453,7 @@ export async function stopNzbget(): Promise<void> {
 	console.log('No NZBGet process found, skipping stop')
 }
 
-async function streamOutput(stream: ReadableStream<Uint8Array>, prefix: string): Promise<void> {
+async function streamOutput(stream: ReadableStream<Uint8Array>, prefix: string) {
 	const reader = stream.getReader()
 	const decoder = new TextDecoder()
 

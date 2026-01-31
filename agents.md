@@ -76,6 +76,10 @@ Core workflow:
 
 - Never use dynamic `await import()`. Always use static imports at top of file.
 
+## TypeScript
+
+- Strongly avoid explicit return types. Let TS infer. If a return type is absolutely necessary, add a comment explaining why. 
+
 ## Naming style
 
 - Prefer clear, descriptive names over abbreviations.  
