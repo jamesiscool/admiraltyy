@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { env } from '@/env'
 import { type Settings, settingsSchema } from './settings'
 
@@ -41,20 +41,13 @@ export function ensureNzbgetPassword() {
 	return password
 }
 
-/** Ensures download folder exists and is valid. Checks env, then settings, defaults to {cwd}/downloads. */
+/** Ensures download folder exists and is valid. defaults to {dataDir}/downloads if settings is relative then resolved against process.cwd() */
 export function ensureDownloadFolder() {
-	// Priority: env var > settings > default
-	const envFolder = env.DOWNLOAD_FOLDER
-	const settings = getSettings()
-	const settingsFolder = settings.downloadFolder
+	const settingsDownloadFolder = getSettings().downloadFolder.trim()
 
-	let folder = envFolder || settingsFolder
-
-	// Validate folder is a non-empty string and directory exists or can be created
-	if (!folder || !isValidDirectory(folder)) {
-		folder = `${process.cwd()}/downloads`
-		console.log(`⚠ Invalid or missing download folder, defaulting to: ${folder}`)
-	}
+	// Empty → data/downloads, absolute path → use as-is, relative → resolve against DATA_DIRECTORY
+	const isAbsolute = settingsDownloadFolder.startsWith('/') || settingsDownloadFolder.startsWith('~')
+	const folder = settingsDownloadFolder === '' ? resolve(env.DATA_DIRECTORY, 'downloads') : isAbsolute ? settingsDownloadFolder : resolve(process.cwd(), settingsDownloadFolder)
 
 	// Ensure directory exists
 	if (!existsSync(folder)) {
@@ -62,28 +55,7 @@ export function ensureDownloadFolder() {
 		console.log(`✓ Created download folder: ${folder}`)
 	}
 
-	// Update settings if needed
-	if (settings.downloadFolder !== folder) {
-		updateSettings({ downloadFolder: folder })
-		console.log(`✓ Updated download folder in settings: ${folder}`)
-	}
-
 	return folder
-}
-
-function isValidDirectory(path: string) {
-	if (!path || path.trim() === '') return false
-	// Check if it exists and is a directory, or if parent exists and we can create it
-	if (existsSync(path)) {
-		try {
-			return statSync(path).isDirectory()
-		} catch {
-			return false
-		}
-	}
-	// Check if parent directory exists
-	const parent = dirname(path)
-	return existsSync(parent)
 }
 
 const defaultSettings: Settings = {

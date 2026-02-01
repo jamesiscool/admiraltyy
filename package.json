@@ -7,6 +7,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"predev": "fuser -k 2828/tcp 28561/tcp 2>/dev/null || true",
 		"dev": "bun --bun vite dev",
 		"build": "bun --bun vite build",
 		"preview": "bun --bun vite preview",

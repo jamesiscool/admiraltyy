@@ -176,8 +176,9 @@ export async function syncNzbgetHistory() {
 
 // --- Process Management ---
 
-process.on('SIGTERM', () => stopNzbget())
-process.on('SIGINT', () => stopNzbget())
+// Clean up nzbget on process exit
+process.on('SIGTERM', () => void stopNzbget())
+process.on('SIGINT', () => void stopNzbget())
 
 async function findPidsOnPort(port: number) {
 	const proc = Bun.spawn(['lsof', '-t', `-i:${port}`], { stdout: 'pipe', stderr: 'ignore' })
@@ -273,6 +274,14 @@ async function startNzbget() {
 		`DestDir=${downloadFolder}`,
 		'-o',
 		`InterDir=${downloadFolder}/.incomplete`,
+		'-o',
+		'Unpack=yes',
+		'-o',
+		'UnpackCleanupDisk=yes',
+		'-o',
+		'UnrarCmd=unar',
+		'-o',
+		'SevenZipCmd=7z',
 		...serverArgs,
 	]
 
@@ -340,38 +349,13 @@ async function startNzbget() {
 	}
 }
 
-const nzbgetSubprocess = startNzbget()
+startNzbget()
 
 export async function stopNzbget() {
 	const port = getSettings().nzbgetSettings.port
-	const proc = await nzbgetSubprocess
-
-	if (proc && !proc.killed) {
-		console.log('⏹ Stopping NZBGet...')
-		try {
-			proc.kill('SIGTERM')
-			const timeout = setTimeout(() => {
-				if (!proc.killed) {
-					console.log('⚠ NZBGet did not exit gracefully, forcing kill...')
-					proc.kill('SIGKILL')
-				}
-			}, 5000)
-			await proc.exited
-			clearTimeout(timeout)
-			console.log('✓ NZBGet stopped')
-		} catch (err) {
-			console.error('✗ Error stopping NZBGet:', err)
-		}
-		return
-	}
-
-	if ((await findPidsOnPort(port)).length > 0) {
-		await killProcessOnPort(port)
-		console.log('✓ Killed NZBGet process on port', port)
-		return
-	}
-
-	console.log('No NZBGet process found, skipping stop')
+	const proc = Bun.spawn(['sh', '-c', `lsof -ti:${port} | xargs kill -9 2>/dev/null`], { stdout: 'ignore', stderr: 'ignore' })
+	await proc.exited
+	process.exit()
 }
 
 async function streamOutput(stream: ReadableStream<Uint8Array>, prefix: string) {

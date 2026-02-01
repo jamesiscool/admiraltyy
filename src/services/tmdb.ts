@@ -25,10 +25,10 @@ const tmdbApi = {
 	fetch: <T>(url: string, opts?: any): Promise<T> => tmdbFetchBase<T>(url, opts),
 }
 const tmdbClient =
-	env.BUN_ENV !== 'production'
+	env.BUN_ENV !== 'prod'
 		? fastForward(tmdbApi, {
 				cache: new FileSystemCache({ cacheDir: './test/fixtures/http', namespace: 'tmdb' }),
-				mode: env.BUN_ENV === 'test' ? CacheMode.READ_ONLY : CacheMode.ON,
+				mode: env.BUN_ENV === 'ci' ? CacheMode.READ_ONLY : CacheMode.ON,
 			})
 		: tmdbApi
 
