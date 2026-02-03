@@ -1,7 +1,9 @@
 import { mkdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { CacheMode, FileSystemCache, fastForward } from '@with-logic/fast-forward'
 import { ofetch } from 'ofetch'
+import { env } from '@/env'
 import type { EpisodeSearchOptions, IndexerRelease, MovieSearchOptions } from '@/services/indexers'
 import type { Indexer } from '@/services/settings'
 import { getSettings } from '@/services/settings.server'
@@ -16,6 +18,37 @@ async function ensureTempDir(): Promise<void> {
 	await mkdir(TEMP_DIR, { recursive: true })
 }
 
+// --- Fast-forward wrapped HTTP clients ---
+
+// Wrap ofetch for indexer searches
+const indexerOfetchBase = ofetch.create({})
+const indexerApi = {
+	// biome-ignore lint/suspicious/noExplicitAny: passthrough wrapper
+	fetch: <T>(url: string, opts?: any): Promise<T> => indexerOfetchBase<T>(url, opts),
+}
+const indexerClient =
+	env.BUN_ENV !== 'prod'
+		? fastForward(indexerApi, {
+				cache: new FileSystemCache({ cacheDir: './test/fixtures/http', namespace: 'indexer' }),
+				mode: env.BUN_ENV === 'ci' ? CacheMode.READ_ONLY : CacheMode.ON,
+			})
+		: indexerApi
+// biome-ignore lint/suspicious/noExplicitAny: passthrough wrapper
+const indexerFetch = <T>(url: string, opts?: any): Promise<T> => indexerClient.fetch<T>(url, opts)
+
+// Wrap fetch for NZB downloads
+const nzbDownloadApi = {
+	fetch: (url: string, opts?: RequestInit): Promise<Response> => globalThis.fetch(url, opts),
+}
+const nzbDownloadClient =
+	env.BUN_ENV !== 'prod'
+		? fastForward(nzbDownloadApi, {
+				cache: new FileSystemCache({ cacheDir: './test/fixtures/http', namespace: 'nzb-download' }),
+				mode: env.BUN_ENV === 'ci' ? CacheMode.READ_ONLY : CacheMode.ON,
+			})
+		: nzbDownloadApi
+const nzbDownloadFetch = (url: string, opts?: RequestInit): Promise<Response> => nzbDownloadClient.fetch(url, opts)
+
 export async function downloadNzb(downloadUrl: string, filename: string): Promise<string> {
 	await ensureTempDir()
 
@@ -24,7 +57,7 @@ export async function downloadNzb(downloadUrl: string, filename: string): Promis
 
 	console.log(`[Indexer] Downloading NZB from: ${downloadUrl}`)
 
-	const response = await fetch(downloadUrl)
+	const response = await nzbDownloadFetch(downloadUrl)
 	if (!response.ok) {
 		throw new Error(`Failed to download NZB: ${response.status} ${response.statusText}`)
 	}
@@ -169,7 +202,7 @@ async function searchIndexer(indexer: Indexer, params: SearchParams): Promise<In
 	console.log(`[Indexer] ${indexer.name}: ${logUrl.toString()}`)
 
 	try {
-		const response = await ofetch<NewznabResponse>(url.toString(), {
+		const response = await indexerFetch<NewznabResponse>(url.toString(), {
 			timeout: 30000,
 		})
 

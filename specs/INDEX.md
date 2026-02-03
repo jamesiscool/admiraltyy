@@ -7,7 +7,6 @@ Technical documentation for Admiraltyy, a unified Usenet media automation platfo
 | Spec | Code | Purpose |
 |------|------|---------|
 | [architecture.md](./architecture.md) | [src/](../src/) | Folder structure, TanStack patterns, data flow |
-| [service-file-organization.md](./service-file-organization.md) | [services/](../src/services/) | 4-file pattern for services |
 
 ## Domain Systems
 
@@ -19,15 +18,10 @@ Technical documentation for Admiraltyy, a unified Usenet media automation platfo
 | [file-management.md](./file-management.md) | [services/fileScan.ts](../src/services/fileScan.ts) | Library scanning, import |
 | [task-system.md](./task-system.md) | [services/tasks.ts](../src/services/tasks.ts) | Background job scheduling |
 
-## Integrations
-
-| Spec | Code | Purpose |
-|------|------|---------|
-| [tmdb-integration.md](./tmdb-integration.md) | [services/tmdb.ts](../src/services/tmdb.ts) | TMDB/TVDB API usage |
 
 ## Testing
 
 | Spec | Code | Purpose |
 |------|------|---------|
-| [testing-strategy.md](./testing-strategy.md) | [test/](../test/) | Test layers, patterns, tooling |
+| [testing-strategy.md](./testing.md) | [test/](../test/) | Test layers, patterns, tooling |
 | [filesystem-size-stub.md](./filesystem-size-stub.md) | [test/fixtures/filesystem.ts](../test/fixtures/filesystem.ts) | Stub file sizes in memfs |

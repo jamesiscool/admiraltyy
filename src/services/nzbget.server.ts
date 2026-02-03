@@ -1,6 +1,8 @@
+import { CacheMode, FileSystemCache, fastForward } from '@with-logic/fast-forward'
 import { and, eq, notInArray } from 'drizzle-orm'
 import { ofetch } from 'ofetch'
 import { db, schema } from '@/db'
+import { env } from '@/env'
 import { processDownloadImport } from '@/services/fileImport.server'
 import type { NzbgetConfigOption, NzbgetHistoryItem, NzbgetQueueItem, NzbgetRpcResponse, NzbgetStatus } from '@/services/nzbget'
 import type { UsenetServer } from '@/services/settings'
@@ -24,7 +26,25 @@ function initializeNzbgetFetch() {
 	})
 }
 
-const nzbgetFetch = initializeNzbgetFetch()
+const nzbgetFetchBase = initializeNzbgetFetch()
+
+// Wrap fetch in object so fast-forward can intercept method calls via Proxy
+const nzbgetApi = {
+	// biome-ignore lint/suspicious/noExplicitAny: passthrough wrapper
+	fetch: <T>(url: string, opts?: any): Promise<T> => nzbgetFetchBase<T>(url, opts),
+}
+
+const nzbgetClient =
+	env.BUN_ENV !== 'prod'
+		? fastForward(nzbgetApi, {
+				cache: new FileSystemCache({ cacheDir: './test/fixtures/http', namespace: 'nzbget' }),
+				mode: env.BUN_ENV === 'ci' ? CacheMode.READ_ONLY : CacheMode.ON,
+			})
+		: nzbgetApi
+
+// Wrapper that always goes through the proxy
+// biome-ignore lint/suspicious/noExplicitAny: passthrough wrapper
+const nzbgetFetch = <T>(url: string, opts?: any): Promise<T> => nzbgetClient.fetch<T>(url, opts)
 
 async function rpcCall<T>(method: string, params: unknown[] = []) {
 	const response = await nzbgetFetch<NzbgetRpcResponse<T>>('', { body: { method, params } })
