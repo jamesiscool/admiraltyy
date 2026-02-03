@@ -1,26 +1,11 @@
-import { resolve } from 'node:path'
 import { and, eq, sql } from 'drizzle-orm'
 import { db, schema } from '@/db'
 import type { resolutions } from '@/db/schema'
 import { grabRelease } from '@/services/downloads.server'
 import { searchMovieReleases } from '@/services/indexers.server'
-import { getSettings } from '@/services/settings.server'
 import type { MovieDetails } from '@/services/tmdb'
 import { fetchMovieDetails } from '@/services/tmdb'
 import type { GrabReleaseInput, MoviePreview, MovieWithFiles } from './movies'
-
-// --- Helpers ---
-
-/** Sanitize a movie title for use as a folder name */
-function sanitizeFolderName(name: string) {
-	return name.replace(/[<>:"/\\|?*]/g, '').trim()
-}
-
-/** Build movie folder path: {rootFolder}/{Title} ({Year}) - always absolute */
-function buildMovieFolderPath(rootFolder: string, title: string, year: number) {
-	const folderName = sanitizeFolderName(`${title} (${year})`)
-	return resolve(rootFolder, folderName)
-}
 
 export async function listMoviesFromDb(): Promise<MoviePreview[]> {
 	return db.all<MoviePreview>(sql`
@@ -154,16 +139,10 @@ export async function grabMovieRelease(data: GrabReleaseInput) {
 		throw new Error('Invalid movie ID')
 	}
 
-	// Get movie info for destination path
 	const movie = await db.select().from(schema.movies).where(eq(schema.movies.id, movieId)).limit(1)
 	if (!movie.length) {
 		throw new Error('Movie not found')
 	}
-
-	// Get default movies folder
-	const settings = getSettings()
-	const defaultFolder = settings.folders.movies.find((f) => f.isDefault) ?? settings.folders.movies[0]
-	const destDir = defaultFolder ? buildMovieFolderPath(defaultFolder.path, movie[0].title, movie[0].year) : undefined
 
 	return grabRelease(
 		{
@@ -176,7 +155,7 @@ export async function grabMovieRelease(data: GrabReleaseInput) {
 			indexerId: data.indexerId,
 			indexerName: data.indexerName,
 		},
-		{ movieId, category: 'movies', destDir },
+		{ movieId, category: 'movies' },
 	)
 }
 
