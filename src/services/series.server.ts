@@ -1,8 +1,39 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { db, schema } from '@/db'
-import type { File, Series } from '@/db/schema'
-import { checkNeedsYearDisambiguation, fetchSeriesPreview, fetchSeriesWithEpisodes } from '@/services/tmdb'
-import type { EpisodeWithFiles, SeasonWithEpisodes, SeriesPreview, SeriesWithDetails } from './series'
+import type { Episode, File, Season, Series } from '@/db/schema'
+import { checkNeedsYearDisambiguation, fetchSeriesPreview, fetchSeriesWithEpisodes } from '@/services/tmdb.server'
+
+// --- Local Types (to avoid circular imports with series.ts) ---
+
+interface SeriesPreview {
+	id: number
+	title: string
+	year: number
+	status: 'continuing' | 'ended'
+	posterUrl: string | null
+	resolution: '480p' | '720p' | '1080p' | '2160p' | null
+	monitored: boolean | null
+	nextAiring: string | null
+	dateAdded: string
+	sizeBytes: number
+	episodeCount: number
+	missingEpisodeCount: number
+}
+
+interface EpisodeWithFiles extends Episode {
+	files: File[]
+}
+
+interface SeasonWithEpisodes extends Season {
+	episodes: EpisodeWithFiles[]
+}
+
+interface SeriesWithDetails extends Series {
+	sizeBytes: number
+	episodeCount: number
+	missingEpisodeCount: number
+	seasons: SeasonWithEpisodes[]
+}
 
 // Get single series with full nested details
 async function findSeriesWithDetails(seriesId: number) {

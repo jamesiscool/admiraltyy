@@ -2,50 +2,9 @@ import { Film, Tv } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import { MOVIE_GENRES, type SearchResult, TV_GENRES } from '@/services/search'
 import { AddMovieDialog } from './-add-movie-dialog'
 import { AddSeriesDialog } from './-add-series-dialog'
-
-// Genre mappings from TMDB
-const MOVIE_GENRES: Record<number, string> = {
-	28: 'Action',
-	12: 'Adventure',
-	16: 'Animation',
-	35: 'Comedy',
-	80: 'Crime',
-	99: 'Documentary',
-	18: 'Drama',
-	10751: 'Family',
-	14: 'Fantasy',
-	36: 'History',
-	27: 'Horror',
-	10402: 'Music',
-	9648: 'Mystery',
-	10749: 'Romance',
-	878: 'Sci-Fi',
-	10770: 'TV Movie',
-	53: 'Thriller',
-	10752: 'War',
-	37: 'Western',
-}
-
-const TV_GENRES: Record<number, string> = {
-	10759: 'Action & Adventure',
-	16: 'Animation',
-	35: 'Comedy',
-	80: 'Crime',
-	99: 'Documentary',
-	18: 'Drama',
-	10751: 'Family',
-	10762: 'Kids',
-	9648: 'Mystery',
-	10763: 'News',
-	10764: 'Reality',
-	10765: 'Sci-Fi & Fantasy',
-	10766: 'Soap',
-	10767: 'Talk',
-	10768: 'War & Politics',
-	37: 'Western',
-}
 
 function TmdbLogo({ className }: { className?: string }) {
 	return (
@@ -85,18 +44,6 @@ function TmdbLogo({ className }: { className?: string }) {
 	)
 }
 
-interface SearchResult {
-	tmdbId: number
-	title: string
-	posterPath?: string
-	backdropPath?: string
-	overview: string
-	releaseDate?: string
-	voteAverage: number
-	mediaType: 'movie' | 'tv'
-	genreIds?: number[]
-}
-
 interface SearchResultCardProps {
 	result: SearchResult
 }
@@ -131,9 +78,9 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 				<div className="flex">
 					{/* Poster */}
 					<div className="relative aspect-[2/3] w-36 shrink-0 overflow-hidden">
-						{result.posterPath ? (
+						{result.posterUrl ? (
 							<img
-								src={result.posterPath}
+								src={result.posterUrl}
 								alt={result.title}
 								className="h-full w-full object-cover transition-transform group-hover:scale-105"
 							/>
@@ -178,7 +125,7 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 					movie={{
 						tmdbId: result.tmdbId,
 						title: result.title,
-						posterPath: result.posterPath,
+						posterUrl: result.posterUrl,
 						releaseDate: result.releaseDate,
 					}}
 					open={movieDialogOpen}
@@ -191,7 +138,7 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
 					series={{
 						tmdbId: result.tmdbId,
 						title: result.title,
-						posterPath: result.posterPath,
+						posterUrl: result.posterUrl,
 						releaseDate: result.releaseDate,
 					}}
 					open={seriesDialogOpen}

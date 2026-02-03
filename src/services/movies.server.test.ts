@@ -22,7 +22,7 @@ vi.mock('@/db', async () => {
 
 // Mock TMDB
 const mockFetchMovieDetails = vi.fn()
-vi.mock('@/services/tmdb', () => ({
+vi.mock('@/services/tmdb.server', () => ({
 	fetchMovieDetails: (...args: unknown[]) => mockFetchMovieDetails(...args),
 }))
 

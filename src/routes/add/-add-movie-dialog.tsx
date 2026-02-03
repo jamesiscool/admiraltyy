@@ -13,7 +13,7 @@ import { getSettingsOptions } from '@/services/settings'
 interface MovieResult {
 	tmdbId: number
 	title: string
-	posterPath?: string
+	posterUrl?: string
 	releaseDate?: string
 }
 

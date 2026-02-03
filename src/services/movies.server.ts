@@ -1,11 +1,62 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { db, schema } from '@/db'
-import type { resolutions } from '@/db/schema'
+import type { Resolution, resolutions } from '@/db/schema'
 import { grabRelease } from '@/services/downloads.server'
 import { searchMovieReleases } from '@/services/indexers.server'
 import type { MovieDetails } from '@/services/tmdb'
-import { fetchMovieDetails } from '@/services/tmdb'
-import type { GrabReleaseInput, MoviePreview, MovieWithFiles } from './movies'
+import { fetchMovieDetails } from '@/services/tmdb.server'
+
+// --- Local Types (to avoid circular imports with movies.ts) ---
+
+interface MoviePreview {
+	id: number
+	title: string
+	year: number
+	posterUrl: string | null
+	resolution: Resolution | null
+	monitored: boolean | null
+	dateAdded: string
+	cinemaReleaseDate: string | null
+	sizeBytes: number
+}
+
+interface MovieWithFiles {
+	id: number
+	tmdbId: number
+	imdbId: string | null
+	title: string
+	year: number
+	posterUrl: string | null
+	backdropUrl: string | null
+	synopsis: string | null
+	runtimeMins: number | null
+	genres: string | null
+	cinemaReleaseDate: string | null
+	digitalReleaseDate: string | null
+	contentRating: string | null
+	dateAdded: string
+	monitored: boolean | null
+	resolution: Resolution | null
+	lastSearchTime: string | null
+	lastInfoSync: string | null
+	rtId: string | null
+	rtVanity: string | null
+	alternateTitles: string | null
+	sizeBytes: number | undefined
+	files: (typeof schema.files.$inferSelect)[]
+}
+
+interface GrabReleaseInput {
+	movieId: string
+	guid: string
+	title: string
+	downloadUrl: string
+	infoUrl?: string
+	size: number
+	publishDate: string
+	indexerId: string
+	indexerName: string
+}
 
 export async function listMoviesFromDb(): Promise<MoviePreview[]> {
 	return db.all<MoviePreview>(sql`

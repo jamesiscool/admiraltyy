@@ -15,7 +15,7 @@ import { getSettingsOptions } from '@/services/settings'
 interface SeriesResult {
 	tmdbId: number
 	title: string
-	posterPath?: string
+	posterUrl?: string
 	releaseDate?: string
 }
 

@@ -1,4 +1,4 @@
-import { searchMulti } from '@/services/tmdb'
+import { searchMulti } from '@/services/tmdb.server'
 
 export async function searchTmdb(q: string, page?: number) {
 	if (!q.trim()) {

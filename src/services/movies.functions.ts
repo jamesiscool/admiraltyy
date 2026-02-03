@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { resolutions } from '@/db/schema'
-import { grabReleaseInput } from './movies'
 import { createMovieFromTmdb, deleteMovie, findMovieReleases, getMovieById, grabMovieRelease, listMoviesFromDb, updateMovie } from './movies.server'
 
 export const listMoviesFn = createServerFn({ method: 'GET' }).handler(async () => {
@@ -33,7 +32,19 @@ export const searchMovieReleasesFn = createServerFn({ method: 'POST' })
 	})
 
 export const grabMovieReleaseFn = createServerFn({ method: 'POST' })
-	.inputValidator(grabReleaseInput)
+	.inputValidator(
+		z.object({
+			movieId: z.string(),
+			guid: z.string(),
+			title: z.string(),
+			downloadUrl: z.string(),
+			infoUrl: z.string().optional(),
+			size: z.number(),
+			publishDate: z.string(),
+			indexerId: z.string(),
+			indexerName: z.string(),
+		}),
+	)
 	.handler(async ({ data }) => {
 		return grabMovieRelease(data)
 	})
