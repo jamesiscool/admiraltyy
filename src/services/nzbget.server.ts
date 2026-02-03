@@ -275,13 +275,9 @@ async function startNzbget() {
 		'-o',
 		`InterDir=${downloadFolder}/.incomplete`,
 		'-o',
+		`QueueDir=${downloadFolder}/.nzbget`,
+		'-o',
 		'Unpack=yes',
-		'-o',
-		'UnpackCleanupDisk=yes',
-		'-o',
-		'UnrarCmd=unar',
-		'-o',
-		'SevenZipCmd=7z',
 		...serverArgs,
 	]
 
@@ -291,9 +287,9 @@ async function startNzbget() {
 		const proc = Bun.spawn(args, {
 			stdout: 'pipe',
 			stderr: 'pipe',
-			onExit(_proc, exitCode, signalCode) {
-				console.log(`⏹ NZBGet exited (code: ${exitCode}, signal: ${signalCode})`)
-			},
+			// onExit(_proc, exitCode, signalCode) {
+			// 	console.log(`⏹ NZBGet exited (code: ${exitCode}, signal: ${signalCode})`)
+			// },
 		})
 
 		// Stream output
@@ -333,14 +329,15 @@ async function startNzbget() {
 
 		console.log(`✓ NZBGet started (pid: ${proc.pid})`)
 
-		// Clear queue on startup (non-blocking)
-		clearNzbgetQueue()
-			.then((cleared) => {
+		// Ensure download queue is active and clear stale items (non-blocking)
+		Promise.all([
+			rpcCall('resumedownload').catch(() => {}),
+			clearNzbgetQueue().then((cleared) => {
 				if (cleared) console.log('✓ Cleared NZBGet queue on startup')
-			})
-			.catch((err) => {
-				console.error('✗ Failed to clear NZBGet queue:', err)
-			})
+			}),
+		]).catch((err) => {
+			console.error('✗ Failed post-startup tasks:', err)
+		})
 
 		return proc
 	} catch (err) {

@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Search } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { searchTmdbQueryOptions } from '@/services/search.queries'
+import { searchTmdbQueryOptions } from '@/services/search'
 import { SearchResultCard } from './-search-result-card'
 
 export const Route = createFileRoute('/add/')({

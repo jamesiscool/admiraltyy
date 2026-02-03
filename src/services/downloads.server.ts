@@ -21,6 +21,8 @@ export interface GrabReleaseOptions {
 	episodeId?: number
 	/** NZBGet category (e.g. 'movies', 'tv') */
 	category: string
+	/** Destination directory for the download */
+	destDir?: string
 }
 
 /** Orchestrates full download: NZB fetch -> queue to NZBGet -> create DB records */

@@ -1,4 +1,6 @@
+import { queryOptions } from '@tanstack/react-query'
 import { z } from 'zod'
+import { getSettingsFn } from '@/services/settings.functions'
 
 // Zod Schemas
 const folderSchema = z.object({
@@ -108,3 +110,11 @@ export type FormatPreference = z.infer<typeof formatPreferenceSchema>
 export type FormatSettings = z.infer<typeof formatSettingsSchema>
 export type AuthSettings = z.infer<typeof authSettingsSchema>
 export type NzbgetSettings = z.infer<typeof nzbgetSettingsSchema>
+
+// --- Query Options ---
+
+export const getSettingsOptions = () =>
+	queryOptions({
+		queryKey: ['settings'],
+		queryFn: () => getSettingsFn(),
+	})

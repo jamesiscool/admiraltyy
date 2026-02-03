@@ -8,9 +8,9 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { Resolution } from '@/db/schema'
+import { getSeriesPreviewFromTmdbOptions } from '@/services/series'
 import { createSeriesFn } from '@/services/series.functions'
-import { getSeriesPreviewFromTmdbOptions } from '@/services/series.queries'
-import { getSettingsOptions } from '@/services/settings.queries'
+import { getSettingsOptions } from '@/services/settings'
 
 interface SeriesResult {
 	tmdbId: number

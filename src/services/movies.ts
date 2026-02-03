@@ -1,6 +1,8 @@
+import { queryOptions } from '@tanstack/react-query'
 import { z } from 'zod'
 import type * as schema from '@/db/schema'
 import type { Resolution } from '@/db/schema'
+import { getMovieFn, listMoviesFn } from '@/services/movies.functions'
 
 // Preview type for list/card display (minimal fields)
 export interface MoviePreview {
@@ -56,3 +58,15 @@ export const grabReleaseInput = z.object({
 })
 
 export type GrabReleaseInput = z.infer<typeof grabReleaseInput>
+
+export const listMoviesQueryOptions = () =>
+	queryOptions({
+		queryKey: ['movies'],
+		queryFn: () => listMoviesFn(),
+	})
+
+export const getMovieOptions = (movieId: string) =>
+	queryOptions({
+		queryKey: ['movies', movieId],
+		queryFn: () => getMovieFn({ data: { movieId } }),
+	})

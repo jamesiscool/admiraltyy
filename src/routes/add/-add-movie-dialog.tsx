@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Resolution } from '@/db/schema'
 import { createMovieFn } from '@/services/movies.functions'
-import { getSettingsOptions } from '@/services/settings.queries'
+import { getSettingsOptions } from '@/services/settings'
 
 interface MovieResult {
 	tmdbId: number

@@ -6,8 +6,8 @@ import { DeleteConfirmationModal, type DeleteTarget } from '@/components/delete-
 import { MovieManualSearchDialog } from '@/components/movie-manual-search-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getMovieOptions } from '@/services/movies'
 import { deleteMovieFn, updateMovieFn } from '@/services/movies.functions'
-import { getMovieOptions } from '@/services/movies.queries'
 
 export const Route = createFileRoute('/movies/$movieId')({
 	loader: ({ params, context }) => context.queryClient.ensureQueryData(getMovieOptions(params.movieId)),
