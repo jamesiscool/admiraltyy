@@ -46,17 +46,7 @@ interface MovieWithFiles {
 	files: (typeof schema.files.$inferSelect)[]
 }
 
-interface GrabReleaseInput {
-	movieId: string
-	guid: string
-	title: string
-	downloadUrl: string
-	infoUrl?: string
-	size: number
-	publishDate: string
-	indexerId: string
-	indexerName: string
-}
+type GrabReleaseInput = import('@/services/movies').GrabMovieReleaseInput
 
 export async function listMoviesFromDb(): Promise<MoviePreview[]> {
 	return db.all<MoviePreview>(sql`

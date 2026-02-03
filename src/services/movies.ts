@@ -4,6 +4,20 @@ import type * as schema from '@/db/schema'
 import type { Resolution } from '@/db/schema'
 import { getMovieFn, listMoviesFn } from '@/services/movies.functions'
 
+export const grabMovieReleaseInput = z.object({
+	movieId: z.string(),
+	guid: z.string(),
+	title: z.string(),
+	downloadUrl: z.string(),
+	infoUrl: z.string().optional(),
+	size: z.number(),
+	publishDate: z.string(),
+	indexerId: z.string(),
+	indexerName: z.string(),
+})
+
+export type GrabMovieReleaseInput = z.infer<typeof grabMovieReleaseInput>
+
 // Preview type for list/card display (minimal fields)
 export interface MoviePreview {
 	id: number
@@ -43,21 +57,6 @@ export interface MovieWithFiles {
 	sizeBytes: number | undefined
 	files: (typeof schema.files.$inferSelect)[]
 }
-
-// Grab release input schema
-export const grabReleaseInput = z.object({
-	movieId: z.string(),
-	guid: z.string(),
-	title: z.string(),
-	downloadUrl: z.string(),
-	infoUrl: z.string().optional(),
-	size: z.number(),
-	publishDate: z.string(),
-	indexerId: z.string(),
-	indexerName: z.string(),
-})
-
-export type GrabReleaseInput = z.infer<typeof grabReleaseInput>
 
 export const listMoviesQueryOptions = () =>
 	queryOptions({

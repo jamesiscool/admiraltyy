@@ -23,11 +23,6 @@ export interface SearchResponse {
 	totalResults: number
 }
 
-export interface SearchInput {
-	q: string
-	page?: number
-}
-
 // --- Genre Mappings ---
 
 export const MOVIE_GENRES: Record<number, string> = {

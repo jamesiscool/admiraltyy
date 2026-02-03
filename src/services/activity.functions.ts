@@ -1,9 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
-import { deleteDownloadInput } from './activity'
+import { z } from 'zod'
 import { deleteDownloadById, listDownloadsFromDb } from './activity.server'
 
 export const listDownloadsFn = createServerFn({ method: 'GET' }).handler(async () => listDownloadsFromDb())
 
 export const deleteDownloadFn = createServerFn({ method: 'POST' })
-	.inputValidator(deleteDownloadInput)
+	.inputValidator(z.object({ downloadId: z.string() }))
 	.handler(async ({ data }) => deleteDownloadById(data.downloadId))
