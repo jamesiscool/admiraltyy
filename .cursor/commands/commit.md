@@ -5,7 +5,7 @@
 - Staged changes: !`git diff --cached`
 - Unstaged changes: !`git diff`
 - Current branch: !`git branch --show-current`
-- Recent commits: !`git log --oneline -10`
+- Recent commits: !`git log -10`
 
 ## Your task
 
