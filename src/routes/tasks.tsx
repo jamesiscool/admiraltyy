@@ -2,8 +2,8 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { Loader2, Play } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import type { ScanResult } from '@/services/tasks'
-import { scanMoviesFilesFn, scanSeriesFilesFn } from '@/services/tasks.functions'
+import type { ScanResult } from '@/services/fileScan'
+import { scanMoviesFilesFn, scanSeriesFilesFn } from '@/services/fileScan.functions'
 
 export const Route = createFileRoute('/tasks')({
 	component: TasksPage,
