@@ -22,14 +22,15 @@
 			"browsers": "chromium"
 		},
 		"ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
-			"packages": "curl,nano,sqlite3,nzbget,unar,p7zip-full"
+			"packages": "curl,nano,sqlite3,unar,p7zip-full"
 		}
 	},
 	"workspaceMount": "source=/Users/jlles/Projects/admiraltyy,target=/workspace,type=bind",
 	"workspaceFolder": "/workspace",
 	"mounts": [
 		"source=admiraltyy-node-modules,target=/workspace/node_modules,type=volume",
-		"source=admiraltyy-claude,target=/home/node/.claude,type=volume"
+		"source=admiraltyy-claude,target=/home/node/.claude,type=volume",
+		"source=admiraltyy-gh,target=/home/node/.config/gh,type=volume"
 	],
 	"forwardPorts": [
 		4983

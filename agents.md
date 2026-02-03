@@ -4,7 +4,7 @@
 
 ## Very important !!!!!!!!!!!!!!!!
 
-- After all changes, before the summery run `bun fix && bun tsgo` and fix any errors
+- After all code changes, before the summery run `bun fix && bun tsgo` and fix any errors
 
 ## UI
 
@@ -71,6 +71,18 @@ Core workflow:
 2. `agent-browser snapshot -i` - Get interactive elements with refs (@e1, @e2)
 3. `agent-browser click @e1` / `fill @e2 "text"` - Interact using refs
 4. Re-snapshot after page changes
+
+## Service file structure
+
+3-file pattern per domain in `src/services/`:
+- **`foo.ts`** — types, zod schemas, query options (client-safe)
+- **`foo.functions.ts`** — `createServerFn` wrappers (client/server bridge)
+- **`foo.server.ts`** — server-only logic (DB, filesystem, external APIs)
+
+Import rules:
+- Client code can import `*.ts` and `*.functions.ts`, never `*.server.ts`
+- `*.functions.ts` can import `*.server.ts`
+- `*.server.ts` must not import `*.functions.ts`
 
 ## Imports
 
